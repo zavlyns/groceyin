@@ -5,9 +5,16 @@
       "firebase.json",
       ".firebaserc",
       "**/.*",
+      "**/node_modules/**",
+      "node_modules/**",
+      "node_modules",
       "server.js",
       "test.js",
-      "README.md"
+      "README.md",
+      "deploy-firebase.bat",
+      "firestore.rules",
+      "package.json",
+      "package-lock.json"
     ],
     "rewrites": [
       {
