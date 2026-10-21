@@ -1,15 +1,23 @@
 /**
- * GROCERYIN - SMART GROCERY & PRICE TRACKER
- * Features:
- * - Single-User Authentication Lock & Google Sign-In Simulation
- * - Realtime Quantity & Subtotal Auto-Calculation
- * - Cascading Tiered Discount Engine (e.g. 50% + 20%)
- * - Realtime Price Fluctuation Detection (↑ Panah Merah Naik, ↓ Panah Hijau Turun, = Setara)
- * - Budget Safety Cap with Dynamic Glowing Red Danger Alerts
- * - Mobile-First Segmented Navigation & Floating Cart Bar
- * - Quick Benchmark Market Catalog
- * - Printable Digital Receipt
+ * GROCERYIN - SMART GROCERY & EXPENSE TRACKER
+ * FIREBASE EDITION (Project: grocery1n)
+ *
+ * Connected Firebase Products:
+ * - Firebase App SDK
+ * - Firebase Authentication (Google Sign-In + Username Single-User Lock)
+ * - Cloud Firestore Realtime Database (Collection: 'grocery_items', 'budget_settings', 'users')
+ * - LocalStorage Offline Fallback Support
  */
+
+// ==================== FIREBASE CONFIGURATION ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyCyr3K9_IxxrD30TYkpLApD6AMxsYoxf1c",
+  authDomain: "grocery1n.firebaseapp.com",
+  projectId: "grocery1n",
+  storageBucket: "grocery1n.firebasestorage.app",
+  messagingSenderId: "135631831952",
+  appId: "1:135631831952:web:e680edb0bb9fffebf72915"
+};
 
 // ==================== INITIAL DATA & BENCHMARKS ====================
 const BENCHMARK_CATALOG = [
@@ -23,7 +31,6 @@ const BENCHMARK_CATALOG = [
   { name: "Sabun Cuci Piring Refill", category: "Kebersihan", unit: "pack", defaultQty: 1, currentPrice: 13500, lastMonthPrice: 15000, icon: "🧼", discount: "" }
 ];
 
-// Initial starter shopping cart items
 const INITIAL_ITEMS = [
   {
     id: "item-1",
@@ -63,7 +70,7 @@ const INITIAL_ITEMS = [
   }
 ];
 
-// ==================== STATE MANAGEMENT ====================
+// ==================== STATE MANAGEMENT & FIREBASE ADAPTER ====================
 class GroceryInApp {
   constructor() {
     this.storageKeyUser = "groceryin_single_user_lock";
@@ -76,13 +83,44 @@ class GroceryInApp {
     this.editingId = null;
     this.currentMobileTab = "cart"; // cart, add, catalog
 
+    // Firebase instances
+    this.firebaseApp = null;
+    this.firebaseAuth = null;
+    this.firestoreDb = null;
+    this.isCloudSyncActive = false;
+    this.firestoreUnsubscribe = null;
+
+    this.initFirebase();
     this.initElements();
     this.initEventListeners();
     this.loadState();
   }
 
+  // ==================== INITIALIZE FIREBASE SDK ====================
+  initFirebase() {
+    try {
+      if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+        if (!firebase.apps || firebase.apps.length === 0) {
+          this.firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+          this.firebaseApp = firebase.app();
+        }
+        this.firebaseAuth = firebase.auth();
+        this.firestoreDb = firebase.firestore();
+        this.isCloudSyncActive = true;
+        console.log("🔥 Firebase initialized successfully for project grocery1n!");
+      }
+    } catch (err) {
+      console.warn("Firebase initialization warning (using local fallback mode):", err);
+      this.isCloudSyncActive = false;
+    }
+  }
+
   // ==================== ELEMENT SELECTORS ====================
   initElements() {
+    // Cloud Status Badge
+    this.cloudStatusBadge = document.getElementById("cloudStatusBadge");
+
     // Auth Elements
     this.authOverlay = document.getElementById("authOverlay");
     this.authTitle = document.getElementById("authTitle");
@@ -184,10 +222,10 @@ class GroceryInApp {
     this.inputUsername.addEventListener("keypress", (e) => {
       if (e.key === "Enter") this.handleUsernameLogin();
     });
-    this.btnGoogleLogin.addEventListener("click", () => this.openGoogleModal());
+    this.btnGoogleLogin.addEventListener("click", () => this.handleGoogleLoginFirebase());
     this.btnCloseGoogleModal.addEventListener("click", () => this.closeGoogleModal());
-    this.gAccDemo1.addEventListener("click", () => this.handleGoogleLogin("Budi Santoso", "budi.santoso@gmail.com", "👨"));
-    this.gAccDemo2.addEventListener("click", () => this.handleGoogleLogin("Siti Rahma", "siti.rahma99@gmail.com", "👩"));
+    this.gAccDemo1.addEventListener("click", () => this.handleCustomGoogleSelect("Budi Santoso", "budi.santoso@gmail.com", "👨"));
+    this.gAccDemo2.addEventListener("click", () => this.handleCustomGoogleSelect("Siti Rahma", "siti.rahma99@gmail.com", "👩"));
     this.btnLogout.addEventListener("click", () => this.handleLogout());
 
     // Mobile Segmented Navigation Tabs
@@ -286,13 +324,11 @@ class GroceryInApp {
       this.tabBtnCatalog.classList.toggle("active", tabName === "catalog");
     }
 
-    // Scroll smoothly to top of content
-    window.scrollTo({ top: 120, behavior: "smooth" });
+    window.scrollTo({ top: 100, behavior: "smooth" });
   }
 
-  // ==================== AUTHENTICATION & SINGLE-USER LOCK ====================
+  // ==================== CLOUD SYNC & AUTHENTICATION ====================
   loadState() {
-    // Default mobile tab
     this.switchMobileTab("cart");
 
     // 1. Check Locked Single-User
@@ -317,7 +353,7 @@ class GroceryInApp {
       this.inputBudgetCap.value = this.budgetCap;
     }
 
-    // 3. Load Items
+    // 3. Load Items from Local Storage first
     const savedItemsJson = localStorage.getItem(this.storageKeyItems);
     if (savedItemsJson) {
       try {
@@ -330,18 +366,70 @@ class GroceryInApp {
       this.saveItems();
     }
 
+    // 4. Connect Cloud Firestore Realtime Sync
+    this.initFirestoreRealtimeSync();
+
     // Render components
     this.renderQuickCatalog();
     this.renderGroceryList();
     this.renderBudgetSafetyCap();
     this.updateLiveFormCalculations();
+    this.updateCloudStatusIndicator();
+  }
+
+  updateCloudStatusIndicator() {
+    if (!this.cloudStatusBadge) return;
+    if (this.isCloudSyncActive) {
+      this.cloudStatusBadge.className = "cloud-status-badge";
+      this.cloudStatusBadge.innerHTML = `<span class="cloud-pulse-dot"></span><span>Cloud Firebase (grocery1n)</span>`;
+      this.cloudStatusBadge.title = "Tersambung ke Cloud Firestore Database & Hosting Firebase";
+    } else {
+      this.cloudStatusBadge.className = "cloud-status-badge offline";
+      this.cloudStatusBadge.innerHTML = `<span>📱 Mode Lokal</span>`;
+      this.cloudStatusBadge.title = "Mode penyimpanan offline/lokal aktif";
+    }
+  }
+
+  // FIRESTORE REALTIME SYNC (Cross-Device Sync: PC & Phone)
+  initFirestoreRealtimeSync() {
+    if (!this.firestoreDb) return;
+
+    try {
+      // Listen to real-time updates from Firestore collection 'groceries_shared'
+      this.firestoreUnsubscribe = this.firestoreDb.collection("groceries_shared")
+        .doc("current_cart")
+        .onSnapshot((doc) => {
+          if (doc.exists) {
+            const data = doc.data();
+            if (data && Array.isArray(data.items)) {
+              this.items = data.items;
+              localStorage.setItem(this.storageKeyItems, JSON.stringify(this.items));
+              this.renderGroceryList();
+            }
+            if (data && typeof data.budgetCap === 'number') {
+              this.budgetCap = data.budgetCap;
+              this.inputBudgetCap.value = this.budgetCap;
+              localStorage.setItem(this.storageKeyBudget, this.budgetCap.toString());
+            }
+            this.renderBudgetSafetyCap();
+            this.isCloudSyncActive = true;
+            this.updateCloudStatusIndicator();
+          }
+        }, (err) => {
+          console.warn("Firestore onSnapshot error (continuing with local data):", err);
+          this.isCloudSyncActive = false;
+          this.updateCloudStatusIndicator();
+        });
+    } catch (e) {
+      console.warn("Could not bind Firestore listener:", e);
+    }
   }
 
   showAuthModal(existingUser) {
     this.authOverlay.classList.remove("hidden");
     if (existingUser) {
       this.singleUserNotice.classList.add("locked");
-      this.singleUserNoticeDesc.innerHTML = `Profil pengguna tunggal terdaftar: <strong>${existingUser.username}</strong> (${existingUser.authType}). Sistem menolak username lain untuk menjaga data anggaran tetap personal.`;
+      this.singleUserNoticeDesc.innerHTML = `Profil pengguna tunggal terdaftar: <strong>${existingUser.username}</strong> (${existingUser.authType}). Multi-user ditolak demi integritas anggaran pribadi.`;
       this.inputUsername.value = existingUser.username;
     } else {
       this.singleUserNotice.classList.remove("locked");
@@ -358,7 +446,7 @@ class GroceryInApp {
       return;
     }
 
-    // Check single-user rule:
+    // Single-user rule check
     const lockedUserJson = localStorage.getItem(this.storageKeyUser);
     if (lockedUserJson) {
       const lockedUser = JSON.parse(lockedUserJson);
@@ -374,7 +462,6 @@ class GroceryInApp {
       }
     }
 
-    // Save and log in as single user
     const userObj = {
       username: username,
       authType: "Username",
@@ -386,9 +473,75 @@ class GroceryInApp {
     this.currentUser = userObj;
     this.showActiveUserSession(userObj);
     this.authOverlay.classList.add("hidden");
+
+    // Sync user session to Firestore
+    if (this.firestoreDb) {
+      this.firestoreDb.collection("users").doc(username).set({
+        ...userObj,
+        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(() => {});
+    }
   }
 
-  handleGoogleLogin(name, email, avatar = "👤") {
+  // REAL FIREBASE GOOGLE AUTHENTICATION
+  async handleGoogleLoginFirebase() {
+    if (this.firebaseAuth && typeof firebase.auth.GoogleAuthProvider !== 'undefined') {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        
+        // Trigger popup
+        const result = await this.firebaseAuth.signInWithPopup(provider);
+        const gUser = result.user;
+
+        const userObj = {
+          username: gUser.displayName || gUser.email.split('@')[0],
+          email: gUser.email,
+          authType: "Google (Firebase)",
+          avatar: gUser.photoURL || "👤",
+          uid: gUser.uid,
+          loginTime: new Date().toISOString()
+        };
+
+        // Enforce single-user rule
+        const lockedUserJson = localStorage.getItem(this.storageKeyUser);
+        if (lockedUserJson) {
+          const lockedUser = JSON.parse(lockedUserJson);
+          if (lockedUser.email && lockedUser.email.toLowerCase() !== userObj.email.toLowerCase()) {
+            alert(
+              `⛔ AKSES DITOLAK (Single-User Lock):\n\n` +
+              `Aplikasi telah terkunci untuk akun Google: "${lockedUser.email}".\n` +
+              `Akun multi-user lain tidak diizinkan login bersamaan.`
+            );
+            await this.firebaseAuth.signOut();
+            return;
+          }
+        }
+
+        localStorage.setItem(this.storageKeyUser, JSON.stringify(userObj));
+        this.currentUser = userObj;
+        this.showActiveUserSession(userObj);
+        this.authOverlay.classList.add("hidden");
+
+        // Sync to Firestore
+        if (this.firestoreDb) {
+          this.firestoreDb.collection("users").doc(gUser.uid).set({
+            ...userObj,
+            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }).catch(() => {});
+        }
+        return;
+      } catch (authErr) {
+        console.warn("Firebase Google popup error or domain not yet whitelisted, opening fallback modal:", authErr);
+        // Fallback to simulated accounts if Google Popup is restricted on local file
+        this.openGoogleModal();
+      }
+    } else {
+      this.openGoogleModal();
+    }
+  }
+
+  handleCustomGoogleSelect(name, email, avatar = "👤") {
     const lockedUserJson = localStorage.getItem(this.storageKeyUser);
     if (lockedUserJson) {
       const lockedUser = JSON.parse(lockedUserJson);
@@ -416,20 +569,30 @@ class GroceryInApp {
     this.closeGoogleModal();
     this.showActiveUserSession(userObj);
     this.authOverlay.classList.add("hidden");
+
+    if (this.firestoreDb) {
+      this.firestoreDb.collection("users").doc(name).set({
+        ...userObj,
+        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(() => {});
+    }
   }
 
   showActiveUserSession(user) {
     this.displayName.textContent = user.username;
-    this.userAvatar.textContent = user.avatar || "👤";
+    if (user.avatar && user.avatar.startsWith("http")) {
+      this.userAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width: 20px; height: 20px; border-radius: 50%;">`;
+    } else {
+      this.userAvatar.textContent = user.avatar || "👤";
+    }
   }
 
-  handleLogout() {
-    const choice = confirm(
-      "Apakah Anda ingin keluar dari sesi?\n\n" +
-      "Catatan Pengguna Tunggal:\n" +
-      "- Klik [OK] untuk keluar dari sesi GroceryIn."
-    );
+  async handleLogout() {
+    const choice = confirm("Apakah Anda ingin keluar dari sesi akun tunggal GroceryIn?");
     if (choice) {
+      if (this.firebaseAuth) {
+        try { await this.firebaseAuth.signOut(); } catch (e) {}
+      }
       this.currentUser = null;
       this.authOverlay.classList.remove("hidden");
       const locked = localStorage.getItem(this.storageKeyUser);
@@ -741,7 +904,8 @@ class GroceryInApp {
           price,
           lastMonthPrice,
           discountTiers,
-          notes
+          notes,
+          updatedAt: new Date().toISOString()
         };
       }
       this.editingId = null;
@@ -756,7 +920,8 @@ class GroceryInApp {
         lastMonthPrice,
         discountTiers,
         notes,
-        isBought: false
+        isBought: false,
+        createdAt: new Date().toISOString()
       };
       this.items.unshift(newItem);
     }
@@ -792,7 +957,6 @@ class GroceryInApp {
 
     this.updateLiveFormCalculations();
 
-    // Switch to Add/Edit tab on mobile
     if (window.innerWidth <= 840) {
       this.switchMobileTab("add");
     }
@@ -942,7 +1106,6 @@ class GroceryInApp {
 
     this.updateLiveFormCalculations();
 
-    // Switch to Add tab on mobile
     if (window.innerWidth <= 840) {
       this.switchMobileTab("add");
     }
@@ -1000,13 +1163,36 @@ class GroceryInApp {
     this.receiptModal.classList.add("hidden");
   }
 
-  // ==================== UTILS & STORAGE ====================
+  // ==================== UTILS & CLOUD PERSISTENCE ====================
   saveItems() {
+    // 1. Save to Local Storage immediately
     localStorage.setItem(this.storageKeyItems, JSON.stringify(this.items));
+
+    // 2. Sync to Cloud Firestore Database in real time
+    if (this.firestoreDb) {
+      this.firestoreDb.collection("groceries_shared").doc("current_cart").set({
+        items: this.items,
+        budgetCap: this.budgetCap,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedBy: this.currentUser ? this.currentUser.username : "Guest"
+      }, { merge: true }).then(() => {
+        this.isCloudSyncActive = true;
+        this.updateCloudStatusIndicator();
+      }).catch(err => {
+        console.warn("Firestore save warning (stored locally):", err);
+      });
+    }
   }
 
   saveBudget() {
     localStorage.setItem(this.storageKeyBudget, this.budgetCap.toString());
+
+    if (this.firestoreDb) {
+      this.firestoreDb.collection("groceries_shared").doc("current_cart").set({
+        budgetCap: this.budgetCap,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(() => {});
+    }
   }
 
   formatRupiah(number) {
