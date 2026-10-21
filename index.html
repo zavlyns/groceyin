@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GroceryIn - Smart Grocery & Expense Assistant</title>
+  <meta name="description" content="GroceryIn adalah aplikasi asisten belanja pintar dengan kalkulasi kuantitas realtime, diskon bertingkat, deteksi fluktuasi harga bulan lalu, dan pengendali anggaran dompet.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== AUTHENTICATION OVERLAY ==================== -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-card" id="authCard">
+      <div class="auth-header">
+        <div class="app-brand-badge">
+          <span class="brand-icon">🛒</span>
+          <span class="brand-name">GroceryIn</span>
+        </div>
+        <h2 id="authTitle">Selamat Datang di GroceryIn</h2>
+        <p class="auth-subtitle">Asisten Belanja Pintar & Pengendali Anggaran Dompet Pribadi</p>
+      </div>
+
+      <!-- Single User Info Banner -->
+      <div class="single-user-notice" id="singleUserNotice">
+        <span class="notice-icon">🔒</span>
+        <div class="notice-text">
+          <strong>Mode Eksklusif Pengguna Tunggal</strong>
+          <span id="singleUserNoticeDesc">Aplikasi diamankan untuk satu profil pengguna aktif per perangkat demi integritas anggaran pribadi.</span>
+        </div>
+      </div>
+
+      <!-- Google Sign In Button -->
+      <div class="google-auth-section">
+        <button type="button" id="btnGoogleLogin" class="btn-google">
+          <svg class="google-icon" viewBox="0 0 48 48" width="20px" height="20px">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            <path fill="none" d="M0 0h48v48H0z"/>
+          </svg>
+          <span>Masuk Cepat lewat Google</span>
+        </button>
+      </div>
+
+      <div class="auth-divider">
+        <span>atau masuk dengan Username</span>
+      </div>
+
+      <!-- Username Form -->
+      <form id="usernameLoginForm" class="auth-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="inputUsername">Username Pengguna</label>
+          <div class="input-with-icon">
+            <span class="field-icon">👤</span>
+            <input type="text" id="inputUsername" placeholder="Contoh: BudiSantoso" autocomplete="username" required>
+          </div>
+          <small class="form-hint" id="usernameHint">Sistem menolak login multi-user jika profil sudah ditetapkan.</small>
+        </div>
+
+        <button type="submit" id="btnSubmitLogin" class="btn-primary btn-block">
+          <span>Mulai Belanja</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </form>
+
+      <!-- Active User Switch/Reset if already configured -->
+      <div class="auth-footer" id="authFooterArea">
+        <span class="auth-security-tag">🛡️ Enkripsi Data Lokal & Sesi Tunggal Terproteksi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GOOGLE SIMULATED POPUP MODAL ==================== -->
+  <div id="googleModal" class="modal-backdrop hidden">
+    <div class="google-modal-box">
+      <div class="g-modal-header">
+        <svg viewBox="0 0 48 48" width="28px" height="28px">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <h3>Pilih Akun Google untuk GroceryIn</h3>
+      </div>
+      <p class="g-modal-sub">Lanjutkan ke aplikasi GroceryIn sebagai akun tunggal resmi:</p>
+      <div class="google-account-list">
+        <div class="google-acc-item" id="gAccDemo1">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Felix" class="g-avatar">
+          <div class="g-acc-info">
+            <strong>Budi Santoso</strong>
+            <small>budi.santoso@gmail.com</small>
+          </div>
+        </div>
+        <div class="google-acc-item" id="gAccDemo2">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aria" alt="Aria" class="g-avatar">
+          <div class="g-acc-info">
+            <strong>Siti Rahma</strong>
+            <small>siti.rahma99@gmail.com</small>
+          </div>
+        </div>
+      </div>
+      <div class="g-modal-footer">
+        <button type="button" id="btnCloseGoogleModal" class="btn-secondary">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN APPLICATION CONTAINER ==================== -->
+  <div class="app-layout" id="mainApp">
+    
+    <!-- TOP NAVIGATION BAR -->
+    <header class="app-header">
+      <div class="header-container">
+        <div class="brand-group">
+          <div class="logo-circle">🛒</div>
+          <div>
+            <h1 class="app-title">GroceryIn</h1>
+            <span class="app-tagline">Smart Grocery & Price Fluctuation Tracker</span>
+          </div>
+        </div>
+
+        <!-- User Profile & Session Controls -->
+        <div class="header-controls">
+          <div class="active-user-badge" id="activeUserBadge">
+            <span class="status-dot"></span>
+            <span class="user-icon" id="userAvatar">👤</span>
+            <div class="user-meta">
+              <span class="user-label">Pengguna Tunggal Aktif:</span>
+              <strong class="user-name" id="displayName">Pengguna</strong>
+            </div>
+          </div>
+          <button type="button" id="btnLogout" class="btn-logout" title="Keluar dari sesi akun tunggal">
+            <span>Keluar</span>
+            <span class="logout-icon">🚪</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- BUDGET SAFETY CAP - CRITICAL ALERT HEADER -->
+    <section class="budget-cap-section" id="budgetCapSection">
+      <div class="budget-container">
+        
+        <!-- Budget Card -->
+        <div class="budget-card" id="budgetCard">
+          <div class="budget-top-row">
+            <div class="budget-title-wrap">
+              <div class="budget-icon-badge" id="budgetIconBadge">🛡️</div>
+              <div>
+                <h2>Pengendali Anggaran Dompet (Budget Safety Cap)</h2>
+                <p class="budget-hint">Pantau total belanjaan seketika agar tidak melebihi uang saku yang dibawa.</p>
+              </div>
+            </div>
+
+            <!-- Input Wallet Cap -->
+            <div class="wallet-input-wrapper">
+              <label for="inputBudgetCap">Batas Uang Dompet (Limit):</label>
+              <div class="currency-input-group" id="budgetInputGroup">
+                <span class="curr-prefix">Rp</span>
+                <input type="number" id="inputBudgetCap" min="0" step="5000" placeholder="500.000" value="500000">
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar & Status Indicators -->
+          <div class="budget-meter-wrap">
+            <div class="meter-labels">
+              <span>Terpakai: <strong id="budgetSpentText">Rp 0</strong></span>
+              <span id="budgetPercentText" class="badge-percent">0%</span>
+              <span>Sisa Dompet: <strong id="budgetRemainingText">Rp 500.000</strong></span>
+            </div>
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill safe" id="budgetProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Live Dynamic Warning Banner -->
+          <div class="budget-alert-banner safe" id="budgetAlertBanner">
+            <span class="alert-icon" id="alertIcon">✅</span>
+            <span class="alert-message" id="alertMessage">Pengeluaran belanja Anda dalam batas aman dan terkendali.</span>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MAIN BODY GRID (Catalog / Form / Cart) -->
+    <main class="main-content-grid">
+
+      <!-- LEFT COLUMN: Input Form & Quick Benchmark Catalog -->
+      <aside class="left-panel">
+        
+        <!-- Add / Edit Item Form Card -->
+        <div class="card item-form-card" id="itemFormCard">
+          <div class="card-header">
+            <h3 id="formTitle">📝 Catat / Tambah Belanjaan</h3>
+            <span class="badge-accent">Auto-Kalkulasi</span>
+          </div>
+
+          <form id="groceryForm" onsubmit="return false;">
+            <input type="hidden" id="editingItemId" value="">
+
+            <!-- Nama Barang & Kategori -->
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="inputItemName">Nama Barang <span class="required">*</span></label>
+                <input type="text" id="inputItemName" placeholder="Contoh: Beras Ramos, Minyak Bimoli..." required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="inputCategory">Kategori</label>
+                <select id="inputCategory">
+                  <option value="Sembako">🍚 Sembako</option>
+                  <option value="Sayur & Buah">🥦 Sayur & Buah</option>
+                  <option value="Daging & Ikan">🥩 Daging & Ikan</option>
+                  <option value="Susu & Telur">🥚 Susu & Telur</option>
+                  <option value="Bumbu Dapur">🧄 Bumbu Dapur</option>
+                  <option value="Snack & Minuman">🧃 Snack & Minuman</option>
+                  <option value="Kebersihan">🧼 Kebersihan</option>
+                  <option value="Lainnya">📦 Lainnya</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Satuan & Kuantitas -->
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="inputUnit">Satuan Ukuran</label>
+                <select id="inputUnit">
+                  <option value="kg">kg (Kilogram)</option>
+                  <option value="liter">liter</option>
+                  <option value="pcs">pcs (Biji/Buah)</option>
+                  <option value="gram">gram</option>
+                  <option value="ikat">ikat</option>
+                  <option value="botol">botol</option>
+                  <option value="pack">pack</option>
+                  <option value="kaleng">kaleng</option>
+                </select>
+              </div>
+              
+              <div class="form-group flex-1">
+                <label for="inputQty">Kuantitas <span class="required">*</span></label>
+                <div class="qty-stepper">
+                  <button type="button" class="btn-step" id="btnQtyMinus" aria-label="Kurangi kuantitas">-</button>
+                  <input type="number" id="inputQty" min="0.1" step="any" value="1" required>
+                  <button type="button" class="btn-step" id="btnQtyPlus" aria-label="Tambah kuantitas">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Harga Satuan & Harga Bulan Lalu -->
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="inputPrice">Harga Satuan Saat Ini <span class="required">*</span></label>
+                <div class="currency-input-group">
+                  <span class="curr-prefix">Rp</span>
+                  <input type="number" id="inputPrice" min="0" step="500" placeholder="0" required>
+                </div>
+              </div>
+
+              <div class="form-group flex-1">
+                <label for="inputLastMonthPrice">Harga Riwayat Bulan Lalu</label>
+                <div class="currency-input-group">
+                  <span class="curr-prefix">Rp</span>
+                  <input type="number" id="inputLastMonthPrice" min="0" step="500" placeholder="0">
+                </div>
+              </div>
+            </div>
+
+            <!-- REALTIME FLUCTUATION INDICATOR LIVE PREVIEW -->
+            <div class="fluctuation-preview-card" id="fluctuationPreviewCard">
+              <div class="fluc-icon-box" id="flucIconBox">⚖️</div>
+              <div class="fluc-details">
+                <div class="fluc-title" id="flucTitle">Deteksi Fluktuasi Harga Realtime</div>
+                <div class="fluc-sub" id="flucSub">Masukkan harga saat ini dan harga bulan lalu untuk melihat perbandingannya.</div>
+              </div>
+              <div class="fluc-badge" id="flucBadge">= Stabil</div>
+            </div>
+
+            <!-- DISKON BERTINGKAT (TIERED DISCOUNT) LOGIC -->
+            <div class="discount-container">
+              <div class="discount-header">
+                <label for="inputDiscountTiers">
+                  🏷️ Diskon Bertingkat (Cascading Promo)
+                </label>
+                <span class="discount-example-hint">Contoh: 50% + 20%</span>
+              </div>
+
+              <div class="discount-input-row">
+                <input type="text" id="inputDiscountTiers" placeholder="Contoh: 50 + 20 atau 30+10" value="">
+                <!-- Quick Preset Chips -->
+                <div class="preset-chips">
+                  <button type="button" class="chip" data-tier="50+20">50% + 20%</button>
+                  <button type="button" class="chip" data-tier="30+10">30% + 10%</button>
+                  <button type="button" class="chip" data-tier="20+5">20% + 5%</button>
+                  <button type="button" class="chip" data-tier="0">Reset</button>
+                </div>
+              </div>
+
+              <!-- Mathematical breakdown explain box -->
+              <div class="discount-math-box" id="discountMathBox">
+                <div class="math-title">📊 Rincian Logika Matematika Diskon Bertingkat:</div>
+                <div class="math-content" id="discountMathContent">
+                  Tidak ada diskon aktif. Harga dihitung normal.
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes / Catatan -->
+            <div class="form-group">
+              <label for="inputNotes">Catatan Tambahan (Opsional)</label>
+              <input type="text" id="inputNotes" placeholder="Misal: Cari merk Tropical, pilih kemasan pouch...">
+            </div>
+
+            <!-- Live Calculation Summary Card per Item -->
+            <div class="live-calc-summary">
+              <div class="calc-label-col">
+                <span>Subtotal Item Otomatis:</span>
+                <small id="calcSubtotalNote">1 x Rp 0</small>
+              </div>
+              <div class="calc-val-col">
+                <span class="original-price-strike" id="calcOriginalStrike"></span>
+                <span class="final-item-total" id="calcFinalItemTotal">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div class="form-actions">
+              <button type="submit" id="btnSaveItem" class="btn-primary btn-large">
+                <span id="btnSaveText">➕ Masukkan ke Keranjang</span>
+              </button>
+              <button type="button" id="btnCancelEdit" class="btn-secondary hidden">
+                Batal Edit
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- QUICK BENCHMARK CATALOG / IDE BELANJA -->
+        <div class="card catalog-card">
+          <div class="catalog-header">
+            <h4>💡 Katalog Cepat & Riwayat Acuan Pasar</h4>
+            <span class="catalog-subtitle">Klik untuk langsung mengisi form dengan data riwayat bulan lalu</span>
+          </div>
+          <div class="quick-items-grid" id="quickCatalogGrid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT COLUMN: Shopping Cart, Filters, & Total Breakdown -->
+      <section class="right-panel">
+
+        <!-- Shopping Cart Summary Bar -->
+        <div class="card cart-summary-card">
+          <div class="cart-stats-row">
+            <div class="stat-col">
+              <span class="stat-label">Total Belanjaan</span>
+              <strong class="stat-value text-primary" id="totalCartPrice">Rp 0</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">Total Penghematan Diskon</span>
+              <strong class="stat-value text-green" id="totalDiscountSaved">Rp 0</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">Jumlah Barang</span>
+              <strong class="stat-value" id="totalItemsCount">0 Item</strong>
+            </div>
+            <div class="stat-col">
+              <span class="stat-label">Status Anggaran</span>
+              <span class="badge-status-safe" id="budgetStatusBadge">Aman</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart Filters & Action Bar -->
+        <div class="cart-toolbar">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchCart" placeholder="Cari barang di daftar belanja...">
+          </div>
+
+          <div class="filter-category-wrap">
+            <select id="filterCategory">
+              <option value="ALL">Semua Kategori</option>
+              <option value="Sembako">Sembako</option>
+              <option value="Sayur & Buah">Sayur & Buah</option>
+              <option value="Daging & Ikan">Daging & Ikan</option>
+              <option value="Susu & Telur">Susu & Telur</option>
+              <option value="Bumbu Dapur">Bumbu Dapur</option>
+              <option value="Snack & Minuman">Snack & Minuman</option>
+              <option value="Kebersihan">Kebersihan</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+
+          <div class="toolbar-actions">
+            <button type="button" id="btnPrintReceipt" class="btn-outline" title="Lihat & Cetak Struk Belanja">
+              <span>🧾 Struk</span>
+            </button>
+            <button type="button" id="btnClearAll" class="btn-danger-outline" title="Kosongkan Daftar Belanja">
+              <span>🗑️ Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GROCERY ITEMS LIST -->
+        <div class="grocery-list-container" id="groceryListContainer">
+          <!-- List rendered dynamically -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">🛒</div>
+            <h3>Daftar Belanja Masih Kosong</h3>
+            <p>Silakan gunakan formulir di samping atau pilih barang dari katalog cepat untuk mulai mencatat belanjaan.</p>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <p><strong>GroceryIn</strong> &copy; 2026 &mdash; Aplikasi Asisten Belanja Pintar dengan Deteksi Fluktuasi Harga, Diskon Bertingkat, dan Pengendali Anggaran Dompet.</p>
+    </footer>
+
+  </div>
+
+  <!-- ==================== RECEIPT MODAL ==================== -->
+  <div id="receiptModal" class="modal-backdrop hidden">
+    <div class="receipt-modal-box">
+      <div class="receipt-paper" id="receiptPrintableArea">
+        <div class="receipt-header">
+          <h2>GROCERYIN</h2>
+          <p>Smart Grocery & Price Analytics</p>
+          <div class="receipt-divider">--------------------------------</div>
+          <div class="receipt-meta">
+            <div>Tanggal: <span id="receiptDate">21/10/2026</span></div>
+            <div>Pengguna: <strong id="receiptUser">User</strong></div>
+          </div>
+          <div class="receipt-divider">--------------------------------</div>
+        </div>
+
+        <div class="receipt-items-table" id="receiptItemsTable">
+          <!-- Populated via JS -->
+        </div>
+
+        <div class="receipt-divider">--------------------------------</div>
+        <div class="receipt-totals">
+          <div class="r-row">
+            <span>Batas Dompet (Cap):</span>
+            <strong id="rBudget">Rp 0</strong>
+          </div>
+          <div class="r-row">
+            <span>Total Sebelum Diskon:</span>
+            <span id="rGross">Rp 0</span>
+          </div>
+          <div class="r-row text-green">
+            <span>Total Hemat Diskon:</span>
+            <strong id="rDiscount">-Rp 0</strong>
+          </div>
+          <div class="receipt-divider">================================</div>
+          <div class="r-row r-final">
+            <span>TOTAL AKHIR:</span>
+            <strong id="rNet">Rp 0</strong>
+          </div>
+          <div class="r-row">
+            <span>Sisa Uang Dompet:</span>
+            <strong id="rRemaining">Rp 0</strong>
+          </div>
+        </div>
+
+        <div class="receipt-footer">
+          <p>Terima kasih telah berbelanja bijak bersama GroceryIn!</p>
+          <small>*** Simpan struk ini untuk catatan keuangan Anda ***</small>
+        </div>
+      </div>
+
+      <div class="receipt-modal-actions">
+        <button type="button" id="btnDoPrint" class="btn-primary">🖨️ Cetak Struk</button>
+        <button type="button" id="btnCloseReceipt" class="btn-secondary">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
