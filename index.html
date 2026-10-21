@@ -2,15 +2,15 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>GroceryIn - Smart Grocery & Expense Assistant</title>
-  <meta name="description" content="GroceryIn adalah aplikasi asisten belanja pintar dengan kalkulasi kuantitas realtime, diskon bertingkat, deteksi fluktuasi harga bulan lalu, dan pengendali anggaran dompet.">
+  <meta name="description" content="GroceryIn adalah aplikasi asisten belanja pintar mobile-friendly dengan kalkulasi kuantitas realtime, diskon bertingkat, deteksi fluktuasi harga bulan lalu, dan pengendali anggaran dompet.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
 /* ==========================================================================
-   GROCERYIN - MODERN DESIGN SYSTEM & STYLESHEET
+   GROCERYIN - MODERN MOBILE-FIRST DESIGN SYSTEM & STYLESHEET
    ========================================================================== */
 
 :root {
@@ -70,6 +70,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -79,6 +80,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  padding-bottom: 70px; /* Space for mobile floating nav */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -92,14 +94,14 @@ h1, h2, h3, h4, h5, h6 {
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   opacity: 1;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
@@ -115,11 +117,13 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg), 0 20px 40px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 460px;
-  padding: 32px;
+  max-width: 440px;
+  padding: 28px 24px;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.6);
   animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 92vh;
+  overflow-y: auto;
 }
 
 @keyframes modalPop {
@@ -129,7 +133,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .auth-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .app-brand-badge {
@@ -142,13 +146,17 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-full);
   font-size: 0.9rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+}
+
+.auth-header h2 {
+  font-size: 1.35rem;
 }
 
 .auth-subtitle {
   color: var(--text-muted);
-  font-size: 0.95rem;
-  margin-top: 6px;
+  font-size: 0.88rem;
+  margin-top: 4px;
 }
 
 .single-user-notice {
@@ -159,8 +167,8 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid #bbf7d0;
   border-radius: var(--radius-md);
   padding: 12px 14px;
-  margin-bottom: 20px;
-  font-size: 0.85rem;
+  margin-bottom: 18px;
+  font-size: 0.82rem;
   color: #166534;
 }
 
@@ -180,9 +188,10 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
   gap: 12px;
   width: 100%;
+  min-height: 48px;
   padding: 12px 18px;
   background: #ffffff;
-  border: 1px solid #dadce0;
+  border: 1.5px solid #dadce0;
   border-radius: var(--radius-md);
   font-family: var(--font-heading);
   font-size: 0.95rem;
@@ -193,17 +202,16 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 1px 3px rgba(60,64,67,0.12);
 }
 
-.btn-google:hover {
-  background-color: #f8fafc;
-  box-shadow: 0 2px 6px rgba(60,64,67,0.2);
-  border-color: #c0c4c9;
+.btn-google:active {
+  background-color: #f1f5f9;
+  transform: scale(0.99);
 }
 
 .auth-divider {
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 20px 0;
+  margin: 18px 0;
   color: var(--text-light);
   font-size: 0.8rem;
 }
@@ -220,7 +228,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .form-group label {
@@ -245,16 +253,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .input-with-icon input {
-  padding-left: 42px !important;
+  padding-left: 44px !important;
 }
 
 input[type="text"],
 input[type="number"],
 select {
   width: 100%;
-  padding: 10px 14px;
+  min-height: 48px; /* Touch target on phones */
+  padding: 11px 14px;
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1rem; /* 16px prevents iOS zoom */
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
   background-color: var(--surface);
@@ -266,14 +275,14 @@ input:focus,
 select:focus {
   outline: none;
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
 .form-hint {
   display: block;
   font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 6px;
+  margin-top: 5px;
 }
 
 .btn-primary {
@@ -281,10 +290,11 @@ select:focus {
   color: #ffffff;
   border: none;
   border-radius: var(--radius-md);
+  min-height: 48px;
   padding: 12px 20px;
   font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -294,10 +304,8 @@ select:focus {
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
 }
 
-.btn-primary:hover {
-  background: linear-gradient(135deg, #047857 0%, #059669 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+.btn-primary:active {
+  transform: scale(0.98);
 }
 
 .btn-block {
@@ -306,7 +314,7 @@ select:focus {
 
 .auth-footer {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 18px;
   font-size: 0.75rem;
   color: var(--text-light);
 }
@@ -315,13 +323,13 @@ select:focus {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(4px);
   z-index: 1100;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
 }
 
 .modal-backdrop.hidden {
@@ -331,7 +339,7 @@ select:focus {
 .google-modal-box {
   background: #ffffff;
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 24px 20px;
   max-width: 400px;
   width: 100%;
   box-shadow: var(--shadow-lg);
@@ -365,23 +373,24 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.google-acc-item:hover {
+.google-acc-item:active {
   background-color: var(--accent-light);
   border-color: var(--accent);
 }
 
 .g-avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #e2e8f0;
+  flex-shrink: 0;
 }
 
 .g-acc-info {
@@ -390,12 +399,12 @@ select:focus {
 }
 
 .g-acc-info strong {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .g-acc-info small {
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
 
 /* ==================== APP LAYOUT ==================== */
@@ -418,39 +427,40 @@ select:focus {
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 
 .brand-group {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .logo-circle {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   background: var(--primary-gradient);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+  flex-shrink: 0;
 }
 
 .app-title {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   letter-spacing: -0.5px;
   color: var(--primary-dark);
 }
 
 .app-tagline {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   display: block;
 }
@@ -458,16 +468,16 @@ select:focus {
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .active-user-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--surface-secondary);
   border: 1px solid var(--border);
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: var(--radius-full);
 }
 
@@ -477,42 +487,47 @@ select:focus {
   background: var(--safe);
   border-radius: 50%;
   box-shadow: 0 0 6px var(--safe);
+  flex-shrink: 0;
 }
 
 .user-meta {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .user-label {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .user-name {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-main);
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .btn-logout {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text-muted);
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   transition: all 0.2s ease;
+  min-height: 38px;
 }
 
-.btn-logout:hover {
+.btn-logout:active {
   background: var(--danger-bg);
   border-color: var(--danger-border);
   color: var(--danger);
@@ -520,7 +535,7 @@ select:focus {
 
 /* ==================== BUDGET SAFETY CAP ==================== */
 .budget-cap-section {
-  padding: 20px 24px 0;
+  padding: 14px 18px 0;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -530,14 +545,13 @@ select:focus {
   background: var(--surface);
   border-radius: var(--radius-lg);
   border: 2px solid var(--border);
-  padding: 20px 24px;
+  padding: 16px 18px;
   box-shadow: var(--shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
-/* Budget Card Dynamic States */
 .budget-card.status-safe {
   border-color: #a7f3d0;
   box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
@@ -568,27 +582,28 @@ select:focus {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .budget-title-wrap {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .budget-icon-badge {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   background: var(--safe-bg);
   color: var(--safe);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .budget-card.status-danger .budget-icon-badge {
@@ -603,26 +618,27 @@ select:focus {
 }
 
 .budget-title-wrap h2 {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
 }
 
 .budget-hint {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 .wallet-input-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: var(--surface-secondary);
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 
 .wallet-input-wrapper label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-main);
   white-space: nowrap;
@@ -632,11 +648,13 @@ select:focus {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
+  max-width: 170px;
 }
 
 .curr-prefix {
   position: absolute;
-  left: 10px;
+  left: 12px;
   font-weight: 700;
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -644,35 +662,37 @@ select:focus {
 }
 
 .currency-input-group input {
-  padding-left: 36px;
+  padding-left: 38px;
   font-weight: 700;
-  max-width: 170px;
+  width: 100%;
 }
 
 .budget-meter-wrap {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .meter-labels {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
   font-weight: 600;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .badge-percent {
   background: var(--surface-secondary);
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   border: 1px solid var(--border);
 }
 
 .meter-bar-track {
-  height: 14px;
+  height: 12px;
   background: #e2e8f0;
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -706,10 +726,10 @@ select:focus {
 .budget-alert-banner {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   transition: all 0.3s ease;
 }
@@ -738,28 +758,72 @@ select:focus {
   100% { background-color: #fecaca; }
 }
 
-/* ==================== MAIN GRID ==================== */
-.main-content-grid {
+/* ==================== MOBILE SEGMENTED TAB NAV ==================== */
+.mobile-tab-nav {
+  display: none; /* Hidden on desktop */
+  padding: 12px 18px 0;
   max-width: 1400px;
-  margin: 20px auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 460px 1fr;
-  gap: 24px;
-  flex: 1;
+  margin: 0 auto;
+  width: 100%;
 }
 
-@media (max-width: 1024px) {
-  .main-content-grid {
-    grid-template-columns: 1fr;
-  }
+.mobile-tab-wrapper {
+  display: flex;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 42px;
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: var(--primary-dark);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tab-badge {
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}
+
+/* ==================== MAIN CONTENT GRID ==================== */
+.main-content-grid {
+  max-width: 1400px;
+  margin: 16px auto;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 20px;
+  flex: 1;
 }
 
 .card {
   background: var(--surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  padding: 22px;
+  padding: 20px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -767,13 +831,13 @@ select:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
 }
 
 .card-header h3 {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
 }
 
 .badge-accent {
@@ -805,11 +869,11 @@ select:focus {
 }
 
 .btn-step {
-  width: 38px;
-  height: 42px;
+  width: 44px;
+  height: 48px;
   background: var(--surface-secondary);
   border: 1.5px solid var(--border);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-main);
   cursor: pointer;
@@ -819,8 +883,8 @@ select:focus {
   justify-content: center;
 }
 
-.btn-step:hover {
-  background: #e2e8f0;
+.btn-step:active {
+  background: #cbd5e1;
 }
 
 #btnQtyMinus {
@@ -837,7 +901,8 @@ select:focus {
   border-radius: 0;
   text-align: center;
   font-weight: 700;
-  height: 42px;
+  height: 48px;
+  font-size: 1.1rem;
 }
 
 /* ==================== REALTIME FLUCTUATION PREVIEW ==================== */
@@ -872,8 +937,8 @@ select:focus {
 }
 
 .fluc-icon-box {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -901,7 +966,7 @@ select:focus {
 .fluc-badge {
   font-size: 0.8rem;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
   white-space: nowrap;
 }
@@ -938,6 +1003,8 @@ select:focus {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .discount-header label {
@@ -961,21 +1028,24 @@ select:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .chip {
   background: #ffffff;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-full);
-  padding: 3px 10px;
-  font-size: 0.75rem;
+  padding: 6px 12px;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   color: var(--text-muted);
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.chip:hover,
+.chip:active,
 .chip.active {
   background: var(--primary-light);
   border-color: var(--primary);
@@ -1016,7 +1086,7 @@ select:focus {
   background: #f0fdf4;
   border: 1.5px solid #86efac;
   border-radius: var(--radius-md);
-  padding: 12px 16px;
+  padding: 12px 14px;
   margin-bottom: 16px;
 }
 
@@ -1063,32 +1133,33 @@ select:focus {
 
 .btn-large {
   flex: 1;
-  padding: 12px;
+  min-height: 48px;
   font-size: 1rem;
 }
 
 .btn-secondary {
   background: var(--surface-secondary);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   color: var(--text-main);
-  padding: 10px 18px;
+  padding: 10px 16px;
   border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 48px;
 }
 
-.btn-secondary:hover {
+.btn-secondary:active {
   background: #e2e8f0;
 }
 
 /* ==================== QUICK CATALOG ==================== */
 .catalog-card {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .catalog-header {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .catalog-header h4 {
@@ -1111,22 +1182,23 @@ select:focus {
   align-items: center;
   gap: 10px;
   background: var(--surface-secondary);
-  border: 1px solid var(--border);
-  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 54px;
 }
 
-.quick-catalog-item:hover {
+.quick-catalog-item:active {
   background: #ffffff;
   border-color: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  transform: scale(0.98);
 }
 
 .quick-icon {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  flex-shrink: 0;
 }
 
 .quick-details {
@@ -1154,41 +1226,34 @@ select:focus {
 
 /* ==================== RIGHT PANEL (CART & STATS) ==================== */
 .cart-summary-card {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .cart-stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 12px;
   text-align: center;
-}
-
-@media (max-width: 768px) {
-  .cart-stats-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
 }
 
 .stat-col {
   display: flex;
   flex-direction: column;
-  padding: 8px;
+  padding: 8px 6px;
   background: #ffffff;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .stat-value {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-family: var(--font-heading);
   font-weight: 800;
 }
@@ -1199,9 +1264,9 @@ select:focus {
 .badge-status-safe {
   background: var(--safe-bg);
   color: var(--safe);
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   display: inline-block;
 }
@@ -1209,14 +1274,14 @@ select:focus {
 /* Toolbar */
 .cart-toolbar {
   display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 14px;
   flex-wrap: wrap;
 }
 
 .search-wrap {
   flex: 2;
-  min-width: 200px;
+  min-width: 180px;
   position: relative;
   display: flex;
   align-items: center;
@@ -1235,7 +1300,7 @@ select:focus {
 
 .filter-category-wrap {
   flex: 1;
-  min-width: 160px;
+  min-width: 140px;
 }
 
 .toolbar-actions {
@@ -1245,37 +1310,39 @@ select:focus {
 
 .btn-outline {
   background: #ffffff;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   color: var(--text-main);
   padding: 8px 14px;
   border-radius: var(--radius-md);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   transition: all 0.2s ease;
+  min-height: 48px;
 }
 
-.btn-outline:hover {
+.btn-outline:active {
   background: var(--surface-secondary);
   border-color: #cbd5e1;
 }
 
 .btn-danger-outline {
   background: #ffffff;
-  border: 1px solid var(--danger-border);
+  border: 1.5px solid var(--danger-border);
   color: var(--danger);
   padding: 8px 14px;
   border-radius: var(--radius-md);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 48px;
 }
 
-.btn-danger-outline:hover {
+.btn-danger-outline:active {
   background: var(--danger-bg);
 }
 
@@ -1288,27 +1355,27 @@ select:focus {
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 50px 16px;
   background: var(--surface);
   border-radius: var(--radius-lg);
   border: 2px dashed var(--border);
 }
 
 .empty-icon {
-  font-size: 3.5rem;
-  margin-bottom: 12px;
+  font-size: 3rem;
+  margin-bottom: 10px;
   opacity: 0.6;
 }
 
 .empty-state h3 {
-  font-size: 1.1rem;
-  margin-bottom: 6px;
+  font-size: 1.05rem;
+  margin-bottom: 4px;
 }
 
 .empty-state p {
   color: var(--text-muted);
-  font-size: 0.85rem;
-  max-width: 400px;
+  font-size: 0.82rem;
+  max-width: 360px;
   margin: 0 auto;
 }
 
@@ -1316,19 +1383,18 @@ select:focus {
 .grocery-item-card {
   background: var(--surface);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  padding: 16px 20px;
+  border: 1.5px solid var(--border);
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   box-shadow: var(--shadow-xs);
 }
 
 .grocery-item-card:hover {
-  box-shadow: var(--shadow-md);
   border-color: #cbd5e1;
 }
 
@@ -1344,41 +1410,43 @@ select:focus {
 
 .item-left-col {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 12px;
   flex: 1;
 }
 
 .item-checkbox {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   accent-color: var(--primary);
   cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .item-main-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .item-title-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .item-title {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-main);
 }
 
 .item-cat-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-full);
   background: var(--surface-secondary);
   border: 1px solid var(--border);
@@ -1388,8 +1456,8 @@ select:focus {
 .item-details-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 0.8rem;
+  gap: 10px;
+  font-size: 0.78rem;
   color: var(--text-muted);
   flex-wrap: wrap;
 }
@@ -1401,8 +1469,9 @@ select:focus {
   gap: 4px;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .price-fluc-pill.fluc-up {
@@ -1429,8 +1498,9 @@ select:focus {
   border: 1px solid #fde68a;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .item-notes {
@@ -1442,8 +1512,9 @@ select:focus {
 /* Item Right Column (Price & Actions) */
 .item-right-col {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 .item-pricing-box {
@@ -1459,7 +1530,7 @@ select:focus {
 }
 
 .item-total-price {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-family: var(--font-heading);
   font-weight: 800;
   color: var(--primary-dark);
@@ -1471,8 +1542,8 @@ select:focus {
 }
 
 .btn-icon {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background: #ffffff;
@@ -1481,25 +1552,80 @@ select:focus {
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s ease;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
-.btn-icon:hover {
+.btn-icon:active {
   background: var(--surface-secondary);
-  border-color: #cbd5e1;
 }
 
-.btn-icon.btn-delete:hover {
+.btn-icon.btn-delete:active {
   background: var(--danger-bg);
   border-color: var(--danger-border);
   color: var(--danger);
+}
+
+/* ==================== MOBILE FLOATING BOTTOM SUMMARY BAR ==================== */
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px env(safe-area-inset-bottom, 10px);
+  z-index: 90;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-bottom-content {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-bottom-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-bottom-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.mobile-bottom-price {
+  font-size: 1.15rem;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+
+.mobile-bottom-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-bottom-actions button {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  border-radius: var(--radius-md);
 }
 
 /* ==================== RECEIPT MODAL ==================== */
 .receipt-modal-box {
   background: #ffffff;
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 20px 16px;
   max-width: 440px;
   width: 100%;
   box-shadow: var(--shadow-lg);
@@ -1511,7 +1637,7 @@ select:focus {
 .receipt-paper {
   background: #fafaf9;
   border: 1px dashed #d6d3d1;
-  padding: 20px;
+  padding: 16px;
   font-family: 'Courier New', Courier, monospace;
   overflow-y: auto;
   border-radius: var(--radius-sm);
@@ -1575,7 +1701,7 @@ select:focus {
 .receipt-modal-actions {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .receipt-modal-actions button {
@@ -1585,8 +1711,8 @@ select:focus {
 /* ==================== FOOTER ==================== */
 .app-footer {
   text-align: center;
-  padding: 20px;
-  font-size: 0.8rem;
+  padding: 16px;
+  font-size: 0.78rem;
   color: var(--text-muted);
   border-top: 1px solid var(--border);
   background: var(--surface);
@@ -1595,6 +1721,145 @@ select:focus {
 
 .hidden {
   display: none !important;
+}
+
+/* ==================== RESPONSIVE MEDIA QUERIES (MOBILE FIRST ENHANCEMENTS) ==================== */
+@media (max-width: 840px) {
+  /* Show Mobile Segmented Tab Nav */
+  .mobile-tab-nav {
+    display: block;
+  }
+
+  /* Show Mobile Floating Bottom Summary Bar */
+  .mobile-bottom-bar {
+    display: block;
+  }
+
+  body {
+    padding-bottom: 80px;
+  }
+
+  .main-content-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 12px auto;
+  }
+
+  /* Mobile Tab Display Switching */
+  body.tab-active-cart .left-panel {
+    display: none !important;
+  }
+  body.tab-active-cart .right-panel {
+    display: block !important;
+  }
+
+  body.tab-active-add .left-panel {
+    display: block !important;
+  }
+  body.tab-active-add .item-form-card {
+    display: block !important;
+  }
+  body.tab-active-add .catalog-card {
+    display: none !important;
+  }
+  body.tab-active-add .right-panel {
+    display: none !important;
+  }
+
+  body.tab-active-catalog .left-panel {
+    display: block !important;
+  }
+  body.tab-active-catalog .item-form-card {
+    display: none !important;
+  }
+  body.tab-active-catalog .catalog-card {
+    display: block !important;
+  }
+  body.tab-active-catalog .right-panel {
+    display: none !important;
+  }
+
+  /* Header Compact */
+  .header-container {
+    padding: 10px 16px;
+  }
+  .app-tagline {
+    display: none;
+  }
+  .user-label {
+    display: none;
+  }
+
+  /* Budget Cap Mobile Layout */
+  .budget-top-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .wallet-input-wrapper {
+    justify-content: space-between;
+  }
+  .currency-input-group {
+    max-width: 100%;
+    flex: 1;
+  }
+
+  /* Cart stats grid 2 columns */
+  .cart-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  /* Form row stacks on narrow screens */
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Grocery Item Card Mobile Friendly Layout */
+  .grocery-item-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .item-left-col {
+    width: 100%;
+  }
+
+  .item-right-col {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+    width: 100%;
+  }
+
+  .item-pricing-box {
+    text-align: left;
+  }
+
+  .quick-items-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .budget-card {
+    padding: 14px;
+  }
+  .card {
+    padding: 16px 14px;
+  }
+  .meter-labels {
+    font-size: 0.75rem;
+  }
+  .stat-value {
+    font-size: 0.95rem;
+  }
+  .final-item-total {
+    font-size: 1.2rem;
+  }
 }
 
 /* Print CSS */
@@ -1617,9 +1882,9 @@ select:focus {
   }
 }
 
-</style>
+  </style>
 </head>
-<body>
+<body class="tab-active-cart">
 
   <!-- ==================== AUTHENTICATION OVERLAY ==================== -->
   <div id="authOverlay" class="auth-overlay">
@@ -1645,7 +1910,7 @@ select:focus {
       <!-- Google Sign In Button -->
       <div class="google-auth-section">
         <button type="button" id="btnGoogleLogin" class="btn-google">
-          <svg class="google-icon" viewBox="0 0 48 48" width="20px" height="20px">
+          <svg class="google-icon" viewBox="0 0 48 48" width="22px" height="22px">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
@@ -1677,7 +1942,7 @@ select:focus {
         </button>
       </form>
 
-      <!-- Active User Switch/Reset if already configured -->
+      <!-- Active User Switch/Reset -->
       <div class="auth-footer" id="authFooterArea">
         <span class="auth-security-tag">🛡️ Enkripsi Data Lokal & Sesi Tunggal Terproteksi</span>
       </div>
@@ -1739,7 +2004,7 @@ select:focus {
             <span class="status-dot"></span>
             <span class="user-icon" id="userAvatar">👤</span>
             <div class="user-meta">
-              <span class="user-label">Pengguna Tunggal Aktif:</span>
+              <span class="user-label">Pengguna:</span>
               <strong class="user-name" id="displayName">Pengguna</strong>
             </div>
           </div>
@@ -1761,8 +2026,8 @@ select:focus {
             <div class="budget-title-wrap">
               <div class="budget-icon-badge" id="budgetIconBadge">🛡️</div>
               <div>
-                <h2>Pengendali Anggaran Dompet (Budget Safety Cap)</h2>
-                <p class="budget-hint">Pantau total belanjaan seketika agar tidak melebihi uang saku yang dibawa.</p>
+                <h2>Pengendali Anggaran Dompet</h2>
+                <p class="budget-hint">Pantau total belanjaan seketika agar tidak melebihi uang saku.</p>
               </div>
             </div>
 
@@ -1781,7 +2046,7 @@ select:focus {
             <div class="meter-labels">
               <span>Terpakai: <strong id="budgetSpentText">Rp 0</strong></span>
               <span id="budgetPercentText" class="badge-percent">0%</span>
-              <span>Sisa Dompet: <strong id="budgetRemainingText">Rp 500.000</strong></span>
+              <span>Sisa: <strong id="budgetRemainingText">Rp 500.000</strong></span>
             </div>
             <div class="meter-bar-track">
               <div class="meter-bar-fill safe" id="budgetProgressBar" style="width: 0%;"></div>
@@ -1798,6 +2063,25 @@ select:focus {
 
       </div>
     </section>
+
+    <!-- MOBILE SEGMENTED TAB NAV (Khusus Layar HP) -->
+    <nav class="mobile-tab-nav" id="mobileTabNav" aria-label="Navigasi Menu Mobile">
+      <div class="mobile-tab-wrapper">
+        <button type="button" class="tab-btn active" id="tabBtnCart" data-tab="cart">
+          <span class="tab-icon">🛒</span>
+          <span class="tab-label">Keranjang</span>
+          <span class="tab-badge" id="tabCartCount">0</span>
+        </button>
+        <button type="button" class="tab-btn" id="tabBtnAdd" data-tab="add">
+          <span class="tab-icon">➕</span>
+          <span class="tab-label">Catat Item</span>
+        </button>
+        <button type="button" class="tab-btn" id="tabBtnCatalog" data-tab="catalog">
+          <span class="tab-icon">💡</span>
+          <span class="tab-label">Katalog Acuan</span>
+        </button>
+      </div>
+    </nav>
 
     <!-- MAIN BODY GRID (Catalog / Form / Cart) -->
     <main class="main-content-grid">
@@ -1944,7 +2228,7 @@ select:focus {
                 <span id="btnSaveText">➕ Masukkan ke Keranjang</span>
               </button>
               <button type="button" id="btnCancelEdit" class="btn-secondary hidden">
-                Batal Edit
+                Batal
               </button>
             </div>
 
@@ -1952,7 +2236,7 @@ select:focus {
         </div>
 
         <!-- QUICK BENCHMARK CATALOG / IDE BELANJA -->
-        <div class="card catalog-card">
+        <div class="card catalog-card" id="catalogCard">
           <div class="catalog-header">
             <h4>💡 Katalog Cepat & Riwayat Acuan Pasar</h4>
             <span class="catalog-subtitle">Klik untuk langsung mengisi form dengan data riwayat bulan lalu</span>
@@ -1975,7 +2259,7 @@ select:focus {
               <strong class="stat-value text-primary" id="totalCartPrice">Rp 0</strong>
             </div>
             <div class="stat-col">
-              <span class="stat-label">Total Penghematan Diskon</span>
+              <span class="stat-label">Total Hemat Diskon</span>
               <strong class="stat-value text-green" id="totalDiscountSaved">Rp 0</strong>
             </div>
             <div class="stat-col">
@@ -1983,7 +2267,7 @@ select:focus {
               <strong class="stat-value" id="totalItemsCount">0 Item</strong>
             </div>
             <div class="stat-col">
-              <span class="stat-label">Status Anggaran</span>
+              <span class="stat-label">Status Dompet</span>
               <span class="badge-status-safe" id="budgetStatusBadge">Aman</span>
             </div>
           </div>
@@ -2033,6 +2317,24 @@ select:focus {
       </section>
 
     </main>
+
+    <!-- MOBILE FLOATING BOTTOM SUMMARY BAR (Khusus Layar HP) -->
+    <aside class="mobile-bottom-bar" id="mobileBottomBar">
+      <div class="mobile-bottom-content">
+        <div class="mobile-bottom-info">
+          <span class="mobile-bottom-label">Total Belanja:</span>
+          <strong class="mobile-bottom-price" id="mobileBottomPrice">Rp 0</strong>
+        </div>
+        <div class="mobile-bottom-actions">
+          <button type="button" id="btnMobileAdd" class="btn-primary">
+            <span>➕ Catat Item</span>
+          </button>
+          <button type="button" id="btnMobileReceipt" class="btn-outline">
+            <span>🧾 Struk</span>
+          </button>
+        </div>
+      </div>
+    </aside>
 
     <!-- FOOTER -->
     <footer class="app-footer">
@@ -2108,6 +2410,7 @@ select:focus {
  * - Cascading Tiered Discount Engine (e.g. 50% + 20%)
  * - Realtime Price Fluctuation Detection (↑ Panah Merah Naik, ↓ Panah Hijau Turun, = Setara)
  * - Budget Safety Cap with Dynamic Glowing Red Danger Alerts
+ * - Mobile-First Segmented Navigation & Floating Cart Bar
  * - Quick Benchmark Market Catalog
  * - Printable Digital Receipt
  */
@@ -2121,7 +2424,7 @@ const BENCHMARK_CATALOG = [
   { name: "Bawang Merah Brebes", category: "Bumbu Dapur", unit: "kg", defaultQty: 1, currentPrice: 30000, lastMonthPrice: 35000, icon: "🧅", discount: "" },
   { name: "Susu UHT Full Cream 1L", category: "Susu & Telur", unit: "liter", defaultQty: 2, currentPrice: 19500, lastMonthPrice: 19500, icon: "🥛", discount: "50+20" },
   { name: "Apel Fuji Segar", category: "Sayur & Buah", unit: "kg", defaultQty: 1.5, currentPrice: 48000, lastMonthPrice: 42000, icon: "🍎", discount: "15" },
-  { name: "Sabun Cuci Piring Refill", category: "Kebersihan", unit: "pouch", defaultQty: 1, currentPrice: 13500, lastMonthPrice: 15000, icon: "🧼", discount: "" }
+  { name: "Sabun Cuci Piring Refill", category: "Kebersihan", unit: "pack", defaultQty: 1, currentPrice: 13500, lastMonthPrice: 15000, icon: "🧼", discount: "" }
 ];
 
 // Initial starter shopping cart items
@@ -2175,6 +2478,7 @@ class GroceryInApp {
     this.items = [];
     this.budgetCap = 500000;
     this.editingId = null;
+    this.currentMobileTab = "cart"; // cart, add, catalog
 
     this.initElements();
     this.initEventListeners();
@@ -2211,6 +2515,15 @@ class GroceryInApp {
     this.alertIcon = document.getElementById("alertIcon");
     this.alertMessage = document.getElementById("alertMessage");
     this.budgetStatusBadge = document.getElementById("budgetStatusBadge");
+
+    // Mobile Navigation & Floating Bar Elements
+    this.tabBtnCart = document.getElementById("tabBtnCart");
+    this.tabBtnAdd = document.getElementById("tabBtnAdd");
+    this.tabBtnCatalog = document.getElementById("tabBtnCatalog");
+    this.tabCartCount = document.getElementById("tabCartCount");
+    this.mobileBottomPrice = document.getElementById("mobileBottomPrice");
+    this.btnMobileAdd = document.getElementById("btnMobileAdd");
+    this.btnMobileReceipt = document.getElementById("btnMobileReceipt");
 
     // Item Form Elements
     this.groceryForm = document.getElementById("groceryForm");
@@ -2281,6 +2594,15 @@ class GroceryInApp {
     this.gAccDemo2.addEventListener("click", () => this.handleGoogleLogin("Siti Rahma", "siti.rahma99@gmail.com", "👩"));
     this.btnLogout.addEventListener("click", () => this.handleLogout());
 
+    // Mobile Segmented Navigation Tabs
+    if (this.tabBtnCart) this.tabBtnCart.addEventListener("click", () => this.switchMobileTab("cart"));
+    if (this.tabBtnAdd) this.tabBtnAdd.addEventListener("click", () => this.switchMobileTab("add"));
+    if (this.tabBtnCatalog) this.tabBtnCatalog.addEventListener("click", () => this.switchMobileTab("catalog"));
+
+    // Mobile bottom bar quick actions
+    if (this.btnMobileAdd) this.btnMobileAdd.addEventListener("click", () => this.switchMobileTab("add"));
+    if (this.btnMobileReceipt) this.btnMobileReceipt.addEventListener("click", () => this.openReceiptModal());
+
     // Budget Cap input
     this.inputBudgetCap.addEventListener("input", () => {
       const val = parseFloat(this.inputBudgetCap.value) || 0;
@@ -2330,7 +2652,10 @@ class GroceryInApp {
       this.handleSaveItem();
     });
 
-    this.btnCancelEdit.addEventListener("click", () => this.resetForm());
+    this.btnCancelEdit.addEventListener("click", () => {
+      this.resetForm();
+      this.switchMobileTab("cart");
+    });
 
     // Cart Search & Filter
     this.searchCart.addEventListener("input", () => this.renderGroceryList());
@@ -2353,8 +2678,27 @@ class GroceryInApp {
     this.btnDoPrint.addEventListener("click", () => window.print());
   }
 
+  // ==================== MOBILE TAB SWITCHER ====================
+  switchMobileTab(tabName) {
+    this.currentMobileTab = tabName;
+    document.body.classList.remove("tab-active-cart", "tab-active-add", "tab-active-catalog");
+    document.body.classList.add(`tab-active-${tabName}`);
+
+    if (this.tabBtnCart && this.tabBtnAdd && this.tabBtnCatalog) {
+      this.tabBtnCart.classList.toggle("active", tabName === "cart");
+      this.tabBtnAdd.classList.toggle("active", tabName === "add");
+      this.tabBtnCatalog.classList.toggle("active", tabName === "catalog");
+    }
+
+    // Scroll smoothly to top of content
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  }
+
   // ==================== AUTHENTICATION & SINGLE-USER LOCK ====================
   loadState() {
+    // Default mobile tab
+    this.switchMobileTab("cart");
+
     // 1. Check Locked Single-User
     const savedUserJson = localStorage.getItem(this.storageKeyUser);
     if (savedUserJson) {
@@ -2422,7 +2766,6 @@ class GroceryInApp {
     const lockedUserJson = localStorage.getItem(this.storageKeyUser);
     if (lockedUserJson) {
       const lockedUser = JSON.parse(lockedUserJson);
-      // If a single user is already locked and username doesn't match:
       if (lockedUser.username.toLowerCase() !== username.toLowerCase()) {
         alert(
           `⛔ AKSES DITOLAK (Single-User Enforcement):\n\n` +
@@ -2450,7 +2793,6 @@ class GroceryInApp {
   }
 
   handleGoogleLogin(name, email, avatar = "👤") {
-    // Single user verification
     const lockedUserJson = localStorage.getItem(this.storageKeyUser);
     if (lockedUserJson) {
       const lockedUser = JSON.parse(lockedUserJson);
@@ -2512,16 +2854,6 @@ class GroceryInApp {
   }
 
   // ==================== TIERED DISCOUNT MATHEMATICAL LOGIC ====================
-  /**
-   * Calculates cascading discounts.
-   * Example: 50% + 20% on Rp 100.000:
-   * Tier 1: 100.000 - 50% = 50.000
-   * Tier 2: 50.000 - 20% = 40.000 (Saved: 60.000, final price: 40.000)
-   * 
-   * @param {number} grossPrice - Base price (Qty * UnitPrice)
-   * @param {string|Array} tierInput - "50+20" or "50, 20" or [50, 20]
-   * @returns {Object} { finalPrice, totalSaved, effectivePercent, steps }
-   */
   calculateTieredDiscount(grossPrice, tierInput) {
     if (!tierInput || grossPrice <= 0) {
       return {
@@ -2537,7 +2869,6 @@ class GroceryInApp {
     if (Array.isArray(tierInput)) {
       rawTiers = tierInput;
     } else {
-      // Parse string format: "50+20", "50% + 20%", "50,20", "50 20"
       rawTiers = tierInput
         .replace(/%/g, "")
         .split(/[+,/ ]+/)
@@ -2587,13 +2918,6 @@ class GroceryInApp {
   }
 
   // ==================== PRICE FLUCTUATION DETECTION ====================
-  /**
-   * Compares current price against last month's benchmark price.
-   * Returns visual indicator type:
-   * - UP (↑ Panah Merah Naik)
-   * - DOWN (↓ Panah Hijau Turun)
-   * - EQUAL (= Setara / Stabil)
-   */
   detectPriceFluctuation(currentPrice, lastMonthPrice) {
     if (!lastMonthPrice || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
       return {
@@ -2602,7 +2926,7 @@ class GroceryInApp {
         diffNominal: 0,
         diffPercent: 0,
         cssClass: "fluc-equal",
-        label: "= Stabil (Tidak ada data riwayat)"
+        label: "= Stabil (Tidak ada data)"
       };
     }
 
@@ -2634,7 +2958,7 @@ class GroceryInApp {
         diffNominal: 0,
         diffPercent: 0,
         cssClass: "fluc-equal",
-        label: `= Setara / Stabil persis bulan lalu`
+        label: `= Setara bulan lalu`
       };
     }
   }
@@ -2672,12 +2996,12 @@ class GroceryInApp {
       });
       breakdownHtml += `
         <div class="math-step" style="margin-top: 4px; color: #15803d; font-weight: 700;">
-          🎉 Total Potongan: ${this.formatRupiah(discountResult.totalSaved)} (Efektif ${discountResult.effectivePercent}%, BUKAN flat ${discountResult.tiers.reduce((a,b)=>a+b, 0)}%)
+          🎉 Total Hemat: ${this.formatRupiah(discountResult.totalSaved)} (Efektif ${discountResult.effectivePercent}%, BUKAN flat ${discountResult.tiers.reduce((a,b)=>a+b, 0)}%)
         </div>
       `;
       this.discountMathContent.innerHTML = breakdownHtml;
     } else {
-      this.discountMathContent.textContent = "Tidak ada promo/diskon aktif. Total dihitung normal (Kuantitas x Harga Satuan).";
+      this.discountMathContent.textContent = "Tidak ada promo aktif. Total dihitung normal (Kuantitas x Harga Satuan).";
     }
 
     // 4. Update Realtime Price Fluctuation Preview Box
@@ -2687,7 +3011,7 @@ class GroceryInApp {
     if (fluc.status === "UP") {
       this.flucIconBox.textContent = "🔺";
       this.flucTitle.innerHTML = `<span style="color: #b91c1c;">Harga Naik Dibanding Bulan Lalu!</span>`;
-      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (Selisih +${this.formatRupiah(fluc.diffNominal)})`;
+      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (+${this.formatRupiah(fluc.diffNominal)})`;
       this.flucBadge.className = "fluc-badge badge-up";
       this.flucBadge.textContent = fluc.label;
     } else if (fluc.status === "DOWN") {
@@ -2737,6 +3061,10 @@ class GroceryInApp {
     this.totalDiscountSaved.textContent = this.formatRupiah(totalSaved);
     this.totalItemsCount.textContent = `${this.items.length} Item`;
 
+    // Mobile specific indicators
+    if (this.tabCartCount) this.tabCartCount.textContent = this.items.length;
+    if (this.mobileBottomPrice) this.mobileBottomPrice.textContent = this.formatRupiah(totalCartNet);
+
     // Remove existing state classes
     this.budgetCard.classList.remove("status-safe", "status-warning", "status-danger");
     this.budgetProgressBar.classList.remove("safe", "warning", "danger");
@@ -2744,7 +3072,6 @@ class GroceryInApp {
 
     // DYNAMIC DANGER CAP LOGIC
     if (spentPercent > 100) {
-      // Over budget (EXCEEDED - Pulsing Red Alarm)
       this.budgetCard.classList.add("status-danger");
       this.budgetProgressBar.classList.add("danger");
       this.budgetAlertBanner.classList.add("danger");
@@ -2755,7 +3082,6 @@ class GroceryInApp {
       this.budgetStatusBadge.style.color = "#dc2626";
       this.budgetStatusBadge.textContent = "⚠️ Over Budget!";
     } else if (spentPercent >= 85) {
-      // Near budget limit (WARNING / CRITICAL ZONE)
       this.budgetCard.classList.add("status-danger");
       this.budgetProgressBar.classList.add("danger");
       this.budgetAlertBanner.classList.add("danger");
@@ -2766,16 +3092,14 @@ class GroceryInApp {
       this.budgetStatusBadge.style.color = "#b45309";
       this.budgetStatusBadge.textContent = "Hampir Penuh";
     } else if (spentPercent >= 65) {
-      // Approaching limit (WASPADA)
       this.budgetCard.classList.add("status-warning");
       this.budgetProgressBar.classList.add("warning");
       this.budgetAlertBanner.classList.add("warning");
       this.alertIcon.textContent = "⚡";
-      this.alertMessage.textContent = `Peringatan Anggaran: Belanjaan telah mencapai ${spentPercent.toFixed(1)}% batas dompet. Pantau item tambahan berikutnya.`;
+      this.alertMessage.textContent = `Peringatan: Belanjaan telah mencapai ${spentPercent.toFixed(1)}% batas dompet. Pantau item tambahan berikutnya.`;
       this.budgetStatusBadge.className = "badge-status-safe";
       this.budgetStatusBadge.textContent = "Waspada";
     } else {
-      // Safe (< 65%)
       this.budgetCard.classList.add("status-safe");
       this.budgetProgressBar.classList.add("safe");
       this.budgetAlertBanner.classList.add("safe");
@@ -2810,7 +3134,6 @@ class GroceryInApp {
     }
 
     if (this.editingId) {
-      // Update existing item
       const index = this.items.findIndex(it => it.id === this.editingId);
       if (index !== -1) {
         this.items[index] = {
@@ -2827,7 +3150,6 @@ class GroceryInApp {
       }
       this.editingId = null;
     } else {
-      // Create new item
       const newItem = {
         id: "item-" + Date.now(),
         name,
@@ -2847,6 +3169,11 @@ class GroceryInApp {
     this.resetForm();
     this.renderGroceryList();
     this.renderBudgetSafetyCap();
+
+    // Auto-switch to cart tab on mobile for seamless flow
+    if (window.innerWidth <= 840) {
+      this.switchMobileTab("cart");
+    }
   }
 
   editItem(id) {
@@ -2854,7 +3181,7 @@ class GroceryInApp {
     if (!item) return;
 
     this.editingId = item.id;
-    this.formTitle.textContent = "✏️ Edit Belanjaan: " + item.name;
+    this.formTitle.textContent = "✏️ Edit: " + item.name;
     this.btnSaveText.textContent = "💾 Simpan Perubahan";
     this.btnCancelEdit.classList.remove("hidden");
 
@@ -2868,6 +3195,11 @@ class GroceryInApp {
     this.inputNotes.value = item.notes || "";
 
     this.updateLiveFormCalculations();
+
+    // Switch to Add/Edit tab on mobile
+    if (window.innerWidth <= 840) {
+      this.switchMobileTab("add");
+    }
     this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -2942,7 +3274,7 @@ class GroceryInApp {
 
       let discountPillHtml = "";
       if (discount.totalSaved > 0) {
-        discountPillHtml = `<span class="item-discount-pill" title="Diskon bertingkat hemat ${this.formatRupiah(discount.totalSaved)}">Promo ${it.discountTiers}% (Hemat ${this.formatRupiah(discount.totalSaved)})</span>`;
+        discountPillHtml = `<span class="item-discount-pill" title="Diskon bertingkat hemat ${this.formatRupiah(discount.totalSaved)}">Promo ${it.discountTiers}% (-${this.formatRupiah(discount.totalSaved)})</span>`;
       }
 
       html += `
@@ -3013,6 +3345,11 @@ class GroceryInApp {
     this.inputNotes.value = `Acuan pasar bulan lalu ${this.formatRupiah(found.lastMonthPrice)}`;
 
     this.updateLiveFormCalculations();
+
+    // Switch to Add tab on mobile
+    if (window.innerWidth <= 840) {
+      this.switchMobileTab("add");
+    }
     this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -3102,6 +3439,6 @@ document.addEventListener("DOMContentLoaded", () => {
   app = new GroceryInApp();
 });
 
-</script>
+  </script>
 </body>
 </html>

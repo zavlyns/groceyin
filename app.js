@@ -6,6 +6,7 @@
  * - Cascading Tiered Discount Engine (e.g. 50% + 20%)
  * - Realtime Price Fluctuation Detection (↑ Panah Merah Naik, ↓ Panah Hijau Turun, = Setara)
  * - Budget Safety Cap with Dynamic Glowing Red Danger Alerts
+ * - Mobile-First Segmented Navigation & Floating Cart Bar
  * - Quick Benchmark Market Catalog
  * - Printable Digital Receipt
  */
@@ -19,7 +20,7 @@ const BENCHMARK_CATALOG = [
   { name: "Bawang Merah Brebes", category: "Bumbu Dapur", unit: "kg", defaultQty: 1, currentPrice: 30000, lastMonthPrice: 35000, icon: "🧅", discount: "" },
   { name: "Susu UHT Full Cream 1L", category: "Susu & Telur", unit: "liter", defaultQty: 2, currentPrice: 19500, lastMonthPrice: 19500, icon: "🥛", discount: "50+20" },
   { name: "Apel Fuji Segar", category: "Sayur & Buah", unit: "kg", defaultQty: 1.5, currentPrice: 48000, lastMonthPrice: 42000, icon: "🍎", discount: "15" },
-  { name: "Sabun Cuci Piring Refill", category: "Kebersihan", unit: "pouch", defaultQty: 1, currentPrice: 13500, lastMonthPrice: 15000, icon: "🧼", discount: "" }
+  { name: "Sabun Cuci Piring Refill", category: "Kebersihan", unit: "pack", defaultQty: 1, currentPrice: 13500, lastMonthPrice: 15000, icon: "🧼", discount: "" }
 ];
 
 // Initial starter shopping cart items
@@ -73,6 +74,7 @@ class GroceryInApp {
     this.items = [];
     this.budgetCap = 500000;
     this.editingId = null;
+    this.currentMobileTab = "cart"; // cart, add, catalog
 
     this.initElements();
     this.initEventListeners();
@@ -109,6 +111,15 @@ class GroceryInApp {
     this.alertIcon = document.getElementById("alertIcon");
     this.alertMessage = document.getElementById("alertMessage");
     this.budgetStatusBadge = document.getElementById("budgetStatusBadge");
+
+    // Mobile Navigation & Floating Bar Elements
+    this.tabBtnCart = document.getElementById("tabBtnCart");
+    this.tabBtnAdd = document.getElementById("tabBtnAdd");
+    this.tabBtnCatalog = document.getElementById("tabBtnCatalog");
+    this.tabCartCount = document.getElementById("tabCartCount");
+    this.mobileBottomPrice = document.getElementById("mobileBottomPrice");
+    this.btnMobileAdd = document.getElementById("btnMobileAdd");
+    this.btnMobileReceipt = document.getElementById("btnMobileReceipt");
 
     // Item Form Elements
     this.groceryForm = document.getElementById("groceryForm");
@@ -179,6 +190,15 @@ class GroceryInApp {
     this.gAccDemo2.addEventListener("click", () => this.handleGoogleLogin("Siti Rahma", "siti.rahma99@gmail.com", "👩"));
     this.btnLogout.addEventListener("click", () => this.handleLogout());
 
+    // Mobile Segmented Navigation Tabs
+    if (this.tabBtnCart) this.tabBtnCart.addEventListener("click", () => this.switchMobileTab("cart"));
+    if (this.tabBtnAdd) this.tabBtnAdd.addEventListener("click", () => this.switchMobileTab("add"));
+    if (this.tabBtnCatalog) this.tabBtnCatalog.addEventListener("click", () => this.switchMobileTab("catalog"));
+
+    // Mobile bottom bar quick actions
+    if (this.btnMobileAdd) this.btnMobileAdd.addEventListener("click", () => this.switchMobileTab("add"));
+    if (this.btnMobileReceipt) this.btnMobileReceipt.addEventListener("click", () => this.openReceiptModal());
+
     // Budget Cap input
     this.inputBudgetCap.addEventListener("input", () => {
       const val = parseFloat(this.inputBudgetCap.value) || 0;
@@ -228,7 +248,10 @@ class GroceryInApp {
       this.handleSaveItem();
     });
 
-    this.btnCancelEdit.addEventListener("click", () => this.resetForm());
+    this.btnCancelEdit.addEventListener("click", () => {
+      this.resetForm();
+      this.switchMobileTab("cart");
+    });
 
     // Cart Search & Filter
     this.searchCart.addEventListener("input", () => this.renderGroceryList());
@@ -251,8 +274,27 @@ class GroceryInApp {
     this.btnDoPrint.addEventListener("click", () => window.print());
   }
 
+  // ==================== MOBILE TAB SWITCHER ====================
+  switchMobileTab(tabName) {
+    this.currentMobileTab = tabName;
+    document.body.classList.remove("tab-active-cart", "tab-active-add", "tab-active-catalog");
+    document.body.classList.add(`tab-active-${tabName}`);
+
+    if (this.tabBtnCart && this.tabBtnAdd && this.tabBtnCatalog) {
+      this.tabBtnCart.classList.toggle("active", tabName === "cart");
+      this.tabBtnAdd.classList.toggle("active", tabName === "add");
+      this.tabBtnCatalog.classList.toggle("active", tabName === "catalog");
+    }
+
+    // Scroll smoothly to top of content
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  }
+
   // ==================== AUTHENTICATION & SINGLE-USER LOCK ====================
   loadState() {
+    // Default mobile tab
+    this.switchMobileTab("cart");
+
     // 1. Check Locked Single-User
     const savedUserJson = localStorage.getItem(this.storageKeyUser);
     if (savedUserJson) {
@@ -320,7 +362,6 @@ class GroceryInApp {
     const lockedUserJson = localStorage.getItem(this.storageKeyUser);
     if (lockedUserJson) {
       const lockedUser = JSON.parse(lockedUserJson);
-      // If a single user is already locked and username doesn't match:
       if (lockedUser.username.toLowerCase() !== username.toLowerCase()) {
         alert(
           `⛔ AKSES DITOLAK (Single-User Enforcement):\n\n` +
@@ -348,7 +389,6 @@ class GroceryInApp {
   }
 
   handleGoogleLogin(name, email, avatar = "👤") {
-    // Single user verification
     const lockedUserJson = localStorage.getItem(this.storageKeyUser);
     if (lockedUserJson) {
       const lockedUser = JSON.parse(lockedUserJson);
@@ -410,16 +450,6 @@ class GroceryInApp {
   }
 
   // ==================== TIERED DISCOUNT MATHEMATICAL LOGIC ====================
-  /**
-   * Calculates cascading discounts.
-   * Example: 50% + 20% on Rp 100.000:
-   * Tier 1: 100.000 - 50% = 50.000
-   * Tier 2: 50.000 - 20% = 40.000 (Saved: 60.000, final price: 40.000)
-   * 
-   * @param {number} grossPrice - Base price (Qty * UnitPrice)
-   * @param {string|Array} tierInput - "50+20" or "50, 20" or [50, 20]
-   * @returns {Object} { finalPrice, totalSaved, effectivePercent, steps }
-   */
   calculateTieredDiscount(grossPrice, tierInput) {
     if (!tierInput || grossPrice <= 0) {
       return {
@@ -435,7 +465,6 @@ class GroceryInApp {
     if (Array.isArray(tierInput)) {
       rawTiers = tierInput;
     } else {
-      // Parse string format: "50+20", "50% + 20%", "50,20", "50 20"
       rawTiers = tierInput
         .replace(/%/g, "")
         .split(/[+,/ ]+/)
@@ -485,13 +514,6 @@ class GroceryInApp {
   }
 
   // ==================== PRICE FLUCTUATION DETECTION ====================
-  /**
-   * Compares current price against last month's benchmark price.
-   * Returns visual indicator type:
-   * - UP (↑ Panah Merah Naik)
-   * - DOWN (↓ Panah Hijau Turun)
-   * - EQUAL (= Setara / Stabil)
-   */
   detectPriceFluctuation(currentPrice, lastMonthPrice) {
     if (!lastMonthPrice || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
       return {
@@ -500,7 +522,7 @@ class GroceryInApp {
         diffNominal: 0,
         diffPercent: 0,
         cssClass: "fluc-equal",
-        label: "= Stabil (Tidak ada data riwayat)"
+        label: "= Stabil (Tidak ada data)"
       };
     }
 
@@ -532,7 +554,7 @@ class GroceryInApp {
         diffNominal: 0,
         diffPercent: 0,
         cssClass: "fluc-equal",
-        label: `= Setara / Stabil persis bulan lalu`
+        label: `= Setara bulan lalu`
       };
     }
   }
@@ -570,12 +592,12 @@ class GroceryInApp {
       });
       breakdownHtml += `
         <div class="math-step" style="margin-top: 4px; color: #15803d; font-weight: 700;">
-          🎉 Total Potongan: ${this.formatRupiah(discountResult.totalSaved)} (Efektif ${discountResult.effectivePercent}%, BUKAN flat ${discountResult.tiers.reduce((a,b)=>a+b, 0)}%)
+          🎉 Total Hemat: ${this.formatRupiah(discountResult.totalSaved)} (Efektif ${discountResult.effectivePercent}%, BUKAN flat ${discountResult.tiers.reduce((a,b)=>a+b, 0)}%)
         </div>
       `;
       this.discountMathContent.innerHTML = breakdownHtml;
     } else {
-      this.discountMathContent.textContent = "Tidak ada promo/diskon aktif. Total dihitung normal (Kuantitas x Harga Satuan).";
+      this.discountMathContent.textContent = "Tidak ada promo aktif. Total dihitung normal (Kuantitas x Harga Satuan).";
     }
 
     // 4. Update Realtime Price Fluctuation Preview Box
@@ -585,7 +607,7 @@ class GroceryInApp {
     if (fluc.status === "UP") {
       this.flucIconBox.textContent = "🔺";
       this.flucTitle.innerHTML = `<span style="color: #b91c1c;">Harga Naik Dibanding Bulan Lalu!</span>`;
-      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (Selisih +${this.formatRupiah(fluc.diffNominal)})`;
+      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (+${this.formatRupiah(fluc.diffNominal)})`;
       this.flucBadge.className = "fluc-badge badge-up";
       this.flucBadge.textContent = fluc.label;
     } else if (fluc.status === "DOWN") {
@@ -635,6 +657,10 @@ class GroceryInApp {
     this.totalDiscountSaved.textContent = this.formatRupiah(totalSaved);
     this.totalItemsCount.textContent = `${this.items.length} Item`;
 
+    // Mobile specific indicators
+    if (this.tabCartCount) this.tabCartCount.textContent = this.items.length;
+    if (this.mobileBottomPrice) this.mobileBottomPrice.textContent = this.formatRupiah(totalCartNet);
+
     // Remove existing state classes
     this.budgetCard.classList.remove("status-safe", "status-warning", "status-danger");
     this.budgetProgressBar.classList.remove("safe", "warning", "danger");
@@ -642,7 +668,6 @@ class GroceryInApp {
 
     // DYNAMIC DANGER CAP LOGIC
     if (spentPercent > 100) {
-      // Over budget (EXCEEDED - Pulsing Red Alarm)
       this.budgetCard.classList.add("status-danger");
       this.budgetProgressBar.classList.add("danger");
       this.budgetAlertBanner.classList.add("danger");
@@ -653,7 +678,6 @@ class GroceryInApp {
       this.budgetStatusBadge.style.color = "#dc2626";
       this.budgetStatusBadge.textContent = "⚠️ Over Budget!";
     } else if (spentPercent >= 85) {
-      // Near budget limit (WARNING / CRITICAL ZONE)
       this.budgetCard.classList.add("status-danger");
       this.budgetProgressBar.classList.add("danger");
       this.budgetAlertBanner.classList.add("danger");
@@ -664,16 +688,14 @@ class GroceryInApp {
       this.budgetStatusBadge.style.color = "#b45309";
       this.budgetStatusBadge.textContent = "Hampir Penuh";
     } else if (spentPercent >= 65) {
-      // Approaching limit (WASPADA)
       this.budgetCard.classList.add("status-warning");
       this.budgetProgressBar.classList.add("warning");
       this.budgetAlertBanner.classList.add("warning");
       this.alertIcon.textContent = "⚡";
-      this.alertMessage.textContent = `Peringatan Anggaran: Belanjaan telah mencapai ${spentPercent.toFixed(1)}% batas dompet. Pantau item tambahan berikutnya.`;
+      this.alertMessage.textContent = `Peringatan: Belanjaan telah mencapai ${spentPercent.toFixed(1)}% batas dompet. Pantau item tambahan berikutnya.`;
       this.budgetStatusBadge.className = "badge-status-safe";
       this.budgetStatusBadge.textContent = "Waspada";
     } else {
-      // Safe (< 65%)
       this.budgetCard.classList.add("status-safe");
       this.budgetProgressBar.classList.add("safe");
       this.budgetAlertBanner.classList.add("safe");
@@ -708,7 +730,6 @@ class GroceryInApp {
     }
 
     if (this.editingId) {
-      // Update existing item
       const index = this.items.findIndex(it => it.id === this.editingId);
       if (index !== -1) {
         this.items[index] = {
@@ -725,7 +746,6 @@ class GroceryInApp {
       }
       this.editingId = null;
     } else {
-      // Create new item
       const newItem = {
         id: "item-" + Date.now(),
         name,
@@ -745,6 +765,11 @@ class GroceryInApp {
     this.resetForm();
     this.renderGroceryList();
     this.renderBudgetSafetyCap();
+
+    // Auto-switch to cart tab on mobile for seamless flow
+    if (window.innerWidth <= 840) {
+      this.switchMobileTab("cart");
+    }
   }
 
   editItem(id) {
@@ -752,7 +777,7 @@ class GroceryInApp {
     if (!item) return;
 
     this.editingId = item.id;
-    this.formTitle.textContent = "✏️ Edit Belanjaan: " + item.name;
+    this.formTitle.textContent = "✏️ Edit: " + item.name;
     this.btnSaveText.textContent = "💾 Simpan Perubahan";
     this.btnCancelEdit.classList.remove("hidden");
 
@@ -766,6 +791,11 @@ class GroceryInApp {
     this.inputNotes.value = item.notes || "";
 
     this.updateLiveFormCalculations();
+
+    // Switch to Add/Edit tab on mobile
+    if (window.innerWidth <= 840) {
+      this.switchMobileTab("add");
+    }
     this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -840,7 +870,7 @@ class GroceryInApp {
 
       let discountPillHtml = "";
       if (discount.totalSaved > 0) {
-        discountPillHtml = `<span class="item-discount-pill" title="Diskon bertingkat hemat ${this.formatRupiah(discount.totalSaved)}">Promo ${it.discountTiers}% (Hemat ${this.formatRupiah(discount.totalSaved)})</span>`;
+        discountPillHtml = `<span class="item-discount-pill" title="Diskon bertingkat hemat ${this.formatRupiah(discount.totalSaved)}">Promo ${it.discountTiers}% (-${this.formatRupiah(discount.totalSaved)})</span>`;
       }
 
       html += `
@@ -911,6 +941,11 @@ class GroceryInApp {
     this.inputNotes.value = `Acuan pasar bulan lalu ${this.formatRupiah(found.lastMonthPrice)}`;
 
     this.updateLiveFormCalculations();
+
+    // Switch to Add tab on mobile
+    if (window.innerWidth <= 840) {
+      this.switchMobileTab("add");
+    }
     this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
