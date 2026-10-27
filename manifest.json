@@ -1,14 +1,14 @@
 {
-  "name": "GroceryIn - Smart Grocery & Expense Assistant",
+  "name": "GroceryIn - Smart Grocery & Budget Safety Tracker",
   "short_name": "GroceryIn",
-  "description": "Asisten belanja pintar dengan pengendali anggaran dompet, deteksi fluktuasi harga acuan, dan diskon bertingkat.",
+  "description": "Aplikasi PWA asisten belanja bulanan siswa rantau dengan pengendali budget saku, kalkulasi diskon otomatis, dan deteksi fluktuasi harga.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay"],
   "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#059669",
+  "background_color": "#FAF6F0",
+  "theme_color": "#8C6239",
   "categories": ["shopping", "finance", "lifestyle"],
   "icons": [
     {
@@ -37,4 +37,3 @@
     }
   ]
 }
-

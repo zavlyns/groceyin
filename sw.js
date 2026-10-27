@@ -1,9 +1,9 @@
 /**
  * GroceryIn PWA Service Worker
- * Provides offline capabilities, caching for app shell & static assets.
+ * Provides offline capabilities & caching for aesthetic mobile experience.
  */
 
-const CACHE_NAME = 'groceryin-pwa-v1';
+const CACHE_NAME = 'groceryin-rantau-v2';
 
 const STATIC_ASSETS = [
   './',
@@ -17,13 +17,13 @@ const STATIC_ASSETS = [
   './icons/icon-maskable.png'
 ];
 
-// 1. Install Event: Cache app shell
+// 1. Install Event: Precache app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching offline app shell');
+      console.log('[SW] Pre-caching GroceryIn aesthetic app shell');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[SW] Pre-cache partial failure:', err);
+        console.warn('[SW] Pre-cache partial warning:', err);
       });
     }).then(() => self.skipWaiting())
   );
@@ -45,19 +45,14 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch Event: Stale-While-Revalidate for local assets, Network First for external APIs
+// 3. Fetch Event: Stale-While-Revalidate for local assets and images
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Ignore non-GET requests or browser-extension / firestore sync
   if (req.method !== 'GET') return;
   if (url.protocol.startsWith('chrome-extension')) return;
-  if (url.hostname.includes('firestore') || url.hostname.includes('googleapis.com/identitytoolkit')) {
-    return; // Let Firebase handle its own offline persistence
-  }
 
-  // Google Fonts or static assets: Stale-While-Revalidate
   event.respondWith(
     caches.match(req).then((cachedResponse) => {
       const fetchPromise = fetch(req).then((networkResponse) => {
@@ -68,13 +63,9 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // If network fails, return cached response if present
-        return cachedResponse;
-      });
+      }).catch(() => cachedResponse);
 
       return cachedResponse || fetchPromise;
     })
   );
 });
-

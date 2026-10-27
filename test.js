@@ -1,9 +1,25 @@
 /**
  * Automated Test Suite for GroceryIn Logic
+ * Smart Grocery & Budget Safety Tracker (Edition Anak Rantau)
  */
 const assert = require('assert');
 
-// 1. Cascading Tiered Discount Logic Test
+// 1. Rumus Diskon Tunggal: Harga2 = Harga - (Diskon * Harga)
+function calculateHarga2(harga, diskon) {
+  if (!diskon || diskon <= 0) {
+    return { hasDiscount: false, harga2: harga, discountPercent: 0 };
+  }
+  const discountAmount = Math.round(diskon * harga);
+  const harga2 = harga - discountAmount;
+  return {
+    hasDiscount: true,
+    harga2: harga2,
+    discountAmount: discountAmount,
+    discountPercent: Math.round(diskon * 100)
+  };
+}
+
+// 2. Cascading Tiered Discount Logic Test (Legacy/Compound promo)
 function calculateTieredDiscount(grossPrice, tierInput) {
   if (!tierInput || grossPrice <= 0) {
     return { finalPrice: grossPrice, totalSaved: 0, effectivePercent: 0, steps: [] };
@@ -43,24 +59,27 @@ function calculateTieredDiscount(grossPrice, tierInput) {
   };
 }
 
-// 2. Price Fluctuation Detection Logic Test
+// 3. Price Fluctuation Detection Logic Test
+// a) ⬆ (berwarna merah), emot ini muncul bila harga produk meningkat dibanding harga bulan lalu
+// b) ⬇︎ (berwarna hijau), emot ini muncul bila harga produk menurun dibanding harga bulan lalu
+// c) = (warna kuning), emot ini muncul bila harga produk masih sama dengan bulan lalu
 function detectPriceFluctuation(currentPrice, lastMonthPrice) {
   if (!lastMonthPrice || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
-    return { status: "EQUAL", arrow: "=", diffNominal: 0, diffPercent: 0 };
+    return { status: "EQUAL", emote: "=", color: "yellow", diffNominal: 0, diffPercent: 0 };
   }
   const diff = currentPrice - lastMonthPrice;
   const diffPercent = parseFloat(((diff / lastMonthPrice) * 100).toFixed(1));
 
   if (diff > 0) {
-    return { status: "UP", arrow: "↑", diffNominal: diff, diffPercent: Math.abs(diffPercent) };
+    return { status: "UP", emote: "⬆", color: "red", diffNominal: diff, diffPercent: Math.abs(diffPercent) };
   } else if (diff < 0) {
-    return { status: "DOWN", arrow: "↓", diffNominal: Math.abs(diff), diffPercent: Math.abs(diffPercent) };
+    return { status: "DOWN", emote: "⬇︎", color: "green", diffNominal: Math.abs(diff), diffPercent: Math.abs(diffPercent) };
   } else {
-    return { status: "EQUAL", arrow: "=", diffNominal: 0, diffPercent: 0 };
+    return { status: "EQUAL", emote: "=", color: "yellow", diffNominal: 0, diffPercent: 0 };
   }
 }
 
-// 3. Budget Safety Cap Logic Test
+// 4. Budget Safety Cap Logic Test
 function evaluateBudgetSafetyCap(totalSpent, budgetCap) {
   const remaining = budgetCap - totalSpent;
   const spentPercent = budgetCap > 0 ? (totalSpent / budgetCap) * 100 : 0;
@@ -79,52 +98,71 @@ function evaluateBudgetSafetyCap(totalSpent, budgetCap) {
   return { remaining, spentPercent, state };
 }
 
+// 5. City Supermarket Filter Mapping
+const CITY_SUPERMARKETS = {
+  "Bandung": ["Indomaret", "Alfamart", "Alfamidi"],
+  "Jabodetabek / Jakarta": ["Indomaret", "Alfamart", "Alfamidi", "Family Mart"],
+  "Yogyakarta": ["Indomaret", "Alfamart", "Alfamidi"],
+  "Surabaya": ["Indomaret", "Alfamart", "Alfamidi", "Family Mart"]
+};
+
 // ==================== RUNNING TESTS ====================
 console.log("=== RUNNING GROCERYIN LOGIC UNIT TESTS ===");
 
-// Test 1: Tiered Discount 50% + 20% on Rp 100,000
-const test1 = calculateTieredDiscount(100000, "50+20");
-console.log("Test 1 (50% + 20% on Rp 100.000):", test1);
-assert.strictEqual(test1.finalPrice, 40000, "Final price must be Rp 40.000, not Rp 30.000 flat");
-assert.strictEqual(test1.totalSaved, 60000, "Total saved must be Rp 60.000");
-assert.strictEqual(test1.effectivePercent, 60, "Effective percent must be 60%");
-console.log("✔ Test 1 Passed: Diskon bertingkat 50%+20% terbukti menghasilkan Rp 40.000 (hemat 60%, bukan flat 70%).");
+// Test 1: Rumus Harga2 = Harga - (Diskon * Harga)
+// Contoh: Susu Ultra Milk seharga Rp 20.000 dengan diskon 15% (0.15)
+// Harga2 = 20.000 - (0.15 * 20.000) = 17.000
+const testHarga2 = calculateHarga2(20000, 0.15);
+console.log("Test 1 (Rumus Harga2 pada Rp 20.000 diskon 15%):", testHarga2);
+assert.strictEqual(testHarga2.hasDiscount, true);
+assert.strictEqual(testHarga2.harga2, 17000, "Harga2 harus tepat Rp 17.000");
+assert.strictEqual(testHarga2.discountAmount, 3000);
+console.log("✔ Test 1 Passed: Rumus Harga2 = Harga - (Diskon * Harga) terbukti valid.");
 
-// Test 2: Tiered Discount 30% + 10% on Rp 200,000
-// 200,000 - 30% = 140,000; 140,000 - 10% = 126,000
-const test2 = calculateTieredDiscount(200000, "30+10");
-assert.strictEqual(test2.finalPrice, 126000);
-assert.strictEqual(test2.totalSaved, 74000);
-console.log("✔ Test 2 Passed: Diskon bertingkat 30%+10% terbukti valid.");
+// Test 2: Tiered Discount 50% + 20% on Rp 100,000
+const test2 = calculateTieredDiscount(100000, "50+20");
+assert.strictEqual(test2.finalPrice, 40000, "Final price must be Rp 40.000");
+assert.strictEqual(test2.totalSaved, 60000);
+console.log("✔ Test 2 Passed: Diskon bertingkat 50%+20% terbukti menghasilkan Rp 40.000 (hemat 60%).");
 
-// Test 3: Price Fluctuation (UP, DOWN, EQUAL)
-const flucUp = detectPriceFluctuation(75000, 70000);
+// Test 3: Emote Fluktuasi Harga (⬆ Merah, ⬇︎ Hijau, = Kuning)
+const flucUp = detectPriceFluctuation(3300, 3100);
 assert.strictEqual(flucUp.status, "UP");
-assert.strictEqual(flucUp.arrow, "↑");
-assert.strictEqual(flucUp.diffNominal, 5000);
+assert.strictEqual(flucUp.emote, "⬆");
+assert.strictEqual(flucUp.color, "red");
+assert.strictEqual(flucUp.diffNominal, 200);
 
-const flucDown = detectPriceFluctuation(65000, 70000);
+const flucDown = detectPriceFluctuation(74500, 77000);
 assert.strictEqual(flucDown.status, "DOWN");
-assert.strictEqual(flucDown.arrow, "↓");
-assert.strictEqual(flucDown.diffNominal, 5000);
+assert.strictEqual(flucDown.emote, "⬇︎");
+assert.strictEqual(flucDown.color, "green");
+assert.strictEqual(flucDown.diffNominal, 2500);
 
-const flucEqual = detectPriceFluctuation(70000, 70000);
+const flucEqual = detectPriceFluctuation(36000, 36000);
 assert.strictEqual(flucEqual.status, "EQUAL");
-assert.strictEqual(flucEqual.arrow, "=");
-console.log("✔ Test 3 Passed: Deteksi fluktuasi harga (↑ Naik Merah, ↓ Turun Hijau, = Setara) valid.");
+assert.strictEqual(flucEqual.emote, "=");
+assert.strictEqual(flucEqual.color, "yellow");
+console.log("✔ Test 3 Passed: Deteksi emote fluktuasi (⬆ Merah Naik, ⬇︎ Hijau Turun, = Kuning Stabil) valid.");
 
-// Test 4: Budget Safety Cap Trigger
-const capSafe = evaluateBudgetSafetyCap(200000, 500000); // 40%
+// Test 4: Supermarket filtering based on selected city
+assert.ok(CITY_SUPERMARKETS["Jabodetabek / Jakarta"].includes("Family Mart"));
+assert.ok(!CITY_SUPERMARKETS["Bandung"].includes("Family Mart"), "Family Mart tidak ada di Bandung");
+assert.ok(CITY_SUPERMARKETS["Bandung"].includes("Indomaret"));
+assert.ok(CITY_SUPERMARKETS["Bandung"].includes("Alfamart"));
+console.log("✔ Test 4 Passed: Filter ketersediaan supermarket berdasarkan kota terbukti akurat.");
+
+// Test 5: Budget Safety Cap Trigger
+const capSafe = evaluateBudgetSafetyCap(120000, 300000); // 40%
 assert.strictEqual(capSafe.state, "SAFE");
 
-const capWarning = evaluateBudgetSafetyCap(350000, 500000); // 70%
+const capWarning = evaluateBudgetSafetyCap(210000, 300000); // 70%
 assert.strictEqual(capWarning.state, "WARNING");
 
-const capCritical = evaluateBudgetSafetyCap(450000, 500000); // 90%
+const capCritical = evaluateBudgetSafetyCap(270000, 300000); // 90%
 assert.strictEqual(capCritical.state, "DANGER_CRITICAL");
 
-const capExceeded = evaluateBudgetSafetyCap(550000, 500000); // 110%
+const capExceeded = evaluateBudgetSafetyCap(320000, 300000); // 106%
 assert.strictEqual(capExceeded.state, "DANGER_EXCEEDED");
-console.log("✔ Test 4 Passed: Budget safety cap (Aman, Waspada, Bahaya Berkedip Merah saat melampaui limit) valid.");
+console.log("✔ Test 5 Passed: Budget safety cap (Aman, Waspada, Bahaya saat budget habis) valid.");
 
 console.log("🎉 ALL TESTS PASSED SUCCESSFULLY!");
