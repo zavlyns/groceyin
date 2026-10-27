@@ -1,12 +1,15 @@
 /**
  * GROCERYIN - SMART GROCERY & EXPENSE TRACKER
- * FIREBASE EDITION (Project: grocery1n)
+ * FIREBASE EDITION & PWA MOBILE-FIRST ENGINE
  *
- * Connected Firebase Products:
- * - Firebase App SDK
- * - Firebase Authentication (Google Sign-In + Username Single-User Lock)
- * - Cloud Firestore Realtime Database (Collection: 'grocery_items', 'budget_settings', 'users')
- * - LocalStorage Offline Fallback Support
+ * Connected Features:
+ * - PWA (Progressive Web App) Service Worker & Manifest
+ * - Single-User Lock Authentication + Firebase Auth
+ * - Cloud Firestore Realtime Sync + LocalStorage Offline Persistence
+ * - Realtime Price Fluctuation Detection (Acuan Pasar Bulan Lalu)
+ * - Cascading Tiered Compound Discounts (50+20, etc.)
+ * - Budget Safety Cap with Danger Glow Pulse & Spending Breakdown
+ * - Mobile Touch Ergonomics: Big Stepper Buttons, Large Inputs, Floating Bottom Nav
  */
 
 // ==================== FIREBASE CONFIGURATION ====================
@@ -70,7 +73,7 @@ const INITIAL_ITEMS = [
   }
 ];
 
-// ==================== STATE MANAGEMENT & FIREBASE ADAPTER ====================
+// ==================== STATE MANAGEMENT & APP ENGINE ====================
 class GroceryInApp {
   constructor() {
     this.storageKeyUser = "groceryin_single_user_lock";
@@ -81,7 +84,7 @@ class GroceryInApp {
     this.items = [];
     this.budgetCap = 500000;
     this.editingId = null;
-    this.currentMobileTab = "cart"; // cart, add, catalog
+    this.currentTab = "belanja"; // belanja, catat, anggaran, riwayat
 
     // Firebase instances
     this.firebaseApp = null;
@@ -93,7 +96,19 @@ class GroceryInApp {
     this.initFirebase();
     this.initElements();
     this.initEventListeners();
+    this.initPWA();
     this.loadState();
+  }
+
+  // ==================== PWA INITIALIZATION ====================
+  initPWA() {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('🚀 GroceryIn PWA Service Worker Ready:', reg.scope))
+          .catch((err) => console.warn('PWA registration warning:', err));
+      });
+    }
   }
 
   // ==================== INITIALIZE FIREBASE SDK ====================
@@ -138,7 +153,33 @@ class GroceryInApp {
     this.userAvatar = document.getElementById("userAvatar");
     this.btnLogout = document.getElementById("btnLogout");
 
-    // Budget Cap Elements
+    // Floating Bottom Navigation & Views
+    this.floatingBottomNav = document.getElementById("floatingBottomNav");
+    this.navTabBelanja = document.getElementById("navTabBelanja");
+    this.navTabCatat = document.getElementById("navTabCatat");
+    this.navTabAnggaran = document.getElementById("navTabAnggaran");
+    this.navTabRiwayat = document.getElementById("navTabRiwayat");
+    this.navCartCount = document.getElementById("navCartCount");
+    this.navBudgetDot = document.getElementById("navBudgetDot");
+
+    this.viewBelanja = document.getElementById("viewBelanja");
+    this.viewCatat = document.getElementById("viewCatat");
+    this.viewAnggaran = document.getElementById("viewAnggaran");
+    this.viewRiwayat = document.getElementById("viewRiwayat");
+
+    // Quick Action & Switcher Buttons
+    this.btnThumbAdd = document.getElementById("btnThumbAdd");
+    this.btnBackFromCatat = document.getElementById("btnBackFromCatat");
+    this.btnBackToBelanja = document.getElementById("btnBackToBelanja");
+    this.btnOpenReceiptFromHistory = document.getElementById("btnOpenReceiptFromHistory");
+
+    // Mini Budget Strip (Belanja View)
+    this.miniBudgetStrip = document.getElementById("miniBudgetStrip");
+    this.miniBudgetSpent = document.getElementById("miniBudgetSpent");
+    this.miniBudgetRemaining = document.getElementById("miniBudgetRemaining");
+    this.miniBudgetBarFill = document.getElementById("miniBudgetBarFill");
+
+    // Budget Cap Elements (Anggaran View)
     this.budgetCard = document.getElementById("budgetCard");
     this.inputBudgetCap = document.getElementById("inputBudgetCap");
     this.budgetSpentText = document.getElementById("budgetSpentText");
@@ -149,17 +190,9 @@ class GroceryInApp {
     this.alertIcon = document.getElementById("alertIcon");
     this.alertMessage = document.getElementById("alertMessage");
     this.budgetStatusBadge = document.getElementById("budgetStatusBadge");
+    this.budgetCategoryBreakdown = document.getElementById("budgetCategoryBreakdown");
 
-    // Mobile Navigation & Floating Bar Elements
-    this.tabBtnCart = document.getElementById("tabBtnCart");
-    this.tabBtnAdd = document.getElementById("tabBtnAdd");
-    this.tabBtnCatalog = document.getElementById("tabBtnCatalog");
-    this.tabCartCount = document.getElementById("tabCartCount");
-    this.mobileBottomPrice = document.getElementById("mobileBottomPrice");
-    this.btnMobileAdd = document.getElementById("btnMobileAdd");
-    this.btnMobileReceipt = document.getElementById("btnMobileReceipt");
-
-    // Item Form Elements
+    // Item Form Elements (Catat View)
     this.groceryForm = document.getElementById("groceryForm");
     this.formTitle = document.getElementById("formTitle");
     this.editingItemId = document.getElementById("editingItemId");
@@ -228,16 +261,23 @@ class GroceryInApp {
     this.gAccDemo2.addEventListener("click", () => this.handleCustomGoogleSelect("Siti Rahma", "siti.rahma99@gmail.com", "👩"));
     this.btnLogout.addEventListener("click", () => this.handleLogout());
 
-    // Mobile Segmented Navigation Tabs
-    if (this.tabBtnCart) this.tabBtnCart.addEventListener("click", () => this.switchMobileTab("cart"));
-    if (this.tabBtnAdd) this.tabBtnAdd.addEventListener("click", () => this.switchMobileTab("add"));
-    if (this.tabBtnCatalog) this.tabBtnCatalog.addEventListener("click", () => this.switchMobileTab("catalog"));
+    // Floating Bottom Navigation Tabs
+    if (this.navTabBelanja) this.navTabBelanja.addEventListener("click", () => this.switchTab("belanja"));
+    if (this.navTabCatat) this.navTabCatat.addEventListener("click", () => this.switchTab("catat"));
+    if (this.navTabAnggaran) this.navTabAnggaran.addEventListener("click", () => this.switchTab("anggaran"));
+    if (this.navTabRiwayat) this.navTabRiwayat.addEventListener("click", () => this.switchTab("riwayat"));
 
-    // Mobile bottom bar quick actions
-    if (this.btnMobileAdd) this.btnMobileAdd.addEventListener("click", () => this.switchMobileTab("add"));
-    if (this.btnMobileReceipt) this.btnMobileReceipt.addEventListener("click", () => this.openReceiptModal());
+    // Quick Action Buttons
+    if (this.btnThumbAdd) this.btnThumbAdd.addEventListener("click", () => {
+      this.resetForm();
+      this.switchTab("catat");
+    });
+    if (this.btnBackFromCatat) this.btnBackFromCatat.addEventListener("click", () => this.switchTab("belanja"));
+    if (this.btnBackToBelanja) this.btnBackToBelanja.addEventListener("click", () => this.switchTab("belanja"));
+    if (this.miniBudgetStrip) this.miniBudgetStrip.addEventListener("click", () => this.switchTab("anggaran"));
+    if (this.btnOpenReceiptFromHistory) this.btnOpenReceiptFromHistory.addEventListener("click", () => this.openReceiptModal());
 
-    // Budget Cap input
+    // Budget Cap input & quick presets
     this.inputBudgetCap.addEventListener("input", () => {
       const val = parseFloat(this.inputBudgetCap.value) || 0;
       this.budgetCap = val;
@@ -245,20 +285,37 @@ class GroceryInApp {
       this.renderBudgetSafetyCap();
     });
 
-    // Form Live Quantity & Price Calculation Listeners
+    document.querySelectorAll(".chip-budget").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const add = btn.getAttribute("data-add");
+        const set = btn.getAttribute("data-set");
+        if (add) {
+          this.budgetCap += parseFloat(add);
+        } else if (set) {
+          this.budgetCap = parseFloat(set);
+        }
+        this.inputBudgetCap.value = this.budgetCap;
+        this.saveBudget();
+        this.renderBudgetSafetyCap();
+      });
+    });
+
+    // Form Live Quantity Stepper (+ / -) Listeners
     this.btnQtyMinus.addEventListener("click", () => {
       let current = parseFloat(this.inputQty.value) || 1;
       if (current > 1) {
-        this.inputQty.value = current - 1;
+        current = current - 1;
       } else if (current > 0.1) {
-        this.inputQty.value = Math.max(0.1, (current - 0.1).toFixed(1));
+        current = Math.max(0.1, parseFloat((current - 0.1).toFixed(1)));
       }
+      this.inputQty.value = current;
       this.updateLiveFormCalculations();
     });
 
     this.btnQtyPlus.addEventListener("click", () => {
-      let current = parseFloat(this.inputQty.value) || 0;
-      this.inputQty.value = current + 1;
+      let current = parseFloat(this.inputQty.value) || 1;
+      current = current + 1;
+      this.inputQty.value = current;
       this.updateLiveFormCalculations();
     });
 
@@ -268,7 +325,7 @@ class GroceryInApp {
     this.inputDiscountTiers.addEventListener("input", () => this.updateLiveFormCalculations());
 
     // Preset discount chips
-    document.querySelectorAll(".chip").forEach(chip => {
+    document.querySelectorAll(".preset-chips .chip").forEach(chip => {
       chip.addEventListener("click", (e) => {
         const tier = e.target.getAttribute("data-tier");
         if (tier === "0") {
@@ -280,7 +337,8 @@ class GroceryInApp {
       });
     });
 
-    // Form Submit (Save / Edit)
+    // Save & Cancel Form
+    this.btnSaveItem.addEventListener("click", () => this.handleSaveItem());
     this.groceryForm.addEventListener("submit", (e) => {
       e.preventDefault();
       this.handleSaveItem();
@@ -288,7 +346,7 @@ class GroceryInApp {
 
     this.btnCancelEdit.addEventListener("click", () => {
       this.resetForm();
-      this.switchMobileTab("cart");
+      this.switchTab("belanja");
     });
 
     // Cart Search & Filter
@@ -306,30 +364,60 @@ class GroceryInApp {
       }
     });
 
-    // Receipt modal
+    // Receipt Modal Print
     this.btnPrintReceipt.addEventListener("click", () => this.openReceiptModal());
     this.btnCloseReceipt.addEventListener("click", () => this.closeReceiptModal());
     this.btnDoPrint.addEventListener("click", () => window.print());
   }
 
-  // ==================== MOBILE TAB SWITCHER ====================
+  // ==================== TAB SWITCHER ENGINE ====================
+  switchTab(tabName) {
+    // Normalization aliases
+    let activeTab = tabName;
+    if (tabName === "cart") activeTab = "belanja";
+    if (tabName === "add") activeTab = "catat";
+    if (tabName === "catalog" || tabName === "history") activeTab = "riwayat";
+    if (tabName === "budget") activeTab = "anggaran";
+
+    this.currentTab = activeTab;
+
+    // Toggle views
+    const views = [
+      { id: "viewBelanja", name: "belanja" },
+      { id: "viewCatat", name: "catat" },
+      { id: "viewAnggaran", name: "anggaran" },
+      { id: "viewRiwayat", name: "riwayat" }
+    ];
+
+    views.forEach(v => {
+      const el = document.getElementById(v.id);
+      if (el) el.classList.toggle("active-view", v.name === activeTab);
+    });
+
+    // Toggle nav buttons
+    const navs = [
+      { id: "navTabBelanja", name: "belanja" },
+      { id: "navTabCatat", name: "catat" },
+      { id: "navTabAnggaran", name: "anggaran" },
+      { id: "navTabRiwayat", name: "riwayat" }
+    ];
+
+    navs.forEach(n => {
+      const btn = document.getElementById(n.id);
+      if (btn) btn.classList.toggle("active", n.name === activeTab);
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Alias for backward compatibility
   switchMobileTab(tabName) {
-    this.currentMobileTab = tabName;
-    document.body.classList.remove("tab-active-cart", "tab-active-add", "tab-active-catalog");
-    document.body.classList.add(`tab-active-${tabName}`);
-
-    if (this.tabBtnCart && this.tabBtnAdd && this.tabBtnCatalog) {
-      this.tabBtnCart.classList.toggle("active", tabName === "cart");
-      this.tabBtnAdd.classList.toggle("active", tabName === "add");
-      this.tabBtnCatalog.classList.toggle("active", tabName === "catalog");
-    }
-
-    window.scrollTo({ top: 100, behavior: "smooth" });
+    this.switchTab(tabName);
   }
 
   // ==================== CLOUD SYNC & AUTHENTICATION ====================
   loadState() {
-    this.switchMobileTab("cart");
+    this.switchTab("belanja");
 
     // 1. Check Locked Single-User
     const savedUserJson = localStorage.getItem(this.storageKeyUser);
@@ -340,20 +428,20 @@ class GroceryInApp {
         this.showActiveUserSession(savedUser);
         this.authOverlay.classList.add("hidden");
       } catch (e) {
-        this.showAuthModal(null);
+        this.showLoginModalForFirstUser();
       }
     } else {
-      this.showAuthModal(null);
+      this.showLoginModalForFirstUser();
     }
 
-    // 2. Load Budget
+    // 2. Load Local Budget Cap
     const savedBudget = localStorage.getItem(this.storageKeyBudget);
     if (savedBudget) {
       this.budgetCap = parseFloat(savedBudget) || 500000;
       this.inputBudgetCap.value = this.budgetCap;
     }
 
-    // 3. Load Items from Local Storage first
+    // 3. Load Items (Local fallback)
     const savedItemsJson = localStorage.getItem(this.storageKeyItems);
     if (savedItemsJson) {
       try {
@@ -363,79 +451,29 @@ class GroceryInApp {
       }
     } else {
       this.items = [...INITIAL_ITEMS];
-      this.saveItems();
     }
 
-    // 4. Connect Cloud Firestore Realtime Sync
-    this.initFirestoreRealtimeSync();
-
-    // Render components
-    this.renderQuickCatalog();
+    // 4. Initial Render
     this.renderGroceryList();
     this.renderBudgetSafetyCap();
+    this.renderQuickCatalog();
     this.updateLiveFormCalculations();
-    this.updateCloudStatusIndicator();
+
+    // 5. Connect Firestore Realtime Cloud Listener
+    this.connectFirestoreRealtime();
   }
 
-  updateCloudStatusIndicator() {
-    if (!this.cloudStatusBadge) return;
-    if (this.isCloudSyncActive) {
-      this.cloudStatusBadge.className = "cloud-status-badge";
-      this.cloudStatusBadge.innerHTML = `<span class="cloud-pulse-dot"></span><span>Cloud Firebase (grocery1n)</span>`;
-      this.cloudStatusBadge.title = "Tersambung ke Cloud Firestore Database & Hosting Firebase";
-    } else {
-      this.cloudStatusBadge.className = "cloud-status-badge offline";
-      this.cloudStatusBadge.innerHTML = `<span>📱 Mode Lokal</span>`;
-      this.cloudStatusBadge.title = "Mode penyimpanan offline/lokal aktif";
-    }
-  }
-
-  // FIRESTORE REALTIME SYNC (Cross-Device Sync: PC & Phone)
-  initFirestoreRealtimeSync() {
-    if (!this.firestoreDb) return;
-
-    try {
-      // Listen to real-time updates from Firestore collection 'groceries_shared'
-      this.firestoreUnsubscribe = this.firestoreDb.collection("groceries_shared")
-        .doc("current_cart")
-        .onSnapshot((doc) => {
-          if (doc.exists) {
-            const data = doc.data();
-            if (data && Array.isArray(data.items)) {
-              this.items = data.items;
-              localStorage.setItem(this.storageKeyItems, JSON.stringify(this.items));
-              this.renderGroceryList();
-            }
-            if (data && typeof data.budgetCap === 'number') {
-              this.budgetCap = data.budgetCap;
-              this.inputBudgetCap.value = this.budgetCap;
-              localStorage.setItem(this.storageKeyBudget, this.budgetCap.toString());
-            }
-            this.renderBudgetSafetyCap();
-            this.isCloudSyncActive = true;
-            this.updateCloudStatusIndicator();
-          }
-        }, (err) => {
-          console.warn("Firestore onSnapshot error (continuing with local data):", err);
-          this.isCloudSyncActive = false;
-          this.updateCloudStatusIndicator();
-        });
-    } catch (e) {
-      console.warn("Could not bind Firestore listener:", e);
-    }
-  }
-
-  showAuthModal(existingUser) {
+  showLoginModalForFirstUser() {
     this.authOverlay.classList.remove("hidden");
-    if (existingUser) {
-      this.singleUserNotice.classList.add("locked");
-      this.singleUserNoticeDesc.innerHTML = `Profil pengguna tunggal terdaftar: <strong>${existingUser.username}</strong> (${existingUser.authType}). Multi-user ditolak demi integritas anggaran pribadi.`;
-      this.inputUsername.value = existingUser.username;
-    } else {
-      this.singleUserNotice.classList.remove("locked");
-      this.singleUserNoticeDesc.textContent = "Aplikasi diamankan untuk satu profil pengguna aktif per perangkat demi integritas anggaran pribadi.";
-      this.inputUsername.value = "";
-    }
+    this.authTitle.textContent = "Selamat Datang di GroceryIn";
+    this.singleUserNoticeDesc.textContent = "Aplikasi diamankan secara eksklusif untuk satu profil pengguna aktif per perangkat.";
+    this.singleUserNotice.style.background = "#eff6ff";
+    this.singleUserNotice.style.borderColor = "#bfdbfe";
+  }
+
+  showActiveUserSession(user) {
+    this.displayName.textContent = user.username || "Pengguna";
+    this.userAvatar.textContent = user.avatar || "👤";
   }
 
   handleUsernameLogin() {
@@ -446,165 +484,32 @@ class GroceryInApp {
       return;
     }
 
-    // Single-user rule check
-    const lockedUserJson = localStorage.getItem(this.storageKeyUser);
-    if (lockedUserJson) {
-      const lockedUser = JSON.parse(lockedUserJson);
-      if (lockedUser.username.toLowerCase() !== username.toLowerCase()) {
-        alert(
-          `⛔ AKSES DITOLAK (Single-User Enforcement):\n\n` +
-          `Aplikasi GroceryIn dikonfigurasi KHUSUS Pengguna Tunggal.\n` +
-          `Saat ini perangkat ini telah terikat dengan profil pengguna: "${lockedUser.username}".\n\n` +
-          `Multi-user login tidak diizinkan. Silakan login sebagai "${lockedUser.username}" atau lakukan reset akun terlebih dahulu.`
-        );
-        this.inputUsername.value = lockedUser.username;
-        return;
-      }
-    }
-
-    const userObj = {
-      username: username,
-      authType: "Username",
-      avatar: "👤",
-      loginTime: new Date().toISOString()
-    };
-
-    localStorage.setItem(this.storageKeyUser, JSON.stringify(userObj));
-    this.currentUser = userObj;
-    this.showActiveUserSession(userObj);
-    this.authOverlay.classList.add("hidden");
-
-    // Sync user session to Firestore
-    if (this.firestoreDb) {
-      this.firestoreDb.collection("users").doc(username).set({
-        ...userObj,
-        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(() => {});
-    }
-  }
-
-  // REAL FIREBASE GOOGLE AUTHENTICATION
-  async handleGoogleLoginFirebase() {
-    if (this.firebaseAuth && typeof firebase.auth.GoogleAuthProvider !== 'undefined') {
+    const savedUserJson = localStorage.getItem(this.storageKeyUser);
+    if (savedUserJson) {
       try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        
-        // Trigger popup
-        const result = await this.firebaseAuth.signInWithPopup(provider);
-        const gUser = result.user;
-
-        const userObj = {
-          username: gUser.displayName || gUser.email.split('@')[0],
-          email: gUser.email,
-          authType: "Google (Firebase)",
-          avatar: gUser.photoURL || "👤",
-          uid: gUser.uid,
-          loginTime: new Date().toISOString()
-        };
-
-        // Enforce single-user rule
-        const lockedUserJson = localStorage.getItem(this.storageKeyUser);
-        if (lockedUserJson) {
-          const lockedUser = JSON.parse(lockedUserJson);
-          if (lockedUser.email && lockedUser.email.toLowerCase() !== userObj.email.toLowerCase()) {
-            alert(
-              `⛔ AKSES DITOLAK (Single-User Lock):\n\n` +
-              `Aplikasi telah terkunci untuk akun Google: "${lockedUser.email}".\n` +
-              `Akun multi-user lain tidak diizinkan login bersamaan.`
-            );
-            await this.firebaseAuth.signOut();
-            return;
-          }
+        const savedUser = JSON.parse(savedUserJson);
+        if (savedUser.username.toLowerCase() !== username.toLowerCase()) {
+          alert(`AKSES DITOLAK: Perangkat ini terikat eksklusif dengan profil "${savedUser.username}".`);
+          return;
         }
-
-        localStorage.setItem(this.storageKeyUser, JSON.stringify(userObj));
-        this.currentUser = userObj;
-        this.showActiveUserSession(userObj);
-        this.authOverlay.classList.add("hidden");
-
-        // Sync to Firestore
-        if (this.firestoreDb) {
-          this.firestoreDb.collection("users").doc(gUser.uid).set({
-            ...userObj,
-            lastActive: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true }).catch(() => {});
-        }
-        return;
-      } catch (authErr) {
-        console.warn("Firebase Google popup error or domain not yet whitelisted, opening fallback modal:", authErr);
-        // Fallback to simulated accounts if Google Popup is restricted on local file
-        this.openGoogleModal();
-      }
-    } else {
-      this.openGoogleModal();
-    }
-  }
-
-  handleCustomGoogleSelect(name, email, avatar = "👤") {
-    const lockedUserJson = localStorage.getItem(this.storageKeyUser);
-    if (lockedUserJson) {
-      const lockedUser = JSON.parse(lockedUserJson);
-      if (lockedUser.email && lockedUser.email.toLowerCase() !== email.toLowerCase()) {
-        alert(
-          `⛔ AKSES DITOLAK (Single-User Enforcement):\n\n` +
-          `Aplikasi GroceryIn telah terkunci untuk akun Google: "${lockedUser.email}".\n` +
-          `Akun multi-user lain tidak diizinkan login bersamaan.`
-        );
-        this.closeGoogleModal();
-        return;
-      }
+      } catch (e) {}
     }
 
-    const userObj = {
-      username: name,
-      email: email,
-      authType: "Google Sign-In",
-      avatar: avatar,
-      loginTime: new Date().toISOString()
+    const userData = {
+      username: username,
+      avatar: "👤",
+      type: "username",
+      loginAt: new Date().toISOString()
     };
 
-    localStorage.setItem(this.storageKeyUser, JSON.stringify(userObj));
-    this.currentUser = userObj;
-    this.closeGoogleModal();
-    this.showActiveUserSession(userObj);
+    localStorage.setItem(this.storageKeyUser, JSON.stringify(userData));
+    this.currentUser = userData;
+    this.showActiveUserSession(userData);
     this.authOverlay.classList.add("hidden");
-
-    if (this.firestoreDb) {
-      this.firestoreDb.collection("users").doc(name).set({
-        ...userObj,
-        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(() => {});
-    }
+    this.inputUsername.value = "";
   }
 
-  showActiveUserSession(user) {
-    this.displayName.textContent = user.username;
-    if (user.avatar && user.avatar.startsWith("http")) {
-      this.userAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width: 20px; height: 20px; border-radius: 50%;">`;
-    } else {
-      this.userAvatar.textContent = user.avatar || "👤";
-    }
-  }
-
-  async handleLogout() {
-    const choice = confirm("Apakah Anda ingin keluar dari sesi akun tunggal GroceryIn?");
-    if (choice) {
-      if (this.firebaseAuth) {
-        try { await this.firebaseAuth.signOut(); } catch (e) {}
-      }
-      this.currentUser = null;
-      this.authOverlay.classList.remove("hidden");
-      const locked = localStorage.getItem(this.storageKeyUser);
-      if (locked) {
-        this.showAuthModal(JSON.parse(locked));
-      } else {
-        this.showAuthModal(null);
-      }
-    }
-  }
-
-  openGoogleModal() {
+  handleGoogleLoginFirebase() {
     this.googleModal.classList.remove("hidden");
   }
 
@@ -612,38 +517,101 @@ class GroceryInApp {
     this.googleModal.classList.add("hidden");
   }
 
-  // ==================== TIERED DISCOUNT MATHEMATICAL LOGIC ====================
+  handleCustomGoogleSelect(name, email, avatar) {
+    const savedUserJson = localStorage.getItem(this.storageKeyUser);
+    if (savedUserJson) {
+      try {
+        const savedUser = JSON.parse(savedUserJson);
+        if (savedUser.email && savedUser.email !== email) {
+          alert(`AKSES DITOLAK: Perangkat ini terikat pada akun Google "${savedUser.email}".`);
+          this.closeGoogleModal();
+          return;
+        }
+      } catch (e) {}
+    }
+
+    const userData = {
+      username: name,
+      email: email,
+      avatar: avatar,
+      type: "google_firebase",
+      loginAt: new Date().toISOString()
+    };
+
+    localStorage.setItem(this.storageKeyUser, JSON.stringify(userData));
+    this.currentUser = userData;
+    this.showActiveUserSession(userData);
+    this.closeGoogleModal();
+    this.authOverlay.classList.add("hidden");
+  }
+
+  handleLogout() {
+    if (confirm("Keluar dari sesi akun tunggal ini?")) {
+      localStorage.removeItem(this.storageKeyUser);
+      this.currentUser = null;
+      this.displayName.textContent = "Pengguna";
+      this.userAvatar.textContent = "👤";
+      this.showLoginModalForFirstUser();
+    }
+  }
+
+  connectFirestoreRealtime() {
+    if (!this.firestoreDb) return;
+
+    try {
+      this.firestoreUnsubscribe = this.firestoreDb.collection("groceries_shared")
+        .doc("current_cart")
+        .onSnapshot(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            if (data.items && Array.isArray(data.items)) {
+              this.items = data.items;
+              localStorage.setItem(this.storageKeyItems, JSON.stringify(this.items));
+            }
+            if (data.budgetCap && typeof data.budgetCap === 'number') {
+              this.budgetCap = data.budgetCap;
+              this.inputBudgetCap.value = this.budgetCap;
+              localStorage.setItem(this.storageKeyBudget, this.budgetCap.toString());
+            }
+            this.renderGroceryList();
+            this.renderBudgetSafetyCap();
+            this.isCloudSyncActive = true;
+            this.updateCloudStatusIndicator();
+          }
+        }, err => {
+          console.warn("Firestore realtime sync offline fallback:", err);
+          this.isCloudSyncActive = false;
+          this.updateCloudStatusIndicator();
+        });
+    } catch (e) {
+      console.warn("Firestore snapshot error:", e);
+      this.isCloudSyncActive = false;
+      this.updateCloudStatusIndicator();
+    }
+  }
+
+  updateCloudStatusIndicator() {
+    if (!this.cloudStatusBadge) return;
+    if (this.isCloudSyncActive) {
+      this.cloudStatusBadge.style.display = "inline-flex";
+      this.cloudStatusBadge.title = "Tersambung ke Cloud Firestore";
+    } else {
+      this.cloudStatusBadge.title = "Mode Offline (Data tersimpan di perangkat)";
+    }
+  }
+
+  // ==================== CASCADING TIERED DISCOUNT LOGIC ====================
   calculateTieredDiscount(grossPrice, tierInput) {
     if (!tierInput || grossPrice <= 0) {
-      return {
-        finalPrice: grossPrice,
-        totalSaved: 0,
-        effectivePercent: 0,
-        tiers: [],
-        steps: []
-      };
+      return { finalPrice: grossPrice, totalSaved: 0, effectivePercent: 0, steps: [] };
     }
 
-    let rawTiers = [];
-    if (Array.isArray(tierInput)) {
-      rawTiers = tierInput;
-    } else {
-      rawTiers = tierInput
-        .replace(/%/g, "")
-        .split(/[+,/ ]+/)
-        .map(t => parseFloat(t.trim()))
-        .filter(t => !isNaN(t) && t > 0);
-    }
-
-    if (rawTiers.length === 0) {
-      return {
-        finalPrice: grossPrice,
-        totalSaved: 0,
-        effectivePercent: 0,
-        tiers: [],
-        steps: []
-      };
-    }
+    let rawTiers = tierInput
+      .toString()
+      .replace(/%/g, "")
+      .split(/[+,/ ]+/)
+      .map(t => parseFloat(t.trim()))
+      .filter(t => !isNaN(t) && t > 0);
 
     let currentPrice = grossPrice;
     const steps = [];
@@ -652,15 +620,12 @@ class GroceryInApp {
       const clampedDisc = Math.min(100, Math.max(0, discPct));
       const potongan = (currentPrice * clampedDisc) / 100;
       const priceAfter = currentPrice - potongan;
-
       steps.push({
         stepNumber: idx + 1,
         percent: clampedDisc,
-        baseForStep: currentPrice,
         deduction: potongan,
         priceAfter: priceAfter
       });
-
       currentPrice = priceAfter;
     });
 
@@ -671,131 +636,92 @@ class GroceryInApp {
       finalPrice: Math.round(currentPrice),
       totalSaved: Math.round(totalSaved),
       effectivePercent: parseFloat(effectivePercent.toFixed(1)),
-      tiers: rawTiers,
-      steps: steps
+      steps
     };
   }
 
   // ==================== PRICE FLUCTUATION DETECTION ====================
   detectPriceFluctuation(currentPrice, lastMonthPrice) {
     if (!lastMonthPrice || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
-      return {
-        status: "EQUAL",
-        arrow: "=",
-        diffNominal: 0,
-        diffPercent: 0,
-        cssClass: "fluc-equal",
-        label: "= Stabil (Tidak ada data)"
-      };
+      return { status: "EQUAL", arrow: "=", diffNominal: 0, diffPercent: 0 };
     }
-
     const diff = currentPrice - lastMonthPrice;
     const diffPercent = parseFloat(((diff / lastMonthPrice) * 100).toFixed(1));
 
     if (diff > 0) {
-      return {
-        status: "UP",
-        arrow: "↑",
-        diffNominal: diff,
-        diffPercent: Math.abs(diffPercent),
-        cssClass: "fluc-up",
-        label: `↑ Naik ${this.formatRupiah(diff)} (+${Math.abs(diffPercent)}%)`
-      };
+      return { status: "UP", arrow: "↑", diffNominal: diff, diffPercent: Math.abs(diffPercent) };
     } else if (diff < 0) {
-      return {
-        status: "DOWN",
-        arrow: "↓",
-        diffNominal: Math.abs(diff),
-        diffPercent: Math.abs(diffPercent),
-        cssClass: "fluc-down",
-        label: `↓ Turun ${this.formatRupiah(Math.abs(diff))} (-${Math.abs(diffPercent)}%)`
-      };
+      return { status: "DOWN", arrow: "↓", diffNominal: Math.abs(diff), diffPercent: Math.abs(diffPercent) };
     } else {
-      return {
-        status: "EQUAL",
-        arrow: "=",
-        diffNominal: 0,
-        diffPercent: 0,
-        cssClass: "fluc-equal",
-        label: `= Setara bulan lalu`
-      };
+      return { status: "EQUAL", arrow: "=", diffNominal: 0, diffPercent: 0 };
     }
   }
 
-  // ==================== REALTIME LIVE FORM CALCULATIONS ====================
+  // ==================== FORM REALTIME CALCULATIONS ====================
   updateLiveFormCalculations() {
     const qty = parseFloat(this.inputQty.value) || 0;
     const price = parseFloat(this.inputPrice.value) || 0;
     const lastMonthPrice = parseFloat(this.inputLastMonthPrice.value) || 0;
-    const discountRaw = this.inputDiscountTiers.value.trim();
+    const discountTiers = this.inputDiscountTiers.value.trim();
 
-    // 1. Calculate Gross & Tiered Discounts
-    const grossItemTotal = qty * price;
-    const discountResult = this.calculateTieredDiscount(grossItemTotal, discountRaw);
+    const gross = qty * price;
+    const discountResult = this.calculateTieredDiscount(gross, discountTiers);
 
-    // 2. Update Live Subtotal Display
+    // Live Subtotal Notes
     this.calcSubtotalNote.textContent = `${qty} x ${this.formatRupiah(price)}`;
     if (discountResult.totalSaved > 0) {
-      this.calcOriginalStrike.textContent = this.formatRupiah(grossItemTotal);
+      this.calcOriginalStrike.textContent = this.formatRupiah(gross);
       this.calcFinalItemTotal.textContent = this.formatRupiah(discountResult.finalPrice);
     } else {
       this.calcOriginalStrike.textContent = "";
-      this.calcFinalItemTotal.textContent = this.formatRupiah(grossItemTotal);
+      this.calcFinalItemTotal.textContent = this.formatRupiah(gross);
     }
 
-    // 3. Update Discount Mathematical Breakdown
-    if (discountResult.steps.length > 0 && grossItemTotal > 0) {
-      let breakdownHtml = `<div class="math-step"><strong>Harga Awal:</strong> ${this.formatRupiah(grossItemTotal)}</div>`;
-      discountResult.steps.forEach(s => {
-        breakdownHtml += `
-          <div class="math-step">
-            👉 Diskon ke-${s.stepNumber} (${s.percent}%): Potongan ${this.formatRupiah(s.deduction)} &rarr; Sisa ${this.formatRupiah(s.priceAfter)}
-          </div>
-        `;
-      });
-      breakdownHtml += `
-        <div class="math-step" style="margin-top: 4px; color: #15803d; font-weight: 700;">
-          🎉 Total Hemat: ${this.formatRupiah(discountResult.totalSaved)} (Efektif ${discountResult.effectivePercent}%, BUKAN flat ${discountResult.tiers.reduce((a,b)=>a+b, 0)}%)
-        </div>
-      `;
-      this.discountMathContent.innerHTML = breakdownHtml;
-    } else {
-      this.discountMathContent.textContent = "Tidak ada promo aktif. Total dihitung normal (Kuantitas x Harga Satuan).";
-    }
-
-    // 4. Update Realtime Price Fluctuation Preview Box
+    // Fluctuation Preview
     const fluc = this.detectPriceFluctuation(price, lastMonthPrice);
-    this.flucPreviewCard.className = `fluctuation-preview-card state-${fluc.status.toLowerCase()}`;
-
     if (fluc.status === "UP") {
       this.flucIconBox.textContent = "🔺";
-      this.flucTitle.innerHTML = `<span style="color: #b91c1c;">Harga Naik Dibanding Bulan Lalu!</span>`;
-      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (+${this.formatRupiah(fluc.diffNominal)})`;
-      this.flucBadge.className = "fluc-badge badge-up";
-      this.flucBadge.textContent = fluc.label;
+      this.flucTitle.textContent = `Harga Naik +${this.formatRupiah(fluc.diffNominal)} (+${fluc.diffPercent}%)`;
+      this.flucSub.textContent = `Harga saat ini lebih mahal dibandingkan acuan bulan lalu (${this.formatRupiah(lastMonthPrice)}).`;
+      this.flucBadge.textContent = "↑ Naik";
+      this.flucBadge.style.background = "#fee2e2";
+      this.flucBadge.style.color = "#dc2626";
     } else if (fluc.status === "DOWN") {
       this.flucIconBox.textContent = "🔻";
-      this.flucTitle.innerHTML = `<span style="color: #047857;">Harga Turun Lebih Murah!</span>`;
-      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (Hemat ${this.formatRupiah(fluc.diffNominal)})`;
-      this.flucBadge.className = "fluc-badge badge-down";
-      this.flucBadge.textContent = fluc.label;
+      this.flucTitle.textContent = `Harga Turun -${this.formatRupiah(fluc.diffNominal)} (-${fluc.diffPercent}%)`;
+      this.flucSub.textContent = `Pilihan hemat! Lebih murah daripada acuan bulan lalu (${this.formatRupiah(lastMonthPrice)}).`;
+      this.flucBadge.textContent = "↓ Turun / Hemat";
+      this.flucBadge.style.background = "#dcfce7";
+      this.flucBadge.style.color = "#16a34a";
     } else {
       this.flucIconBox.textContent = "⚖️";
-      this.flucTitle.textContent = "Harga Stabil / Tidak Ada Fluktuasi";
-      if (lastMonthPrice > 0) {
-        this.flucSub.textContent = `Harga tepat sama dengan bulan lalu: ${this.formatRupiah(lastMonthPrice)}.`;
-      } else {
-        this.flucSub.textContent = "Masukkan harga bulan lalu untuk melihat analisa perbandingan otomatis.";
-      }
-      this.flucBadge.className = "fluc-badge badge-equal";
-      this.flucBadge.textContent = fluc.label;
+      this.flucTitle.textContent = "Harga Stabil";
+      this.flucSub.textContent = lastMonthPrice > 0 
+        ? `Tepat setara dengan acuan bulan lalu (${this.formatRupiah(lastMonthPrice)}).`
+        : "Masukkan harga bulan lalu untuk mendeteksi fluktuasi pasar.";
+      this.flucBadge.textContent = "= Stabil";
+      this.flucBadge.style.background = "#f1f5f9";
+      this.flucBadge.style.color = "#475569";
+    }
+
+    // Cascading Discount Breakdown
+    if (discountResult.steps.length > 0 && discountResult.totalSaved > 0) {
+      let breakdownHtml = `<ul style="list-style: none; padding-left: 0; line-height: 1.6;">`;
+      discountResult.steps.forEach(st => {
+        breakdownHtml += `<li><strong>Tahap ${st.stepNumber}</strong>: Potongan ${st.percent}% (-${this.formatRupiah(st.deduction)}) &rarr; Jadi <strong>${this.formatRupiah(st.priceAfter)}</strong></li>`;
+      });
+      breakdownHtml += `</ul><div style="margin-top: 6px; font-weight: 700; color: #166534;">🎉 Total Hemat: ${this.formatRupiah(discountResult.totalSaved)} (Diskon Efektif: ${discountResult.effectivePercent}%)</div>`;
+      this.discountMathContent.innerHTML = breakdownHtml;
+      this.discountMathBox.classList.remove("hidden");
+    } else {
+      this.discountMathContent.textContent = "Tidak ada diskon aktif. Perhitungan harga normal tanpa potongan.";
     }
   }
 
-  // ==================== BUDGET SAFETY CAP CONTROLLER ====================
+  // ==================== BUDGET SAFETY CAP & DANGER PULSE ====================
   renderBudgetSafetyCap() {
-    let totalCartNet = 0;
     let totalGross = 0;
+    let totalCartNet = 0;
 
     this.items.forEach(item => {
       const gross = item.quantity * item.price;
@@ -809,27 +735,36 @@ class GroceryInApp {
     const spentPercent = this.budgetCap > 0 ? (totalCartNet / this.budgetCap) * 100 : 0;
     const clampedWidth = Math.min(100, Math.max(0, spentPercent));
 
-    // Update displays
+    // Update displays in Anggaran View
     this.budgetSpentText.textContent = this.formatRupiah(totalCartNet);
     this.budgetPercentText.textContent = `${spentPercent.toFixed(1)}%`;
     this.budgetRemainingText.textContent = this.formatRupiah(remaining);
     this.budgetProgressBar.style.width = `${clampedWidth}%`;
 
-    // Overview stats
+    // Overview stats in Belanja View
     this.totalCartPrice.textContent = this.formatRupiah(totalCartNet);
     this.totalDiscountSaved.textContent = this.formatRupiah(totalSaved);
     this.totalItemsCount.textContent = `${this.items.length} Item`;
 
-    // Mobile specific indicators
-    if (this.tabCartCount) this.tabCartCount.textContent = this.items.length;
-    if (this.mobileBottomPrice) this.mobileBottomPrice.textContent = this.formatRupiah(totalCartNet);
+    // Mini budget overview strip (Belanja View)
+    if (this.miniBudgetSpent) this.miniBudgetSpent.textContent = this.formatRupiah(totalCartNet);
+    if (this.miniBudgetRemaining) this.miniBudgetRemaining.textContent = this.formatRupiah(remaining);
+    if (this.miniBudgetBarFill) {
+      this.miniBudgetBarFill.style.width = `${clampedWidth}%`;
+      this.miniBudgetBarFill.className = "mini-progress-bar-fill " + (spentPercent >= 85 ? "danger" : spentPercent >= 65 ? "warning" : "safe");
+    }
 
-    // Remove existing state classes
+    // Floating nav indicators
+    if (this.navCartCount) this.navCartCount.textContent = this.items.length;
+    if (this.navBudgetDot) {
+      this.navBudgetDot.className = "nav-status-dot " + (spentPercent >= 85 ? "danger" : spentPercent >= 65 ? "warning" : "safe");
+    }
+
+    // Status Styling
     this.budgetCard.classList.remove("status-safe", "status-warning", "status-danger");
     this.budgetProgressBar.classList.remove("safe", "warning", "danger");
     this.budgetAlertBanner.classList.remove("safe", "warning", "danger");
 
-    // DYNAMIC DANGER CAP LOGIC
     if (spentPercent > 100) {
       this.budgetCard.classList.add("status-danger");
       this.budgetProgressBar.classList.add("danger");
@@ -867,6 +802,38 @@ class GroceryInApp {
       this.budgetStatusBadge.className = "badge-status-safe";
       this.budgetStatusBadge.textContent = "Aman";
     }
+
+    this.renderCategoryBreakdown();
+  }
+
+  // ==================== CATEGORY SPENDING BREAKDOWN ====================
+  renderCategoryBreakdown() {
+    if (!this.budgetCategoryBreakdown) return;
+
+    const catMap = {};
+    this.items.forEach(it => {
+      const gross = it.quantity * it.price;
+      const discount = this.calculateTieredDiscount(gross, it.discountTiers);
+      catMap[it.category] = (catMap[it.category] || 0) + discount.finalPrice;
+    });
+
+    const entries = Object.entries(catMap);
+    if (entries.length === 0) {
+      this.budgetCategoryBreakdown.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-muted);">Belum ada barang belanjaan tercatat.</p>`;
+      return;
+    }
+
+    let html = `<div class="category-breakdown-list">`;
+    entries.sort((a, b) => b[1] - a[1]).forEach(([cat, sum]) => {
+      html += `
+        <div class="cat-breakdown-item">
+          <span>${cat}</span>
+          <strong>${this.formatRupiah(sum)}</strong>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    this.budgetCategoryBreakdown.innerHTML = html;
   }
 
   // ==================== ITEM CRUD OPERATIONS ====================
@@ -931,10 +898,8 @@ class GroceryInApp {
     this.renderGroceryList();
     this.renderBudgetSafetyCap();
 
-    // Auto-switch to cart tab on mobile for seamless flow
-    if (window.innerWidth <= 840) {
-      this.switchMobileTab("cart");
-    }
+    // Return to Belanja view smoothly
+    this.switchTab("belanja");
   }
 
   editItem(id) {
@@ -956,10 +921,7 @@ class GroceryInApp {
     this.inputNotes.value = item.notes || "";
 
     this.updateLiveFormCalculations();
-
-    if (window.innerWidth <= 840) {
-      this.switchMobileTab("add");
-    }
+    this.switchTab("catat");
     this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -990,30 +952,45 @@ class GroceryInApp {
     this.btnSaveText.textContent = "➕ Masukkan ke Keranjang";
     this.btnCancelEdit.classList.add("hidden");
     this.groceryForm.reset();
-    this.inputQty.value = 1;
+    this.inputQty.value = "1";
+    this.inputPrice.value = "";
+    this.inputLastMonthPrice.value = "";
     this.inputDiscountTiers.value = "";
     this.updateLiveFormCalculations();
   }
 
-  // ==================== RENDERING LIST & CATALOG ====================
+  // ==================== RENDERING LISTS & CATALOG ====================
   renderGroceryList() {
-    const query = this.searchCart.value.trim().toLowerCase();
-    const cat = this.filterCategory.value;
+    const search = (this.searchCart.value || "").toLowerCase().trim();
+    const category = this.filterCategory.value;
 
     const filtered = this.items.filter(it => {
-      const matchSearch = it.name.toLowerCase().includes(query) || (it.notes && it.notes.toLowerCase().includes(query));
-      const matchCat = cat === "ALL" || it.category === cat;
-      return matchSearch && matchCat;
+      const matchSearch = it.name.toLowerCase().includes(search) || (it.notes && it.notes.toLowerCase().includes(search));
+      const matchCategory = category === "ALL" || it.category === category;
+      return matchSearch && matchCategory;
     });
 
     if (filtered.length === 0) {
-      this.groceryListContainer.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <h3>Tidak ada barang yang cocok</h3>
-          <p>Coba gunakan kata kunci pencarian lain atau pilih kategori Semua.</p>
-        </div>
-      `;
+      if (this.items.length === 0) {
+        this.groceryListContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🛒</div>
+            <h3>Keranjang Belanja Masih Kosong</h3>
+            <p>Mulai catat belanjaan Anda dengan menekan tombol di bawah ini.</p>
+            <button type="button" class="btn-primary" onclick="app.switchTab('catat')">
+              <span>➕ Mulai Catat Belanjaan</span>
+            </button>
+          </div>
+        `;
+      } else {
+        this.groceryListContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>Tidak Ada Barang yang Cocok</h3>
+            <p>Coba gunakan kata kunci pencarian lain atau pilih Semua Kategori.</p>
+          </div>
+        `;
+      }
       return;
     }
 
@@ -1025,11 +1002,11 @@ class GroceryInApp {
 
       let flucPillHtml = "";
       if (fluc.status === "UP") {
-        flucPillHtml = `<span class="price-fluc-pill fluc-up" title="Harga naik dari bulan lalu ${this.formatRupiah(it.lastMonthPrice)}">↑ +${this.formatRupiah(fluc.diffNominal)} (+${fluc.diffPercent}%)</span>`;
+        flucPillHtml = `<span class="price-fluc-pill fluc-up" title="Harga naik dari acuan bulan lalu ${this.formatRupiah(it.lastMonthPrice)}">↑ +${this.formatRupiah(fluc.diffNominal)} (+${fluc.diffPercent}%)</span>`;
       } else if (fluc.status === "DOWN") {
-        flucPillHtml = `<span class="price-fluc-pill fluc-down" title="Harga turun dari bulan lalu ${this.formatRupiah(it.lastMonthPrice)}">↓ -${this.formatRupiah(fluc.diffNominal)} (-${fluc.diffPercent}%)</span>`;
+        flucPillHtml = `<span class="price-fluc-pill fluc-down" title="Harga turun dari acuan bulan lalu ${this.formatRupiah(it.lastMonthPrice)}">↓ -${this.formatRupiah(fluc.diffNominal)} (-${fluc.diffPercent}%)</span>`;
       } else {
-        flucPillHtml = `<span class="price-fluc-pill fluc-equal" title="Harga stabil setara bulan lalu">= Stabil</span>`;
+        flucPillHtml = `<span class="price-fluc-pill fluc-equal" title="Harga stabil setara acuan bulan lalu">= Stabil</span>`;
       }
 
       let discountPillHtml = "";
@@ -1039,32 +1016,35 @@ class GroceryInApp {
 
       html += `
         <div class="grocery-item-card ${it.isBought ? 'is-bought' : ''}" data-id="${it.id}">
-          <div class="item-left-col">
-            <input type="checkbox" class="item-checkbox" ${it.isBought ? 'checked' : ''} onchange="app.toggleBought('${it.id}')" title="Tandai sudah dibeli">
-            <div class="item-main-info">
-              <div class="item-title-row">
+          <div class="item-top-row">
+            <label class="item-checkbox-wrap" title="Tandai sudah dibeli">
+              <input type="checkbox" class="item-checkbox" ${it.isBought ? 'checked' : ''} onchange="app.toggleBought('${it.id}')">
+            </label>
+            <div class="item-main-details">
+              <div class="item-name-row">
                 <span class="item-title">${this.escapeHtml(it.name)}</span>
                 <span class="item-cat-badge">${it.category}</span>
                 ${flucPillHtml}
                 ${discountPillHtml}
               </div>
-              <div class="item-details-row">
+              <div class="item-meta-row">
                 <span>Kuantitas: <strong>${it.quantity} ${it.unit}</strong></span>
-                <span>Harga: <strong>${this.formatRupiah(it.price)}</strong> / ${it.unit}</span>
-                ${it.lastMonthPrice ? `<span>Bulan lalu: ${this.formatRupiah(it.lastMonthPrice)}</span>` : ''}
+                <span>•</span>
+                <span>Harga: <strong>${this.formatRupiah(it.price)}</strong>/${it.unit}</span>
+                ${it.lastMonthPrice ? `<span>• Acuan: ${this.formatRupiah(it.lastMonthPrice)}</span>` : ''}
               </div>
               ${it.notes ? `<div class="item-notes">💬 ${this.escapeHtml(it.notes)}</div>` : ''}
             </div>
           </div>
 
-          <div class="item-right-col">
-            <div class="item-pricing-box">
+          <div class="item-bottom-row">
+            <div class="item-price-box">
               ${discount.totalSaved > 0 ? `<span class="item-original-price">${this.formatRupiah(gross)}</span>` : ''}
               <span class="item-total-price">${this.formatRupiah(discount.finalPrice)}</span>
             </div>
             <div class="item-actions">
-              <button type="button" class="btn-icon" onclick="app.editItem('${it.id}')" title="Edit belanjaan">✏️</button>
-              <button type="button" class="btn-icon btn-delete" onclick="app.deleteItem('${it.id}')" title="Hapus belanjaan">🗑️</button>
+              <button type="button" class="btn-icon btn-edit" onclick="app.editItem('${it.id}')" title="Edit Belanjaan" aria-label="Edit Belanjaan">✏️</button>
+              <button type="button" class="btn-icon btn-delete" onclick="app.deleteItem('${it.id}')" title="Hapus Belanjaan" aria-label="Hapus Belanjaan">🗑️</button>
             </div>
           </div>
         </div>
@@ -1075,6 +1055,7 @@ class GroceryInApp {
   }
 
   renderQuickCatalog() {
+    if (!this.quickCatalogGrid) return;
     let html = "";
     BENCHMARK_CATALOG.forEach(item => {
       html += `
@@ -1083,7 +1064,7 @@ class GroceryInApp {
           <div class="quick-details">
             <span class="quick-name">${item.name}</span>
             <span class="quick-price">${this.formatRupiah(item.currentPrice)} / ${item.unit}</span>
-            <span class="quick-benchmark">Bulan lalu: ${this.formatRupiah(item.lastMonthPrice)}</span>
+            <span class="quick-benchmark">Acuan bulan lalu: ${this.formatRupiah(item.lastMonthPrice)}</span>
           </div>
         </div>
       `;
@@ -1092,8 +1073,13 @@ class GroceryInApp {
   }
 
   fillFromCatalog(itemName) {
-    const found = BENCHMARK_CATALOG.find(i => i.name === itemName);
+    const found = BENCHMARK_CATALOG.find(b => b.name === itemName);
     if (!found) return;
+
+    this.editingId = null;
+    this.formTitle.textContent = "📝 Catat: " + found.name;
+    this.btnSaveText.textContent = "➕ Masukkan ke Keranjang";
+    this.btnCancelEdit.classList.remove("hidden");
 
     this.inputItemName.value = found.name;
     this.inputCategory.value = found.category;
@@ -1105,10 +1091,7 @@ class GroceryInApp {
     this.inputNotes.value = `Acuan pasar bulan lalu ${this.formatRupiah(found.lastMonthPrice)}`;
 
     this.updateLiveFormCalculations();
-
-    if (window.innerWidth <= 840) {
-      this.switchMobileTab("add");
-    }
+    this.switchTab("catat");
     this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -1165,10 +1148,8 @@ class GroceryInApp {
 
   // ==================== UTILS & CLOUD PERSISTENCE ====================
   saveItems() {
-    // 1. Save to Local Storage immediately
     localStorage.setItem(this.storageKeyItems, JSON.stringify(this.items));
 
-    // 2. Sync to Cloud Firestore Database in real time
     if (this.firestoreDb) {
       this.firestoreDb.collection("groceries_shared").doc("current_cart").set({
         items: this.items,

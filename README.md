@@ -1,17 +1,23 @@
 # GroceryIn - Smart Grocery & Expense Assistant
 
-Aplikasi web modern asisten belanja pintar dengan fitur deteksi fluktuasi harga acuan bulan lalu, diskon bertingkat (cascading discount), dan pengendali anggaran dompet (Budget Safety Cap).
+Aplikasi web modern asisten belanja pintar dengan Progressive Web App (PWA), fitur deteksi fluktuasi harga acuan bulan lalu, diskon bertingkat (cascading discount), dan pengendali anggaran dompet (Budget Safety Cap).
 
 ---
 
 ## 🌟 Fitur Utama
 
-1. **Autentikasi Pengguna Tunggal (Single-User Lock) & Google Sign-In**
+1. **Progressive Web App (PWA) & Pengalaman Mobile-First**
+   - **PWA Siap Pasang (*Installable*)**: Dilengkapi `manifest.json`, icon multi-resolusi (192px, 512px, maskable, SVG), dan Service Worker (`sw.js`) untuk caching offline & responsivitas secepat kilat.
+   - **Tampilan Terpusat Layar Smartphone (Maksimal 430px)**: Tampilan dibatasi pada lebar smartphone modern (430px) dan berada persis di tengah layar saat diakses lewat layar desktop/laptop dengan backdrop elegan.
+   - **Menu Utama Melayang di Bawah Layar (*Floating Bottom Bar*)**: Menu navigasi melayang di bagian bawah dengan ikon yang jelas (**Belanja**, **Catat**, **Anggaran**, dan **Riwayat**) agar sangat mudah dijangkau oleh jempol pengguna saat memegang HP dengan satu tangan.
+   - **Desain Ergonomis Sentuhan Jari (*Touch-Friendly Ergonomics*)**: Stepper kuantitas (+ / −) berukuran besar (54px x 52px) dengan jarak pemisah nyaman (12px), form input 52px, checkbox 44px, serta tombol aksi lapang untuk menghindari salah sentuh saat berbelanja.
+
+2. **Autentikasi Pengguna Tunggal (Single-User Lock) & Google Sign-In**
    - Modal autentikasi saat aplikasi pertama kali dibuka.
    - Penegakan aturan **Single-User**: Perangkat terikat secara eksklusif pada 1 profil pengguna utama untuk menjaga privasi anggaran saku. Sistem menolak login multi-user yang berbeda tanpa otorisasi.
    - Pilihan masuk instan lewat **Google Sign-In** interaktif (simulasi akun Google terverifikasi).
 
-2. **Struktur Data Belanja Lengkap**
+3. **Struktur Data Belanja Lengkap**
    - **Nama Barang** (misal: Beras Ramos, Minyak Goreng, Daging Sapi)
    - **Kategori** (Sembako, Sayur & Buah, Daging & Ikan, Susu & Telur, Bumbu Dapur, Snack & Minuman, Kebersihan, Lainnya)
    - **Satuan Ukuran** (kg, liter, pcs, gram, ikat, botol, pack, kaleng)
@@ -22,10 +28,10 @@ Aplikasi web modern asisten belanja pintar dengan fitur deteksi fluktuasi harga 
    - **Catatan Belanja** (Merk, lokasi lorong rak, dll.)
    - **Status Pembelian** (Checklist barang yang sudah dimasukkan ke troli fisik)
 
-3. **Logika Perhitungan Kuantitas Realtime**
+4. **Logika Perhitungan Kuantitas Realtime**
    - Setiap kali angka kuantitas atau harga satuan diubah, subtotal barang langsung terhitung seketika secara otomatis tanpa perlu menekan tombol kalkulator manual.
 
-4. **Logika Diskon Bertingkat (Cascading Compound Discount)**
+5. **Logika Diskon Bertingkat (Cascading Compound Discount)**
    - Perhitungan diskon bertumpuk matematis:
      - Contoh promo `50% + 20%` pada barang seharga Rp 100.000:
        - Potongan Diskon 1 (50%): Rp 100.000 &rarr; Rp 50.000
@@ -33,20 +39,20 @@ Aplikasi web modern asisten belanja pintar dengan fitur deteksi fluktuasi harga 
        - Total hemat: Rp 60.000 (diskon efektif 60%, bukan potongan flat 70%).
    - Dilengkapi boks transparansi rincian rumus matematika langkah-demi-langkah.
 
-5. **Deteksi Fluktuasi Harga Realtime (Price Fluctuation Detection)**
+6. **Deteksi Fluktuasi Harga Realtime (Price Fluctuation Detection)**
    - Membandingkan harga inputan saat ini dengan harga acuan bulan lalu seketika saat diketik:
      - 🔺 **Panah Merah Naik (↑)**: Jika harga naik dibanding bulan lalu (disertai nominal kenaikan dan persentase inflasi).
      - 🔻 **Panah Hijau Turun (↓)**: Jika harga turun dibanding bulan lalu (disertai nominal penghematan).
      - ⚖️ **Tanda Setara (=)**: Jika harga stabil atau tepat sama dengan bulan lalu.
 
-6. **Pengendali Anggaran (Budget Safety Cap)**
+7. **Pengendali Anggaran (Budget Safety Cap)**
    - Input saldo maksimal dompet / uang saku tunai yang dibawa.
    - Indikator meteran progres belanjaan realtime:
      - **Hijau (< 65%)**: Status aman terkendali.
      - **Kuning / Oranye (65% - 84%)**: Status waspada mendekati limit.
      - **Merah Menyala Berkedip / Glowing Danger Pulse (>= 85% & > 100%)**: Indikator visual menyala merah pekat dengan animasi berdenyut jika total keranjang mendekati atau melampaui limit dompet, disertai spanduk peringatan bahaya.
 
-7. **Katalog Cepat Acuan Pasar & Struk Belanja**
+8. **Katalog Cepat Acuan Pasar & Struk Belanja**
    - 8 barang sembako populer dengan acuan harga riwayat pasar yang dapat langsung diklik untuk auto-fill form.
    - Fitur cetak struk belanja (*Receipt Printable*) siap print atau simpan sebagai PDF.
 

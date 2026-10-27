@@ -2,9 +2,24 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>GroceryIn - Smart Grocery & Expense Assistant</title>
-  <meta name="description" content="GroceryIn adalah aplikasi asisten belanja pintar mobile-friendly dengan Firebase Cloud Firestore, kalkulasi kuantitas realtime, diskon bertingkat, dan pengendali anggaran dompet.">
+  <meta name="description" content="GroceryIn adalah aplikasi asisten belanja pintar PWA mobile dengan Firebase Cloud Firestore, kalkulasi kuantitas realtime, deteksi fluktuasi harga acuan, diskon bertingkat, dan pengendali anggaran dompet.">
+  
+  <!-- PWA Web App Manifest & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#059669">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="GroceryIn">
+  
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,1919 +29,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-  <style>
-/* ==========================================================================
-   GROCERYIN - MODERN MOBILE-FIRST DESIGN SYSTEM & STYLESHEET
-   ========================================================================== */
-
-:root {
-  --primary: #059669;
-  --primary-hover: #047857;
-  --primary-light: #d1fae5;
-  --primary-dark: #064e3b;
-  --primary-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  
-  --accent: #3b82f6;
-  --accent-light: #eff6ff;
-  
-  /* Status Colors */
-  --safe: #10b981;
-  --safe-bg: #ecfdf5;
-  --safe-border: #a7f3d0;
-  
-  --warning: #f59e0b;
-  --warning-bg: #fffbeb;
-  --warning-border: #fde68a;
-  
-  --danger: #ef4444;
-  --danger-bg: #fef2f2;
-  --danger-border: #fecaca;
-  --danger-glow: rgba(239, 68, 68, 0.4);
-
-  /* Neutrals */
-  --bg-app: #f4f7f6;
-  --surface: #ffffff;
-  --surface-secondary: #f8fafc;
-  --border: #e2e8f0;
-  --border-focus: #10b981;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
-
-  /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.25);
-
-  /* Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
-
-  /* Typography */
-  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-body {
-  font-family: var(--font-body);
-  background-color: var(--bg-app);
-  color: var(--text-main);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-  padding-bottom: 70px; /* Space for mobile floating nav */
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  color: var(--text-main);
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-/* ==================== AUTHENTICATION OVERLAY ==================== */
-.auth-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  opacity: 1;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.auth-overlay.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.auth-card {
-  background: var(--surface);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg), 0 20px 40px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 440px;
-  padding: 28px 24px;
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  max-height: 92vh;
-  overflow-y: auto;
-}
-
-@keyframes modalPop {
-  0% { transform: scale(0.92); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.app-brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  font-size: 0.9rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.auth-header h2 {
-  font-size: 1.35rem;
-}
-
-.auth-subtitle {
-  color: var(--text-muted);
-  font-size: 0.88rem;
-  margin-top: 4px;
-}
-
-.single-user-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  margin-bottom: 18px;
-  font-size: 0.82rem;
-  color: #166534;
-}
-
-.single-user-notice.locked {
-  background: #fff7ed;
-  border-color: #ffedd5;
-  color: #9a3412;
-}
-
-.notice-icon {
-  font-size: 1.25rem;
-}
-
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 48px;
-  padding: 12px 18px;
-  background: #ffffff;
-  border: 1.5px solid #dadce0;
-  border-radius: var(--radius-md);
-  font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #3c4043;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(60,64,67,0.12);
-}
-
-.btn-google:active {
-  background-color: #f1f5f9;
-  transform: scale(0.99);
-}
-
-.auth-divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 18px 0;
-  color: var(--text-light);
-  font-size: 0.8rem;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid var(--border);
-}
-
-.auth-divider span {
-  padding: 0 10px;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: 6px;
-}
-
-.input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.field-icon {
-  position: absolute;
-  left: 14px;
-  font-size: 1.1rem;
-  pointer-events: none;
-}
-
-.input-with-icon input {
-  padding-left: 44px !important;
-}
-
-input[type="text"],
-input[type="number"],
-select {
-  width: 100%;
-  min-height: 48px; /* Touch target on phones */
-  padding: 11px 14px;
-  font-family: var(--font-body);
-  font-size: 1rem; /* 16px prevents iOS zoom */
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  background-color: var(--surface);
-  color: var(--text-main);
-  transition: all 0.2s ease;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
-}
-
-.form-hint {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 5px;
-}
-
-.btn-primary {
-  background: var(--primary-gradient);
-  color: #ffffff;
-  border: none;
-  border-radius: var(--radius-md);
-  min-height: 48px;
-  padding: 12px 20px;
-  font-family: var(--font-heading);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
-}
-
-.btn-block {
-  width: 100%;
-}
-
-.auth-footer {
-  text-align: center;
-  margin-top: 18px;
-  font-size: 0.75rem;
-  color: var(--text-light);
-}
-
-/* ==================== GOOGLE SIMULATION POPUP ==================== */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(4px);
-  z-index: 1100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.modal-backdrop.hidden {
-  display: none;
-}
-
-.google-modal-box {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
-  padding: 24px 20px;
-  max-width: 400px;
-  width: 100%;
-  box-shadow: var(--shadow-lg);
-}
-
-.g-modal-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.g-modal-header h3 {
-  font-size: 1.1rem;
-}
-
-.g-modal-sub {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 18px;
-}
-
-.google-account-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.google-acc-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.google-acc-item:active {
-  background-color: var(--accent-light);
-  border-color: var(--accent);
-}
-
-.g-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #e2e8f0;
-  flex-shrink: 0;
-}
-
-.g-acc-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.g-acc-info strong {
-  font-size: 0.95rem;
-}
-
-.g-acc-info small {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-}
-
-/* ==================== APP LAYOUT ==================== */
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* ==================== HEADER ==================== */
-.app-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  box-shadow: var(--shadow-xs);
-}
-
-.header-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 12px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.brand-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-circle {
-  width: 40px;
-  height: 40px;
-  background: var(--primary-gradient);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
-  flex-shrink: 0;
-}
-
-.app-title {
-  font-size: 1.25rem;
-  letter-spacing: -0.5px;
-  color: var(--primary-dark);
-}
-
-.app-tagline {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  display: block;
-}
-
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cloud-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-  white-space: nowrap;
-}
-
-.cloud-status-badge.offline {
-  background: #f8fafc;
-  color: #64748b;
-  border-color: #cbd5e1;
-}
-
-.cloud-pulse-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 6px #10b981;
-  animation: pulseCloud 2s infinite;
-}
-
-@keyframes pulseCloud {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.8; }
-}
-
-
-.active-user-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--safe);
-  border-radius: 50%;
-  box-shadow: 0 0 6px var(--safe);
-  flex-shrink: 0;
-}
-
-.user-meta {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.user-label {
-  font-size: 0.62rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.user-name {
-  font-size: 0.82rem;
-  color: var(--text-main);
-  max-width: 110px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.btn-logout {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
-  min-height: 38px;
-}
-
-.btn-logout:active {
-  background: var(--danger-bg);
-  border-color: var(--danger-border);
-  color: var(--danger);
-}
-
-/* ==================== BUDGET SAFETY CAP ==================== */
-.budget-cap-section {
-  padding: 14px 18px 0;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.budget-card {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--border);
-  padding: 16px 18px;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.budget-card.status-safe {
-  border-color: #a7f3d0;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
-}
-
-.budget-card.status-warning {
-  border-color: #fde68a;
-  background: #fffdf5;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
-}
-
-/* Pulsing Red Danger Alert for Budget Limit */
-.budget-card.status-danger {
-  border-color: var(--danger);
-  background: #fff5f5;
-  box-shadow: 0 0 25px var(--danger-glow);
-  animation: pulse-danger-border 1.5s infinite;
-}
-
-@keyframes pulse-danger-border {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-
-.budget-top-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.budget-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.budget-icon-badge {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: var(--safe-bg);
-  color: var(--safe);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-}
-
-.budget-card.status-danger .budget-icon-badge {
-  background: var(--danger-bg);
-  color: var(--danger);
-  animation: shake 0.6s infinite alternate;
-}
-
-@keyframes shake {
-  0% { transform: rotate(-5deg); }
-  100% { transform: rotate(5deg); }
-}
-
-.budget-title-wrap h2 {
-  font-size: 1.05rem;
-}
-
-.budget-hint {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.wallet-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface-secondary);
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.wallet-input-wrapper label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-main);
-  white-space: nowrap;
-}
-
-.currency-input-group {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 170px;
-}
-
-.curr-prefix {
-  position: absolute;
-  left: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  pointer-events: none;
-}
-
-.currency-input-group input {
-  padding-left: 38px;
-  font-weight: 700;
-  width: 100%;
-}
-
-.budget-meter-wrap {
-  margin-bottom: 10px;
-}
-
-.meter-labels {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.82rem;
-  margin-bottom: 6px;
-  font-weight: 600;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.badge-percent {
-  background: var(--surface-secondary);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.78rem;
-  font-weight: 700;
-  border: 1px solid var(--border);
-}
-
-.meter-bar-track {
-  height: 12px;
-  background: #e2e8f0;
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  position: relative;
-}
-
-.meter-bar-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease;
-}
-
-.meter-bar-fill.safe {
-  background: linear-gradient(90deg, #10b981, #059669);
-}
-
-.meter-bar-fill.warning {
-  background: linear-gradient(90deg, #f59e0b, #d97706);
-}
-
-.meter-bar-fill.danger {
-  background: linear-gradient(90deg, #ef4444, #b91c1c);
-  animation: pulse-fill 1s infinite alternate;
-}
-
-@keyframes pulse-fill {
-  0% { opacity: 0.85; }
-  100% { opacity: 1; }
-}
-
-.budget-alert-banner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  font-size: 0.82rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.budget-alert-banner.safe {
-  background: var(--safe-bg);
-  color: #065f46;
-  border: 1px solid var(--safe-border);
-}
-
-.budget-alert-banner.warning {
-  background: var(--warning-bg);
-  color: #92400e;
-  border: 1px solid var(--warning-border);
-}
-
-.budget-alert-banner.danger {
-  background: var(--danger-bg);
-  color: #991b1b;
-  border: 1px solid var(--danger-border);
-  animation: blink-danger 1s infinite alternate;
-}
-
-@keyframes blink-danger {
-  0% { background-color: #fee2e2; }
-  100% { background-color: #fecaca; }
-}
-
-/* ==================== MOBILE SEGMENTED TAB NAV ==================== */
-.mobile-tab-nav {
-  display: none; /* Hidden on desktop */
-  padding: 12px 18px 0;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.mobile-tab-wrapper {
-  display: flex;
-  background: #e2e8f0;
-  padding: 4px;
-  border-radius: var(--radius-md);
-  gap: 4px;
-}
-
-.tab-btn {
-  flex: 1;
-  background: transparent;
-  border: none;
-  padding: 10px 8px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-heading);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  min-height: 42px;
-}
-
-.tab-btn.active {
-  background: #ffffff;
-  color: var(--primary-dark);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.tab-badge {
-  background: var(--primary);
-  color: #ffffff;
-  font-size: 0.72rem;
-  padding: 2px 7px;
-  border-radius: var(--radius-full);
-}
-
-/* ==================== MAIN CONTENT GRID ==================== */
-.main-content-grid {
-  max-width: 1400px;
-  margin: 16px auto;
-  padding: 0 18px;
-  display: grid;
-  grid-template-columns: 460px 1fr;
-  gap: 20px;
-  flex: 1;
-}
-
-.card {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-.card-header h3 {
-  font-size: 1.1rem;
-}
-
-.badge-accent {
-  background: var(--accent-light);
-  color: var(--accent);
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.form-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.flex-1 { flex: 1; }
-.flex-2 { flex: 2; }
-
-.required {
-  color: var(--danger);
-}
-
-/* Stepper */
-.qty-stepper {
-  display: flex;
-  align-items: center;
-}
-
-.btn-step {
-  width: 44px;
-  height: 48px;
-  background: var(--surface-secondary);
-  border: 1.5px solid var(--border);
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--text-main);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-step:active {
-  background: #cbd5e1;
-}
-
-#btnQtyMinus {
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-  border-right: none;
-}
-
-#btnQtyPlus {
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  border-left: none;
-}
-
-.qty-stepper input {
-  border-radius: 0;
-  text-align: center;
-  font-weight: 700;
-  height: 48px;
-  font-size: 1.1rem;
-}
-
-/* ==================== REALTIME FLUCTUATION PREVIEW ==================== */
-.fluctuation-preview-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
-  background: var(--surface-secondary);
-  border: 1px dashed var(--border);
-  margin-bottom: 16px;
-  transition: all 0.25s ease;
-}
-
-.fluctuation-preview-card.state-up {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  border-style: solid;
-}
-
-.fluctuation-preview-card.state-down {
-  background: #ecfdf5;
-  border-color: #6ee7b7;
-  border-style: solid;
-}
-
-.fluctuation-preview-card.state-equal {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  border-style: solid;
-}
-
-.fluc-icon-box {
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
-  background: #ffffff;
-  box-shadow: var(--shadow-xs);
-  flex-shrink: 0;
-}
-
-.fluc-details {
-  flex: 1;
-}
-
-.fluc-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.fluc-sub {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.fluc-badge {
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
-.fluc-badge.badge-up {
-  background: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #f87171;
-}
-
-.fluc-badge.badge-down {
-  background: #d1fae5;
-  color: #047857;
-  border: 1px solid #34d399;
-}
-
-.fluc-badge.badge-equal {
-  background: #e2e8f0;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-}
-
-/* ==================== TIERED DISCOUNT CONTAINER ==================== */
-.discount-container {
-  background: #f8fafc;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  margin-bottom: 16px;
-}
-
-.discount-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.discount-header label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.discount-example-hint {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
-.discount-input-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.preset-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.chip {
-  background: #ffffff;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 6px 12px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.chip:active,
-.chip.active {
-  background: var(--primary-light);
-  border-color: var(--primary);
-  color: var(--primary-dark);
-}
-
-.discount-math-box {
-  margin-top: 10px;
-  background: #ffffff;
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  font-size: 0.78rem;
-  border: 1px solid #e2e8f0;
-}
-
-.math-title {
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 4px;
-}
-
-.math-content {
-  color: #334155;
-  line-height: 1.4;
-}
-
-.math-step {
-  padding: 2px 0;
-  font-family: monospace;
-  font-size: 0.8rem;
-}
-
-/* Live Calc Summary Card */
-.live-calc-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f0fdf4;
-  border: 1.5px solid #86efac;
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  margin-bottom: 16px;
-}
-
-.calc-label-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.calc-label-col span {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #166534;
-}
-
-.calc-label-col small {
-  color: #15803d;
-  font-size: 0.75rem;
-}
-
-.calc-val-col {
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.original-price-strike {
-  font-size: 0.8rem;
-  color: var(--text-light);
-  text-decoration: line-through;
-}
-
-.final-item-total {
-  font-size: 1.35rem;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  color: #166534;
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-large {
-  flex: 1;
-  min-height: 48px;
-  font-size: 1rem;
-}
-
-.btn-secondary {
-  background: var(--surface-secondary);
-  border: 1.5px solid var(--border);
-  color: var(--text-main);
-  padding: 10px 16px;
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 48px;
-}
-
-.btn-secondary:active {
-  background: #e2e8f0;
-}
-
-/* ==================== QUICK CATALOG ==================== */
-.catalog-card {
-  margin-top: 18px;
-}
-
-.catalog-header {
-  margin-bottom: 12px;
-}
-
-.catalog-header h4 {
-  font-size: 1rem;
-}
-
-.catalog-subtitle {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.quick-items-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.quick-catalog-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface-secondary);
-  border: 1.5px solid var(--border);
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 54px;
-}
-
-.quick-catalog-item:active {
-  background: #ffffff;
-  border-color: var(--primary);
-  transform: scale(0.98);
-}
-
-.quick-icon {
-  font-size: 1.4rem;
-  flex-shrink: 0;
-}
-
-.quick-details {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.quick-name {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.quick-price {
-  font-size: 0.75rem;
-  color: var(--primary);
-  font-weight: 600;
-}
-
-.quick-benchmark {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-}
-
-/* ==================== RIGHT PANEL (CART & STATS) ==================== */
-.cart-summary-card {
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-}
-
-.cart-stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  text-align: center;
-}
-
-.stat-col {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 6px;
-  background: #ffffff;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-}
-
-.stat-label {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-bottom: 2px;
-}
-
-.stat-value {
-  font-size: 1.05rem;
-  font-family: var(--font-heading);
-  font-weight: 800;
-}
-
-.text-primary { color: var(--primary); }
-.text-green { color: #16a34a; }
-
-.badge-status-safe {
-  background: var(--safe-bg);
-  color: var(--safe);
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: inline-block;
-}
-
-/* Toolbar */
-.cart-toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.search-wrap {
-  flex: 2;
-  min-width: 180px;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  color: var(--text-muted);
-  pointer-events: none;
-}
-
-.search-wrap input {
-  padding-left: 36px;
-}
-
-.filter-category-wrap {
-  flex: 1;
-  min-width: 140px;
-}
-
-.toolbar-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-outline {
-  background: #ffffff;
-  border: 1.5px solid var(--border);
-  color: var(--text-main);
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  font-size: 0.85rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  min-height: 48px;
-}
-
-.btn-outline:active {
-  background: var(--surface-secondary);
-  border-color: #cbd5e1;
-}
-
-.btn-danger-outline {
-  background: #ffffff;
-  border: 1.5px solid var(--danger-border);
-  color: var(--danger);
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 48px;
-}
-
-.btn-danger-outline:active {
-  background: var(--danger-bg);
-}
-
-/* ==================== GROCERY ITEM LIST & CARDS ==================== */
-.grocery-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 50px 16px;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 2px dashed var(--border);
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 10px;
-  opacity: 0.6;
-}
-
-.empty-state h3 {
-  font-size: 1.05rem;
-  margin-bottom: 4px;
-}
-
-.empty-state p {
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  max-width: 360px;
-  margin: 0 auto;
-}
-
-/* Item Card */
-.grocery-item-card {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 1.5px solid var(--border);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  box-shadow: var(--shadow-xs);
-}
-
-.grocery-item-card:hover {
-  border-color: #cbd5e1;
-}
-
-.grocery-item-card.is-bought {
-  background: #f8fafc;
-  opacity: 0.75;
-}
-
-.grocery-item-card.is-bought .item-title {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-.item-left-col {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex: 1;
-}
-
-.item-checkbox {
-  width: 24px;
-  height: 24px;
-  accent-color: var(--primary);
-  cursor: pointer;
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.item-main-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.item-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.item-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.item-cat-badge {
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: var(--radius-full);
-  background: var(--surface-secondary);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-
-.item-details-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  flex-wrap: wrap;
-}
-
-/* Price Fluctuation Pill inside Item */
-.price-fluc-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.price-fluc-pill.fluc-up {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fca5a5;
-}
-
-.price-fluc-pill.fluc-down {
-  background: #d1fae5;
-  color: #059669;
-  border: 1px solid #6ee7b7;
-}
-
-.price-fluc-pill.fluc-equal {
-  background: #f1f5f9;
-  color: #64748b;
-  border: 1px solid #cbd5e1;
-}
-
-.item-discount-pill {
-  background: #fef3c7;
-  color: #b45309;
-  border: 1px solid #fde68a;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.item-notes {
-  font-size: 0.75rem;
-  color: var(--text-light);
-  font-style: italic;
-}
-
-/* Item Right Column (Price & Actions) */
-.item-right-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.item-pricing-box {
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-}
-
-.item-original-price {
-  font-size: 0.75rem;
-  color: var(--text-light);
-  text-decoration: line-through;
-}
-
-.item-total-price {
-  font-size: 1.1rem;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  color: var(--primary-dark);
-}
-
-.item-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.btn-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-size: 1rem;
-}
-
-.btn-icon:active {
-  background: var(--surface-secondary);
-}
-
-.btn-icon.btn-delete:active {
-  background: var(--danger-bg);
-  border-color: var(--danger-border);
-  color: var(--danger);
-}
-
-/* ==================== MOBILE FLOATING BOTTOM SUMMARY BAR ==================== */
-.mobile-bottom-bar {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-top: 1px solid var(--border);
-  padding: 10px 16px env(safe-area-inset-bottom, 10px);
-  z-index: 90;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.mobile-bottom-content {
-  max-width: 600px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.mobile-bottom-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.mobile-bottom-label {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-.mobile-bottom-price {
-  font-size: 1.15rem;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  color: var(--primary-dark);
-}
-
-.mobile-bottom-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.mobile-bottom-actions button {
-  min-height: 40px;
-  padding: 8px 14px;
-  font-size: 0.85rem;
-  border-radius: var(--radius-md);
-}
-
-/* ==================== RECEIPT MODAL ==================== */
-.receipt-modal-box {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
-  padding: 20px 16px;
-  max-width: 440px;
-  width: 100%;
-  box-shadow: var(--shadow-lg);
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.receipt-paper {
-  background: #fafaf9;
-  border: 1px dashed #d6d3d1;
-  padding: 16px;
-  font-family: 'Courier New', Courier, monospace;
-  overflow-y: auto;
-  border-radius: var(--radius-sm);
-  color: #1c1917;
-}
-
-.receipt-header {
-  text-align: center;
-}
-
-.receipt-header h2 {
-  font-family: 'Courier New', Courier, monospace;
-  letter-spacing: 2px;
-}
-
-.receipt-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  margin: 6px 0;
-}
-
-.receipt-items-table {
-  margin: 10px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.r-item {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.82rem;
-}
-
-.receipt-totals {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.85rem;
-}
-
-.r-row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.r-final {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 4px 0;
-}
-
-.receipt-footer {
-  text-align: center;
-  margin-top: 14px;
-  font-size: 0.75rem;
-  color: #57534e;
-}
-
-.receipt-modal-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.receipt-modal-actions button {
-  flex: 1;
-}
-
-/* ==================== FOOTER ==================== */
-.app-footer {
-  text-align: center;
-  padding: 16px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-  margin-top: auto;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* ==================== RESPONSIVE MEDIA QUERIES (MOBILE FIRST ENHANCEMENTS) ==================== */
-@media (max-width: 840px) {
-  /* Show Mobile Segmented Tab Nav */
-  .mobile-tab-nav {
-    display: block;
-  }
-
-  /* Show Mobile Floating Bottom Summary Bar */
-  .mobile-bottom-bar {
-    display: block;
-  }
-
-  body {
-    padding-bottom: 80px;
-  }
-
-  .main-content-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin: 12px auto;
-  }
-
-  /* Mobile Tab Display Switching */
-  body.tab-active-cart .left-panel {
-    display: none !important;
-  }
-  body.tab-active-cart .right-panel {
-    display: block !important;
-  }
-
-  body.tab-active-add .left-panel {
-    display: block !important;
-  }
-  body.tab-active-add .item-form-card {
-    display: block !important;
-  }
-  body.tab-active-add .catalog-card {
-    display: none !important;
-  }
-  body.tab-active-add .right-panel {
-    display: none !important;
-  }
-
-  body.tab-active-catalog .left-panel {
-    display: block !important;
-  }
-  body.tab-active-catalog .item-form-card {
-    display: none !important;
-  }
-  body.tab-active-catalog .catalog-card {
-    display: block !important;
-  }
-  body.tab-active-catalog .right-panel {
-    display: none !important;
-  }
-
-  /* Header Compact */
-  .header-container {
-    padding: 10px 16px;
-  }
-  .app-tagline {
-    display: none;
-  }
-  .user-label {
-    display: none;
-  }
-
-  /* Budget Cap Mobile Layout */
-  .budget-top-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .wallet-input-wrapper {
-    justify-content: space-between;
-  }
-  .currency-input-group {
-    max-width: 100%;
-    flex: 1;
-  }
-
-  /* Cart stats grid 2 columns */
-  .cart-stats-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  /* Form row stacks on narrow screens */
-  .form-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* Grocery Item Card Mobile Friendly Layout */
-  .grocery-item-card {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .item-left-col {
-    width: 100%;
-  }
-
-  .item-right-col {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px dashed var(--border);
-    padding-top: 10px;
-    width: 100%;
-  }
-
-  .item-pricing-box {
-    text-align: left;
-  }
-
-  .quick-items-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .budget-card {
-    padding: 14px;
-  }
-  .card {
-    padding: 16px 14px;
-  }
-  .meter-labels {
-    font-size: 0.75rem;
-  }
-  .stat-value {
-    font-size: 0.95rem;
-  }
-  .final-item-total {
-    font-size: 1.2rem;
-  }
-}
-
-/* Print CSS */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #receiptModal, #receiptModal * {
-    visibility: visible;
-  }
-  #receiptModal {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    background: transparent;
-  }
-  .receipt-modal-actions {
-    display: none;
-  }
-}
-
-  </style>
+  <!-- External Mobile Design System Stylesheet -->
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="tab-active-cart">
+<body>
 
   <!-- ==================== AUTHENTICATION OVERLAY ==================== -->
   <div id="authOverlay" class="auth-overlay">
@@ -1978,13 +84,12 @@ select:focus {
           <small class="form-hint" id="usernameHint">Sistem menolak login multi-user jika profil sudah ditetapkan.</small>
         </div>
 
-        <button type="submit" id="btnSubmitLogin" class="btn-primary btn-block">
+        <button type="submit" id="btnSubmitLogin" class="btn-primary">
           <span>Mulai Belanja</span>
           <span class="btn-arrow">→</span>
         </button>
       </form>
 
-      <!-- Active User Switch/Reset -->
       <div class="auth-footer" id="authFooterArea">
         <span class="auth-security-tag">🛡️ Tersambung ke Cloud Firebase (grocery1n)</span>
       </div>
@@ -2026,7 +131,7 @@ select:focus {
     </div>
   </div>
 
-  <!-- ==================== MAIN APPLICATION CONTAINER ==================== -->
+  <!-- ==================== MAIN SMARTPHONE CONTAINER (MAX 430px) ==================== -->
   <div class="app-layout" id="mainApp">
     
     <!-- TOP NAVIGATION BAR -->
@@ -2036,278 +141,56 @@ select:focus {
           <div class="logo-circle">🛒</div>
           <div>
             <h1 class="app-title">GroceryIn</h1>
-            <span class="app-tagline">Smart Grocery & Price Fluctuation Tracker</span>
           </div>
         </div>
 
-        <!-- User Profile & Session Controls -->
         <div class="header-controls">
-          <!-- Firebase Cloud Status Badge -->
+          <!-- Cloud Status Badge -->
           <div class="cloud-status-badge" id="cloudStatusBadge" title="Status sinkronisasi Cloud Firestore">
             <span class="cloud-pulse-dot"></span>
             <span>Cloud Sync</span>
           </div>
 
+          <!-- Active User Session -->
           <div class="active-user-badge" id="activeUserBadge">
-            <span class="status-dot"></span>
             <span class="user-icon" id="userAvatar">👤</span>
-            <div class="user-meta">
-              <span class="user-label">Pengguna:</span>
-              <strong class="user-name" id="displayName">Pengguna</strong>
-            </div>
+            <strong class="user-name" id="displayName">Pengguna</strong>
           </div>
-          <button type="button" id="btnLogout" class="btn-logout" title="Keluar dari sesi akun tunggal">
-            <span>Keluar</span>
-            <span class="logout-icon">🚪</span>
+
+          <!-- Logout Button -->
+          <button type="button" id="btnLogout" class="btn-logout" title="Keluar dari sesi akun tunggal" aria-label="Keluar dari sesi">
+            <span>🚪</span>
           </button>
         </div>
       </div>
     </header>
 
-    <!-- BUDGET SAFETY CAP - CRITICAL ALERT HEADER -->
-    <section class="budget-cap-section" id="budgetCapSection">
-      <div class="budget-container">
+    <!-- MAIN VIEWS CONTAINER -->
+    <main class="main-view-container">
+
+      <!-- ==================== VIEW 1: BELANJA (Active Cart & Shopping List) ==================== -->
+      <section class="app-view active-view" id="viewBelanja" aria-label="Menu Belanja">
         
-        <!-- Budget Card -->
-        <div class="budget-card" id="budgetCard">
-          <div class="budget-top-row">
-            <div class="budget-title-wrap">
-              <div class="budget-icon-badge" id="budgetIconBadge">🛡️</div>
-              <div>
-                <h2>Pengendali Anggaran Dompet</h2>
-                <p class="budget-hint">Pantau total belanjaan seketika agar tidak melebihi uang saku.</p>
-              </div>
-            </div>
-
-            <!-- Input Wallet Cap -->
-            <div class="wallet-input-wrapper">
-              <label for="inputBudgetCap">Batas Uang Dompet (Limit):</label>
-              <div class="currency-input-group" id="budgetInputGroup">
-                <span class="curr-prefix">Rp</span>
-                <input type="number" id="inputBudgetCap" min="0" step="5000" placeholder="500.000" value="500000">
-              </div>
-            </div>
+        <!-- Mini Budget Overview Strip (Tapping opens Anggaran view) -->
+        <div class="mini-budget-strip" id="miniBudgetStrip" title="Klik untuk membuka Pengendali Anggaran Dompet">
+          <div class="mini-budget-row">
+            <span class="mini-budget-title">🛡️ Sisa Dompet:</span>
+            <strong class="mini-budget-val" id="miniBudgetRemaining">Rp 500.000</strong>
           </div>
-
-          <!-- Progress Bar & Status Indicators -->
-          <div class="budget-meter-wrap">
-            <div class="meter-labels">
-              <span>Terpakai: <strong id="budgetSpentText">Rp 0</strong></span>
-              <span id="budgetPercentText" class="badge-percent">0%</span>
-              <span>Sisa: <strong id="budgetRemainingText">Rp 500.000</strong></span>
-            </div>
-            <div class="meter-bar-track">
-              <div class="meter-bar-fill safe" id="budgetProgressBar" style="width: 0%;"></div>
-            </div>
-          </div>
-
-          <!-- Live Dynamic Warning Banner -->
-          <div class="budget-alert-banner safe" id="budgetAlertBanner">
-            <span class="alert-icon" id="alertIcon">✅</span>
-            <span class="alert-message" id="alertMessage">Pengeluaran belanja Anda dalam batas aman dan terkendali.</span>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
-    <!-- MOBILE SEGMENTED TAB NAV (Khusus Layar HP) -->
-    <nav class="mobile-tab-nav" id="mobileTabNav" aria-label="Navigasi Menu Mobile">
-      <div class="mobile-tab-wrapper">
-        <button type="button" class="tab-btn active" id="tabBtnCart" data-tab="cart">
-          <span class="tab-icon">🛒</span>
-          <span class="tab-label">Keranjang</span>
-          <span class="tab-badge" id="tabCartCount">0</span>
-        </button>
-        <button type="button" class="tab-btn" id="tabBtnAdd" data-tab="add">
-          <span class="tab-icon">➕</span>
-          <span class="tab-label">Catat Item</span>
-        </button>
-        <button type="button" class="tab-btn" id="tabBtnCatalog" data-tab="catalog">
-          <span class="tab-icon">💡</span>
-          <span class="tab-label">Katalog Acuan</span>
-        </button>
-      </div>
-    </nav>
-
-    <!-- MAIN BODY GRID (Catalog / Form / Cart) -->
-    <main class="main-content-grid">
-
-      <!-- LEFT COLUMN: Input Form & Quick Benchmark Catalog -->
-      <aside class="left-panel">
-        
-        <!-- Add / Edit Item Form Card -->
-        <div class="card item-form-card" id="itemFormCard">
-          <div class="card-header">
-            <h3 id="formTitle">📝 Catat / Tambah Belanjaan</h3>
-            <span class="badge-accent">Auto-Kalkulasi</span>
-          </div>
-
-          <form id="groceryForm" onsubmit="return false;">
-            <input type="hidden" id="editingItemId" value="">
-
-            <!-- Nama Barang & Kategori -->
-            <div class="form-row">
-              <div class="form-group flex-2">
-                <label for="inputItemName">Nama Barang <span class="required">*</span></label>
-                <input type="text" id="inputItemName" placeholder="Contoh: Beras Ramos, Minyak Bimoli..." required>
-              </div>
-              <div class="form-group flex-1">
-                <label for="inputCategory">Kategori</label>
-                <select id="inputCategory">
-                  <option value="Sembako">🍚 Sembako</option>
-                  <option value="Sayur & Buah">🥦 Sayur & Buah</option>
-                  <option value="Daging & Ikan">🥩 Daging & Ikan</option>
-                  <option value="Susu & Telur">🥚 Susu & Telur</option>
-                  <option value="Bumbu Dapur">🧄 Bumbu Dapur</option>
-                  <option value="Snack & Minuman">🧃 Snack & Minuman</option>
-                  <option value="Kebersihan">🧼 Kebersihan</option>
-                  <option value="Lainnya">📦 Lainnya</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Satuan & Kuantitas -->
-            <div class="form-row">
-              <div class="form-group flex-1">
-                <label for="inputUnit">Satuan Ukuran</label>
-                <select id="inputUnit">
-                  <option value="kg">kg (Kilogram)</option>
-                  <option value="liter">liter</option>
-                  <option value="pcs">pcs (Biji/Buah)</option>
-                  <option value="gram">gram</option>
-                  <option value="ikat">ikat</option>
-                  <option value="botol">botol</option>
-                  <option value="pack">pack</option>
-                  <option value="kaleng">kaleng</option>
-                </select>
-              </div>
-              
-              <div class="form-group flex-1">
-                <label for="inputQty">Kuantitas <span class="required">*</span></label>
-                <div class="qty-stepper">
-                  <button type="button" class="btn-step" id="btnQtyMinus" aria-label="Kurangi kuantitas">-</button>
-                  <input type="number" id="inputQty" min="0.1" step="any" value="1" required>
-                  <button type="button" class="btn-step" id="btnQtyPlus" aria-label="Tambah kuantitas">+</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Harga Satuan & Harga Bulan Lalu -->
-            <div class="form-row">
-              <div class="form-group flex-1">
-                <label for="inputPrice">Harga Satuan Saat Ini <span class="required">*</span></label>
-                <div class="currency-input-group">
-                  <span class="curr-prefix">Rp</span>
-                  <input type="number" id="inputPrice" min="0" step="500" placeholder="0" required>
-                </div>
-              </div>
-
-              <div class="form-group flex-1">
-                <label for="inputLastMonthPrice">Harga Riwayat Bulan Lalu</label>
-                <div class="currency-input-group">
-                  <span class="curr-prefix">Rp</span>
-                  <input type="number" id="inputLastMonthPrice" min="0" step="500" placeholder="0">
-                </div>
-              </div>
-            </div>
-
-            <!-- REALTIME FLUCTUATION INDICATOR LIVE PREVIEW -->
-            <div class="fluctuation-preview-card" id="fluctuationPreviewCard">
-              <div class="fluc-icon-box" id="flucIconBox">⚖️</div>
-              <div class="fluc-details">
-                <div class="fluc-title" id="flucTitle">Deteksi Fluktuasi Harga Realtime</div>
-                <div class="fluc-sub" id="flucSub">Masukkan harga saat ini dan harga bulan lalu untuk melihat perbandingannya.</div>
-              </div>
-              <div class="fluc-badge" id="flucBadge">= Stabil</div>
-            </div>
-
-            <!-- DISKON BERTINGKAT (TIERED DISCOUNT) LOGIC -->
-            <div class="discount-container">
-              <div class="discount-header">
-                <label for="inputDiscountTiers">
-                  🏷️ Diskon Bertingkat (Cascading Promo)
-                </label>
-                <span class="discount-example-hint">Contoh: 50% + 20%</span>
-              </div>
-
-              <div class="discount-input-row">
-                <input type="text" id="inputDiscountTiers" placeholder="Contoh: 50 + 20 atau 30+10" value="">
-                <!-- Quick Preset Chips -->
-                <div class="preset-chips">
-                  <button type="button" class="chip" data-tier="50+20">50% + 20%</button>
-                  <button type="button" class="chip" data-tier="30+10">30% + 10%</button>
-                  <button type="button" class="chip" data-tier="20+5">20% + 5%</button>
-                  <button type="button" class="chip" data-tier="0">Reset</button>
-                </div>
-              </div>
-
-              <!-- Mathematical breakdown explain box -->
-              <div class="discount-math-box" id="discountMathBox">
-                <div class="math-title">📊 Rincian Logika Matematika Diskon Bertingkat:</div>
-                <div class="math-content" id="discountMathContent">
-                  Tidak ada diskon aktif. Harga dihitung normal.
-                </div>
-              </div>
-            </div>
-
-            <!-- Notes / Catatan -->
-            <div class="form-group">
-              <label for="inputNotes">Catatan Tambahan (Opsional)</label>
-              <input type="text" id="inputNotes" placeholder="Misal: Cari merk Tropical, pilih kemasan pouch...">
-            </div>
-
-            <!-- Live Calculation Summary Card per Item -->
-            <div class="live-calc-summary">
-              <div class="calc-label-col">
-                <span>Subtotal Item Otomatis:</span>
-                <small id="calcSubtotalNote">1 x Rp 0</small>
-              </div>
-              <div class="calc-val-col">
-                <span class="original-price-strike" id="calcOriginalStrike"></span>
-                <span class="final-item-total" id="calcFinalItemTotal">Rp 0</span>
-              </div>
-            </div>
-
-            <!-- Form Action Buttons -->
-            <div class="form-actions">
-              <button type="submit" id="btnSaveItem" class="btn-primary btn-large">
-                <span id="btnSaveText">➕ Masukkan ke Keranjang</span>
-              </button>
-              <button type="button" id="btnCancelEdit" class="btn-secondary hidden">
-                Batal
-              </button>
-            </div>
-
-          </form>
-        </div>
-
-        <!-- QUICK BENCHMARK CATALOG / IDE BELANJA -->
-        <div class="card catalog-card" id="catalogCard">
-          <div class="catalog-header">
-            <h4>💡 Katalog Cepat & Riwayat Acuan Pasar</h4>
-            <span class="catalog-subtitle">Klik untuk langsung mengisi form dengan data riwayat bulan lalu</span>
-          </div>
-          <div class="quick-items-grid" id="quickCatalogGrid">
-            <!-- Populated via JS -->
+          <div class="mini-progress-bar-track">
+            <div class="mini-progress-bar-fill safe" id="miniBudgetBarFill" style="width: 0%;"></div>
           </div>
         </div>
 
-      </aside>
-
-      <!-- RIGHT COLUMN: Shopping Cart, Filters, & Total Breakdown -->
-      <section class="right-panel">
-
-        <!-- Shopping Cart Summary Bar -->
-        <div class="card cart-summary-card">
+        <!-- Cart Summary Stats -->
+        <div class="cart-summary-card">
           <div class="cart-stats-row">
             <div class="stat-col">
               <span class="stat-label">Total Belanjaan</span>
               <strong class="stat-value text-primary" id="totalCartPrice">Rp 0</strong>
             </div>
             <div class="stat-col">
-              <span class="stat-label">Total Hemat Diskon</span>
+              <span class="stat-label">Hemat Diskon</span>
               <strong class="stat-value text-green" id="totalDiscountSaved">Rp 0</strong>
             </div>
             <div class="stat-col">
@@ -2321,29 +204,36 @@ select:focus {
           </div>
         </div>
 
-        <!-- Cart Filters & Action Bar -->
+        <!-- Prominent Large Thumb-Friendly Add Action -->
+        <div class="thumb-add-btn-wrap">
+          <button type="button" class="btn-thumb-add" id="btnThumbAdd">
+            <span>➕ Catat Belanja Baru</span>
+          </button>
+        </div>
+
+        <!-- Cart Search & Filter Toolbar -->
         <div class="cart-toolbar">
           <div class="search-wrap">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchCart" placeholder="Cari barang di daftar belanja...">
+            <input type="text" id="searchCart" class="search-input" placeholder="Cari barang belanjaan...">
           </div>
 
           <div class="filter-category-wrap">
-            <select id="filterCategory">
+            <select id="filterCategory" aria-label="Filter berdasarkan kategori">
               <option value="ALL">Semua Kategori</option>
-              <option value="Sembako">Sembako</option>
-              <option value="Sayur & Buah">Sayur & Buah</option>
-              <option value="Daging & Ikan">Daging & Ikan</option>
-              <option value="Susu & Telur">Susu & Telur</option>
-              <option value="Bumbu Dapur">Bumbu Dapur</option>
-              <option value="Snack & Minuman">Snack & Minuman</option>
-              <option value="Kebersihan">Kebersihan</option>
-              <option value="Lainnya">Lainnya</option>
+              <option value="Sembako">🍚 Sembako</option>
+              <option value="Sayur & Buah">🥦 Sayur & Buah</option>
+              <option value="Daging & Ikan">🥩 Daging & Ikan</option>
+              <option value="Susu & Telur">🥚 Susu & Telur</option>
+              <option value="Bumbu Dapur">🧄 Bumbu Dapur</option>
+              <option value="Snack & Minuman">🧃 Snack & Minuman</option>
+              <option value="Kebersihan">🧼 Kebersihan</option>
+              <option value="Lainnya">📦 Lainnya</option>
             </select>
           </div>
 
-          <div class="toolbar-actions">
-            <button type="button" id="btnPrintReceipt" class="btn-outline" title="Lihat & Cetak Struk Belanja">
+          <div class="cart-action-buttons">
+            <button type="button" id="btnPrintReceipt" class="btn-outline" title="Lihat Struk Belanja">
               <span>🧾 Struk</span>
             </button>
             <button type="button" id="btnClearAll" class="btn-danger-outline" title="Kosongkan Daftar Belanja">
@@ -2352,45 +242,301 @@ select:focus {
           </div>
         </div>
 
-        <!-- GROCERY ITEMS LIST -->
+        <!-- Grocery Items List -->
         <div class="grocery-list-container" id="groceryListContainer">
-          <div class="empty-state" id="emptyState">
-            <div class="empty-icon">🛒</div>
-            <h3>Daftar Belanja Masih Kosong</h3>
-            <p>Silakan gunakan formulir di samping atau pilih barang dari katalog cepat untuk mulai mencatat belanjaan.</p>
+          <!-- Populated dynamically via JS -->
+        </div>
+
+      </section>
+
+      <!-- ==================== VIEW 2: CATAT / TAMBAH (Add & Edit Form) ==================== -->
+      <section class="app-view" id="viewCatat" aria-label="Menu Catat Belanja">
+        
+        <div class="form-card" id="itemFormCard">
+          <div class="form-header-bar">
+            <div>
+              <h3 id="formTitle">📝 Catat / Tambah Belanjaan</h3>
+            </div>
+            <button type="button" class="btn-back-link" id="btnBackFromCatat">
+              <span>← Kembali</span>
+            </button>
           </div>
+
+          <form id="groceryForm" onsubmit="return false;">
+            <input type="hidden" id="editingItemId" value="">
+
+            <!-- Nama Barang -->
+            <div class="form-group">
+              <label for="inputItemName">Nama Barang <span class="required">*</span></label>
+              <input type="text" id="inputItemName" placeholder="Contoh: Beras Ramos, Minyak Bimoli..." required>
+            </div>
+
+            <!-- Kategori -->
+            <div class="form-group">
+              <label for="inputCategory">Kategori</label>
+              <select id="inputCategory">
+                <option value="Sembako">🍚 Sembako</option>
+                <option value="Sayur & Buah">🥦 Sayur & Buah</option>
+                <option value="Daging & Ikan">🥩 Daging & Ikan</option>
+                <option value="Susu & Telur">🥚 Susu & Telur</option>
+                <option value="Bumbu Dapur">🧄 Bumbu Dapur</option>
+                <option value="Snack & Minuman">🧃 Snack & Minuman</option>
+                <option value="Kebersihan">🧼 Kebersihan</option>
+                <option value="Lainnya">📦 Lainnya</option>
+              </select>
+            </div>
+
+            <!-- Satuan Ukuran -->
+            <div class="form-group">
+              <label for="inputUnit">Satuan Ukuran</label>
+              <select id="inputUnit">
+                <option value="kg">kg (Kilogram)</option>
+                <option value="liter">liter</option>
+                <option value="pcs">pcs (Biji/Buah)</option>
+                <option value="gram">gram</option>
+                <option value="ikat">ikat</option>
+                <option value="botol">botol</option>
+                <option value="pack">pack</option>
+                <option value="kaleng">kaleng</option>
+              </select>
+            </div>
+
+            <!-- Kuantitas dengan Stepper (+ / -) Ergonomis Besar -->
+            <div class="form-group">
+              <label for="inputQty">Kuantitas <span class="required">*</span></label>
+              <div class="qty-stepper">
+                <button type="button" class="btn-step" id="btnQtyMinus" aria-label="Kurangi kuantitas">−</button>
+                <input type="number" id="inputQty" min="0.1" step="any" value="1" required>
+                <button type="button" class="btn-step" id="btnQtyPlus" aria-label="Tambah kuantitas">+</button>
+              </div>
+            </div>
+
+            <!-- Harga Satuan Saat Ini -->
+            <div class="form-group">
+              <label for="inputPrice">Harga Satuan Saat Ini <span class="required">*</span></label>
+              <div class="currency-input-group">
+                <span class="curr-prefix">Rp</span>
+                <input type="number" id="inputPrice" min="0" step="500" placeholder="0" required>
+              </div>
+            </div>
+
+            <!-- Harga Riwayat Bulan Lalu -->
+            <div class="form-group">
+              <label for="inputLastMonthPrice">Harga Riwayat Bulan Lalu (Acuan Pasar)</label>
+              <div class="currency-input-group">
+                <span class="curr-prefix">Rp</span>
+                <input type="number" id="inputLastMonthPrice" min="0" step="500" placeholder="0">
+              </div>
+            </div>
+
+            <!-- Deteksi Fluktuasi Harga Realtime Preview -->
+            <div class="fluctuation-preview-card" id="fluctuationPreviewCard">
+              <div class="fluc-icon-box" id="flucIconBox">⚖️</div>
+              <div class="fluc-details">
+                <div class="fluc-title" id="flucTitle">Deteksi Fluktuasi Harga Realtime</div>
+                <div class="fluc-sub" id="flucSub">Masukkan harga saat ini dan harga bulan lalu untuk melihat perbandingannya.</div>
+              </div>
+              <div class="fluc-badge" id="flucBadge">= Stabil</div>
+            </div>
+
+            <!-- Diskon Bertingkat (Cascading Compound Promo) -->
+            <div class="discount-container">
+              <div class="discount-header">
+                <label for="inputDiscountTiers">🏷️ Diskon Bertingkat (Cascading Promo)</label>
+                <span>Contoh: 50+20</span>
+              </div>
+
+              <div class="discount-input-row">
+                <input type="text" id="inputDiscountTiers" placeholder="Contoh: 50+20 atau 30+10" value="">
+                
+                <!-- Preset Chips -->
+                <div class="preset-chips">
+                  <button type="button" class="chip" data-tier="50+20">50% + 20%</button>
+                  <button type="button" class="chip" data-tier="30+10">30% + 10%</button>
+                  <button type="button" class="chip" data-tier="20+5">20% + 5%</button>
+                  <button type="button" class="chip" data-tier="0">Reset</button>
+                </div>
+              </div>
+
+              <div class="discount-math-box" id="discountMathBox">
+                <div class="math-title">📊 Rincian Logika Matematika Diskon:</div>
+                <div class="math-content" id="discountMathContent">
+                  Tidak ada diskon aktif. Harga dihitung normal.
+                </div>
+              </div>
+            </div>
+
+            <!-- Catatan Tambahan -->
+            <div class="form-group">
+              <label for="inputNotes">Catatan Tambahan (Opsional)</label>
+              <input type="text" id="inputNotes" placeholder="Misal: Pilih kemasan pouch, cari merk Tropical...">
+            </div>
+
+            <!-- Subtotal Live Summary -->
+            <div class="live-calc-summary">
+              <div class="calc-label-col">
+                <span>Subtotal Item Otomatis:</span>
+                <small id="calcSubtotalNote">1 x Rp 0</small>
+              </div>
+              <div class="calc-val-col">
+                <span class="original-price-strike" id="calcOriginalStrike"></span>
+                <span class="final-item-total" id="calcFinalItemTotal">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div class="form-actions">
+              <button type="submit" id="btnSaveItem" class="btn-primary">
+                <span id="btnSaveText">➕ Masukkan ke Keranjang</span>
+              </button>
+              <button type="button" id="btnCancelEdit" class="btn-secondary hidden">
+                Batal / Kembali ke Belanja
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </section>
+
+      <!-- ==================== VIEW 3: ANGGARAN (Budget Safety Cap) ==================== -->
+      <section class="app-view" id="viewAnggaran" aria-label="Menu Anggaran">
+        
+        <div class="budget-view-card">
+          <div class="budget-header-block">
+            <h2>💰 Pengendali Anggaran Dompet</h2>
+            <p>Pantau uang saku tunai agar total belanja tidak over-budget sebelum ke kasir.</p>
+          </div>
+
+          <!-- Input Limit Dompet -->
+          <div class="budget-wallet-box">
+            <label for="inputBudgetCap">Batas Uang Dompet (Limit Uang Saku):</label>
+            <div class="currency-input-group">
+              <span class="curr-prefix">Rp</span>
+              <input type="number" id="inputBudgetCap" min="0" step="10000" placeholder="500.000" value="500000">
+            </div>
+
+            <!-- Quick Budget Presets -->
+            <div class="budget-presets-row">
+              <button type="button" class="chip-budget" data-add="20000">+20rb</button>
+              <button type="button" class="chip-budget" data-add="50000">+50rb</button>
+              <button type="button" class="chip-budget" data-add="100000">+100rb</button>
+              <button type="button" class="chip-budget" data-set="300000">300rb</button>
+              <button type="button" class="chip-budget" data-set="500000">500rb</button>
+              <button type="button" class="chip-budget" data-set="1000000">1 Jt</button>
+            </div>
+          </div>
+
+          <!-- Hero Status Card -->
+          <div class="budget-status-hero safe" id="budgetCard">
+            <span class="hero-label">Sisa Uang Saku Tunai</span>
+            <div class="hero-value" id="budgetRemainingText">Rp 500.000</div>
+
+            <div class="hero-meter-stats">
+              <span>Terpakai: <strong id="budgetSpentText">Rp 0</strong></span>
+              <span id="budgetPercentText">0%</span>
+            </div>
+
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill safe" id="budgetProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Dynamic Alert Banner -->
+          <div class="budget-alert-banner safe" id="budgetAlertBanner">
+            <span class="alert-icon" id="alertIcon">✅</span>
+            <span class="alert-message" id="alertMessage">Pengeluaran belanja Anda dalam batas aman dan terkendali.</span>
+          </div>
+
+          <!-- Spending Breakdown per Category -->
+          <div class="category-breakdown-card">
+            <h4>📊 Alokasi Belanja per Kategori</h4>
+            <div id="budgetCategoryBreakdown">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary" id="btnBackToBelanja">
+            <span>🛒 Kembali ke Daftar Belanja</span>
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- ==================== VIEW 4: RIWAYAT & ACUAN PASAR ==================== -->
+      <section class="app-view" id="viewRiwayat" aria-label="Menu Riwayat">
+        
+        <div class="history-view-wrap">
+          
+          <!-- Struk Belanja Card -->
+          <div class="receipt-action-card">
+            <h4>🧾 Struk & Bukti Pembelian</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Cetak atau simpan struk belanjaan saat ini dalam format struk kasir profesional.</p>
+            <button type="button" class="btn-primary" id="btnOpenReceiptFromHistory">
+              <span>🧾 Buka & Cetak Struk Belanja</span>
+            </button>
+          </div>
+
+          <!-- Katalog Acuan Pasar Bulan Lalu -->
+          <div class="catalog-card" id="catalogCard">
+            <div class="catalog-header">
+              <h4>💡 Katalog Acuan Pasar Bulan Lalu</h4>
+              <span class="catalog-subtitle">Klik komoditas di bawah untuk mengisi formulir belanja otomatis</span>
+            </div>
+            <div class="quick-items-grid" id="quickCatalogGrid">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
         </div>
 
       </section>
 
     </main>
 
-    <!-- MOBILE FLOATING BOTTOM SUMMARY BAR (Khusus Layar HP) -->
-    <aside class="mobile-bottom-bar" id="mobileBottomBar">
-      <div class="mobile-bottom-content">
-        <div class="mobile-bottom-info">
-          <span class="mobile-bottom-label">Total Belanja:</span>
-          <strong class="mobile-bottom-price" id="mobileBottomPrice">Rp 0</strong>
+    <!-- ==================== FLOATING BOTTOM MAIN MENU (MELAYANG DI PALING BAWAH) ==================== -->
+    <nav class="floating-bottom-nav" id="floatingBottomNav" aria-label="Menu Utama Navigasi Bawah">
+      
+      <!-- Menu Belanja -->
+      <button type="button" class="nav-tab-btn active" id="navTabBelanja" data-tab="belanja" aria-label="Menu Belanja">
+        <div class="nav-icon-wrap">
+          <span class="nav-tab-icon">🛒</span>
+          <span class="nav-badge" id="navCartCount">0</span>
         </div>
-        <div class="mobile-bottom-actions">
-          <button type="button" id="btnMobileAdd" class="btn-primary">
-            <span>➕ Catat Item</span>
-          </button>
-          <button type="button" id="btnMobileReceipt" class="btn-outline">
-            <span>🧾 Struk</span>
-          </button>
-        </div>
-      </div>
-    </aside>
+        <span class="nav-tab-label">Belanja</span>
+      </button>
 
-    <!-- FOOTER -->
-    <footer class="app-footer">
-      <p><strong>GroceryIn</strong> &copy; 2026 &mdash; Aplikasi Asisten Belanja Pintar dengan Firebase Cloud Firestore, Deteksi Fluktuasi Harga, Diskon Bertingkat, dan Pengendali Anggaran Dompet.</p>
-    </footer>
+      <!-- Menu Catat -->
+      <button type="button" class="nav-tab-btn" id="navTabCatat" data-tab="catat" aria-label="Menu Catat Belanja">
+        <div class="nav-icon-wrap">
+          <span class="nav-tab-icon">➕</span>
+        </div>
+        <span class="nav-tab-label">Catat</span>
+      </button>
+
+      <!-- Menu Anggaran -->
+      <button type="button" class="nav-tab-btn" id="navTabAnggaran" data-tab="anggaran" aria-label="Menu Anggaran">
+        <div class="nav-icon-wrap">
+          <span class="nav-tab-icon">💰</span>
+          <span class="nav-status-dot" id="navBudgetDot"></span>
+        </div>
+        <span class="nav-tab-label">Anggaran</span>
+      </button>
+
+      <!-- Menu Riwayat -->
+      <button type="button" class="nav-tab-btn" id="navTabRiwayat" data-tab="riwayat" aria-label="Menu Riwayat">
+        <div class="nav-icon-wrap">
+          <span class="nav-tab-icon">📜</span>
+        </div>
+        <span class="nav-tab-label">Riwayat</span>
+      </button>
+
+    </nav>
 
   </div>
 
-  <!-- ==================== RECEIPT MODAL ==================== -->
+  <!-- ==================== RECEIPT PRINT MODAL ==================== -->
   <div id="receiptModal" class="modal-backdrop hidden">
     <div class="receipt-modal-box">
       <div class="receipt-paper" id="receiptPrintableArea">
@@ -2447,1231 +593,7 @@ select:focus {
     </div>
   </div>
 
-  <!-- App Script with Firebase Integration -->
-  <script>
-/**
- * GROCERYIN - SMART GROCERY & EXPENSE TRACKER
- * FIREBASE EDITION (Project: grocery1n)
- *
- * Connected Firebase Products:
- * - Firebase App SDK
- * - Firebase Authentication (Google Sign-In + Username Single-User Lock)
- * - Cloud Firestore Realtime Database (Collection: 'grocery_items', 'budget_settings', 'users')
- * - LocalStorage Offline Fallback Support
- */
-
-// ==================== FIREBASE CONFIGURATION ====================
-const firebaseConfig = {
-  apiKey: "AIzaSyCyr3K9_IxxrD30TYkpLApD6AMxsYoxf1c",
-  authDomain: "grocery1n.firebaseapp.com",
-  projectId: "grocery1n",
-  storageBucket: "grocery1n.firebasestorage.app",
-  messagingSenderId: "135631831952",
-  appId: "1:135631831952:web:e680edb0bb9fffebf72915"
-};
-
-// ==================== INITIAL DATA & BENCHMARKS ====================
-const BENCHMARK_CATALOG = [
-  { name: "Beras Ramos Premium", category: "Sembako", unit: "kg", defaultQty: 5, currentPrice: 72000, lastMonthPrice: 68000, icon: "🍚", discount: "" },
-  { name: "Minyak Goreng 2 Liter", category: "Sembako", unit: "liter", defaultQty: 2, currentPrice: 34500, lastMonthPrice: 37000, icon: "🛢️", discount: "10" },
-  { name: "Telur Ayam Negeri", category: "Susu & Telur", unit: "kg", defaultQty: 1, currentPrice: 28500, lastMonthPrice: 28500, icon: "🥚", discount: "" },
-  { name: "Daging Sapi Segar", category: "Daging & Ikan", unit: "kg", defaultQty: 1, currentPrice: 142000, lastMonthPrice: 135000, icon: "🥩", discount: "20+10" },
-  { name: "Bawang Merah Brebes", category: "Bumbu Dapur", unit: "kg", defaultQty: 1, currentPrice: 30000, lastMonthPrice: 35000, icon: "🧅", discount: "" },
-  { name: "Susu UHT Full Cream 1L", category: "Susu & Telur", unit: "liter", defaultQty: 2, currentPrice: 19500, lastMonthPrice: 19500, icon: "🥛", discount: "50+20" },
-  { name: "Apel Fuji Segar", category: "Sayur & Buah", unit: "kg", defaultQty: 1.5, currentPrice: 48000, lastMonthPrice: 42000, icon: "🍎", discount: "15" },
-  { name: "Sabun Cuci Piring Refill", category: "Kebersihan", unit: "pack", defaultQty: 1, currentPrice: 13500, lastMonthPrice: 15000, icon: "🧼", discount: "" }
-];
-
-const INITIAL_ITEMS = [
-  {
-    id: "item-1",
-    name: "Minyak Goreng 2 Liter",
-    category: "Sembako",
-    unit: "liter",
-    quantity: 2,
-    price: 34500,
-    lastMonthPrice: 37000,
-    discountTiers: "10",
-    notes: "Promo supermarket akhir pekan",
-    isBought: true
-  },
-  {
-    id: "item-2",
-    name: "Beras Ramos Premium",
-    category: "Sembako",
-    unit: "kg",
-    quantity: 5,
-    price: 72000,
-    lastMonthPrice: 68000,
-    discountTiers: "",
-    notes: "Pilih karung yang bersih",
-    isBought: false
-  },
-  {
-    id: "item-3",
-    name: "Daging Sapi Segar",
-    category: "Daging & Ikan",
-    unit: "kg",
-    quantity: 1,
-    price: 142000,
-    lastMonthPrice: 135000,
-    discountTiers: "20+10",
-    notes: "Diskon bertingkat promo kartu member",
-    isBought: false
-  }
-];
-
-// ==================== STATE MANAGEMENT & FIREBASE ADAPTER ====================
-class GroceryInApp {
-  constructor() {
-    this.storageKeyUser = "groceryin_single_user_lock";
-    this.storageKeyItems = "groceryin_items_data";
-    this.storageKeyBudget = "groceryin_budget_cap";
-
-    this.currentUser = null;
-    this.items = [];
-    this.budgetCap = 500000;
-    this.editingId = null;
-    this.currentMobileTab = "cart"; // cart, add, catalog
-
-    // Firebase instances
-    this.firebaseApp = null;
-    this.firebaseAuth = null;
-    this.firestoreDb = null;
-    this.isCloudSyncActive = false;
-    this.firestoreUnsubscribe = null;
-
-    this.initFirebase();
-    this.initElements();
-    this.initEventListeners();
-    this.loadState();
-  }
-
-  // ==================== INITIALIZE FIREBASE SDK ====================
-  initFirebase() {
-    try {
-      if (typeof firebase !== 'undefined' && firebase.initializeApp) {
-        if (!firebase.apps || firebase.apps.length === 0) {
-          this.firebaseApp = firebase.initializeApp(firebaseConfig);
-        } else {
-          this.firebaseApp = firebase.app();
-        }
-        this.firebaseAuth = firebase.auth();
-        this.firestoreDb = firebase.firestore();
-        this.isCloudSyncActive = true;
-        console.log("🔥 Firebase initialized successfully for project grocery1n!");
-      }
-    } catch (err) {
-      console.warn("Firebase initialization warning (using local fallback mode):", err);
-      this.isCloudSyncActive = false;
-    }
-  }
-
-  // ==================== ELEMENT SELECTORS ====================
-  initElements() {
-    // Cloud Status Badge
-    this.cloudStatusBadge = document.getElementById("cloudStatusBadge");
-
-    // Auth Elements
-    this.authOverlay = document.getElementById("authOverlay");
-    this.authTitle = document.getElementById("authTitle");
-    this.singleUserNotice = document.getElementById("singleUserNotice");
-    this.singleUserNoticeDesc = document.getElementById("singleUserNoticeDesc");
-    this.inputUsername = document.getElementById("inputUsername");
-    this.usernameHint = document.getElementById("usernameHint");
-    this.btnSubmitLogin = document.getElementById("btnSubmitLogin");
-    this.btnGoogleLogin = document.getElementById("btnGoogleLogin");
-    this.googleModal = document.getElementById("googleModal");
-    this.btnCloseGoogleModal = document.getElementById("btnCloseGoogleModal");
-    this.gAccDemo1 = document.getElementById("gAccDemo1");
-    this.gAccDemo2 = document.getElementById("gAccDemo2");
-    this.displayName = document.getElementById("displayName");
-    this.userAvatar = document.getElementById("userAvatar");
-    this.btnLogout = document.getElementById("btnLogout");
-
-    // Budget Cap Elements
-    this.budgetCard = document.getElementById("budgetCard");
-    this.inputBudgetCap = document.getElementById("inputBudgetCap");
-    this.budgetSpentText = document.getElementById("budgetSpentText");
-    this.budgetPercentText = document.getElementById("budgetPercentText");
-    this.budgetRemainingText = document.getElementById("budgetRemainingText");
-    this.budgetProgressBar = document.getElementById("budgetProgressBar");
-    this.budgetAlertBanner = document.getElementById("budgetAlertBanner");
-    this.alertIcon = document.getElementById("alertIcon");
-    this.alertMessage = document.getElementById("alertMessage");
-    this.budgetStatusBadge = document.getElementById("budgetStatusBadge");
-
-    // Mobile Navigation & Floating Bar Elements
-    this.tabBtnCart = document.getElementById("tabBtnCart");
-    this.tabBtnAdd = document.getElementById("tabBtnAdd");
-    this.tabBtnCatalog = document.getElementById("tabBtnCatalog");
-    this.tabCartCount = document.getElementById("tabCartCount");
-    this.mobileBottomPrice = document.getElementById("mobileBottomPrice");
-    this.btnMobileAdd = document.getElementById("btnMobileAdd");
-    this.btnMobileReceipt = document.getElementById("btnMobileReceipt");
-
-    // Item Form Elements
-    this.groceryForm = document.getElementById("groceryForm");
-    this.formTitle = document.getElementById("formTitle");
-    this.editingItemId = document.getElementById("editingItemId");
-    this.inputItemName = document.getElementById("inputItemName");
-    this.inputCategory = document.getElementById("inputCategory");
-    this.inputUnit = document.getElementById("inputUnit");
-    this.inputQty = document.getElementById("inputQty");
-    this.btnQtyMinus = document.getElementById("btnQtyMinus");
-    this.btnQtyPlus = document.getElementById("btnQtyPlus");
-    this.inputPrice = document.getElementById("inputPrice");
-    this.inputLastMonthPrice = document.getElementById("inputLastMonthPrice");
-    this.inputDiscountTiers = document.getElementById("inputDiscountTiers");
-    this.inputNotes = document.getElementById("inputNotes");
-    this.btnSaveItem = document.getElementById("btnSaveItem");
-    this.btnSaveText = document.getElementById("btnSaveText");
-    this.btnCancelEdit = document.getElementById("btnCancelEdit");
-
-    // Realtime Form Live Preview
-    this.flucPreviewCard = document.getElementById("fluctuationPreviewCard");
-    this.flucIconBox = document.getElementById("flucIconBox");
-    this.flucTitle = document.getElementById("flucTitle");
-    this.flucSub = document.getElementById("flucSub");
-    this.flucBadge = document.getElementById("flucBadge");
-    this.discountMathBox = document.getElementById("discountMathBox");
-    this.discountMathContent = document.getElementById("discountMathContent");
-    this.calcSubtotalNote = document.getElementById("calcSubtotalNote");
-    this.calcOriginalStrike = document.getElementById("calcOriginalStrike");
-    this.calcFinalItemTotal = document.getElementById("calcFinalItemTotal");
-
-    // Cart List & Controls
-    this.groceryListContainer = document.getElementById("groceryListContainer");
-    this.emptyState = document.getElementById("emptyState");
-    this.totalCartPrice = document.getElementById("totalCartPrice");
-    this.totalDiscountSaved = document.getElementById("totalDiscountSaved");
-    this.totalItemsCount = document.getElementById("totalItemsCount");
-    this.searchCart = document.getElementById("searchCart");
-    this.filterCategory = document.getElementById("filterCategory");
-    this.btnPrintReceipt = document.getElementById("btnPrintReceipt");
-    this.btnClearAll = document.getElementById("btnClearAll");
-    this.quickCatalogGrid = document.getElementById("quickCatalogGrid");
-
-    // Receipt Modal Elements
-    this.receiptModal = document.getElementById("receiptModal");
-    this.btnCloseReceipt = document.getElementById("btnCloseReceipt");
-    this.btnDoPrint = document.getElementById("btnDoPrint");
-    this.receiptUser = document.getElementById("receiptUser");
-    this.receiptDate = document.getElementById("receiptDate");
-    this.receiptItemsTable = document.getElementById("receiptItemsTable");
-    this.rBudget = document.getElementById("rBudget");
-    this.rGross = document.getElementById("rGross");
-    this.rDiscount = document.getElementById("rDiscount");
-    this.rNet = document.getElementById("rNet");
-    this.rRemaining = document.getElementById("rRemaining");
-  }
-
-  // ==================== EVENT LISTENERS ====================
-  initEventListeners() {
-    // Auth events
-    this.btnSubmitLogin.addEventListener("click", () => this.handleUsernameLogin());
-    this.inputUsername.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.handleUsernameLogin();
-    });
-    this.btnGoogleLogin.addEventListener("click", () => this.handleGoogleLoginFirebase());
-    this.btnCloseGoogleModal.addEventListener("click", () => this.closeGoogleModal());
-    this.gAccDemo1.addEventListener("click", () => this.handleCustomGoogleSelect("Budi Santoso", "budi.santoso@gmail.com", "👨"));
-    this.gAccDemo2.addEventListener("click", () => this.handleCustomGoogleSelect("Siti Rahma", "siti.rahma99@gmail.com", "👩"));
-    this.btnLogout.addEventListener("click", () => this.handleLogout());
-
-    // Mobile Segmented Navigation Tabs
-    if (this.tabBtnCart) this.tabBtnCart.addEventListener("click", () => this.switchMobileTab("cart"));
-    if (this.tabBtnAdd) this.tabBtnAdd.addEventListener("click", () => this.switchMobileTab("add"));
-    if (this.tabBtnCatalog) this.tabBtnCatalog.addEventListener("click", () => this.switchMobileTab("catalog"));
-
-    // Mobile bottom bar quick actions
-    if (this.btnMobileAdd) this.btnMobileAdd.addEventListener("click", () => this.switchMobileTab("add"));
-    if (this.btnMobileReceipt) this.btnMobileReceipt.addEventListener("click", () => this.openReceiptModal());
-
-    // Budget Cap input
-    this.inputBudgetCap.addEventListener("input", () => {
-      const val = parseFloat(this.inputBudgetCap.value) || 0;
-      this.budgetCap = val;
-      this.saveBudget();
-      this.renderBudgetSafetyCap();
-    });
-
-    // Form Live Quantity & Price Calculation Listeners
-    this.btnQtyMinus.addEventListener("click", () => {
-      let current = parseFloat(this.inputQty.value) || 1;
-      if (current > 1) {
-        this.inputQty.value = current - 1;
-      } else if (current > 0.1) {
-        this.inputQty.value = Math.max(0.1, (current - 0.1).toFixed(1));
-      }
-      this.updateLiveFormCalculations();
-    });
-
-    this.btnQtyPlus.addEventListener("click", () => {
-      let current = parseFloat(this.inputQty.value) || 0;
-      this.inputQty.value = current + 1;
-      this.updateLiveFormCalculations();
-    });
-
-    this.inputQty.addEventListener("input", () => this.updateLiveFormCalculations());
-    this.inputPrice.addEventListener("input", () => this.updateLiveFormCalculations());
-    this.inputLastMonthPrice.addEventListener("input", () => this.updateLiveFormCalculations());
-    this.inputDiscountTiers.addEventListener("input", () => this.updateLiveFormCalculations());
-
-    // Preset discount chips
-    document.querySelectorAll(".chip").forEach(chip => {
-      chip.addEventListener("click", (e) => {
-        const tier = e.target.getAttribute("data-tier");
-        if (tier === "0") {
-          this.inputDiscountTiers.value = "";
-        } else {
-          this.inputDiscountTiers.value = tier;
-        }
-        this.updateLiveFormCalculations();
-      });
-    });
-
-    // Form Submit (Save / Edit)
-    this.groceryForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      this.handleSaveItem();
-    });
-
-    this.btnCancelEdit.addEventListener("click", () => {
-      this.resetForm();
-      this.switchMobileTab("cart");
-    });
-
-    // Cart Search & Filter
-    this.searchCart.addEventListener("input", () => this.renderGroceryList());
-    this.filterCategory.addEventListener("change", () => this.renderGroceryList());
-
-    // Clear All
-    this.btnClearAll.addEventListener("click", () => {
-      if (this.items.length === 0) return;
-      if (confirm("Apakah Anda yakin ingin mengosongkan seluruh daftar belanja?")) {
-        this.items = [];
-        this.saveItems();
-        this.renderGroceryList();
-        this.renderBudgetSafetyCap();
-      }
-    });
-
-    // Receipt modal
-    this.btnPrintReceipt.addEventListener("click", () => this.openReceiptModal());
-    this.btnCloseReceipt.addEventListener("click", () => this.closeReceiptModal());
-    this.btnDoPrint.addEventListener("click", () => window.print());
-  }
-
-  // ==================== MOBILE TAB SWITCHER ====================
-  switchMobileTab(tabName) {
-    this.currentMobileTab = tabName;
-    document.body.classList.remove("tab-active-cart", "tab-active-add", "tab-active-catalog");
-    document.body.classList.add(`tab-active-${tabName}`);
-
-    if (this.tabBtnCart && this.tabBtnAdd && this.tabBtnCatalog) {
-      this.tabBtnCart.classList.toggle("active", tabName === "cart");
-      this.tabBtnAdd.classList.toggle("active", tabName === "add");
-      this.tabBtnCatalog.classList.toggle("active", tabName === "catalog");
-    }
-
-    window.scrollTo({ top: 100, behavior: "smooth" });
-  }
-
-  // ==================== CLOUD SYNC & AUTHENTICATION ====================
-  loadState() {
-    this.switchMobileTab("cart");
-
-    // 1. Check Locked Single-User
-    const savedUserJson = localStorage.getItem(this.storageKeyUser);
-    if (savedUserJson) {
-      try {
-        const savedUser = JSON.parse(savedUserJson);
-        this.currentUser = savedUser;
-        this.showActiveUserSession(savedUser);
-        this.authOverlay.classList.add("hidden");
-      } catch (e) {
-        this.showAuthModal(null);
-      }
-    } else {
-      this.showAuthModal(null);
-    }
-
-    // 2. Load Budget
-    const savedBudget = localStorage.getItem(this.storageKeyBudget);
-    if (savedBudget) {
-      this.budgetCap = parseFloat(savedBudget) || 500000;
-      this.inputBudgetCap.value = this.budgetCap;
-    }
-
-    // 3. Load Items from Local Storage first
-    const savedItemsJson = localStorage.getItem(this.storageKeyItems);
-    if (savedItemsJson) {
-      try {
-        this.items = JSON.parse(savedItemsJson);
-      } catch (e) {
-        this.items = [...INITIAL_ITEMS];
-      }
-    } else {
-      this.items = [...INITIAL_ITEMS];
-      this.saveItems();
-    }
-
-    // 4. Connect Cloud Firestore Realtime Sync
-    this.initFirestoreRealtimeSync();
-
-    // Render components
-    this.renderQuickCatalog();
-    this.renderGroceryList();
-    this.renderBudgetSafetyCap();
-    this.updateLiveFormCalculations();
-    this.updateCloudStatusIndicator();
-  }
-
-  updateCloudStatusIndicator() {
-    if (!this.cloudStatusBadge) return;
-    if (this.isCloudSyncActive) {
-      this.cloudStatusBadge.className = "cloud-status-badge";
-      this.cloudStatusBadge.innerHTML = `<span class="cloud-pulse-dot"></span><span>Cloud Firebase (grocery1n)</span>`;
-      this.cloudStatusBadge.title = "Tersambung ke Cloud Firestore Database & Hosting Firebase";
-    } else {
-      this.cloudStatusBadge.className = "cloud-status-badge offline";
-      this.cloudStatusBadge.innerHTML = `<span>📱 Mode Lokal</span>`;
-      this.cloudStatusBadge.title = "Mode penyimpanan offline/lokal aktif";
-    }
-  }
-
-  // FIRESTORE REALTIME SYNC (Cross-Device Sync: PC & Phone)
-  initFirestoreRealtimeSync() {
-    if (!this.firestoreDb) return;
-
-    try {
-      // Listen to real-time updates from Firestore collection 'groceries_shared'
-      this.firestoreUnsubscribe = this.firestoreDb.collection("groceries_shared")
-        .doc("current_cart")
-        .onSnapshot((doc) => {
-          if (doc.exists) {
-            const data = doc.data();
-            if (data && Array.isArray(data.items)) {
-              this.items = data.items;
-              localStorage.setItem(this.storageKeyItems, JSON.stringify(this.items));
-              this.renderGroceryList();
-            }
-            if (data && typeof data.budgetCap === 'number') {
-              this.budgetCap = data.budgetCap;
-              this.inputBudgetCap.value = this.budgetCap;
-              localStorage.setItem(this.storageKeyBudget, this.budgetCap.toString());
-            }
-            this.renderBudgetSafetyCap();
-            this.isCloudSyncActive = true;
-            this.updateCloudStatusIndicator();
-          }
-        }, (err) => {
-          console.warn("Firestore onSnapshot error (continuing with local data):", err);
-          this.isCloudSyncActive = false;
-          this.updateCloudStatusIndicator();
-        });
-    } catch (e) {
-      console.warn("Could not bind Firestore listener:", e);
-    }
-  }
-
-  showAuthModal(existingUser) {
-    this.authOverlay.classList.remove("hidden");
-    if (existingUser) {
-      this.singleUserNotice.classList.add("locked");
-      this.singleUserNoticeDesc.innerHTML = `Profil pengguna tunggal terdaftar: <strong>${existingUser.username}</strong> (${existingUser.authType}). Multi-user ditolak demi integritas anggaran pribadi.`;
-      this.inputUsername.value = existingUser.username;
-    } else {
-      this.singleUserNotice.classList.remove("locked");
-      this.singleUserNoticeDesc.textContent = "Aplikasi diamankan untuk satu profil pengguna aktif per perangkat demi integritas anggaran pribadi.";
-      this.inputUsername.value = "";
-    }
-  }
-
-  handleUsernameLogin() {
-    const username = this.inputUsername.value.trim();
-    if (!username) {
-      alert("Silakan masukkan username terlebih dahulu!");
-      this.inputUsername.focus();
-      return;
-    }
-
-    // Single-user rule check
-    const lockedUserJson = localStorage.getItem(this.storageKeyUser);
-    if (lockedUserJson) {
-      const lockedUser = JSON.parse(lockedUserJson);
-      if (lockedUser.username.toLowerCase() !== username.toLowerCase()) {
-        alert(
-          `⛔ AKSES DITOLAK (Single-User Enforcement):\n\n` +
-          `Aplikasi GroceryIn dikonfigurasi KHUSUS Pengguna Tunggal.\n` +
-          `Saat ini perangkat ini telah terikat dengan profil pengguna: "${lockedUser.username}".\n\n` +
-          `Multi-user login tidak diizinkan. Silakan login sebagai "${lockedUser.username}" atau lakukan reset akun terlebih dahulu.`
-        );
-        this.inputUsername.value = lockedUser.username;
-        return;
-      }
-    }
-
-    const userObj = {
-      username: username,
-      authType: "Username",
-      avatar: "👤",
-      loginTime: new Date().toISOString()
-    };
-
-    localStorage.setItem(this.storageKeyUser, JSON.stringify(userObj));
-    this.currentUser = userObj;
-    this.showActiveUserSession(userObj);
-    this.authOverlay.classList.add("hidden");
-
-    // Sync user session to Firestore
-    if (this.firestoreDb) {
-      this.firestoreDb.collection("users").doc(username).set({
-        ...userObj,
-        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(() => {});
-    }
-  }
-
-  // REAL FIREBASE GOOGLE AUTHENTICATION
-  async handleGoogleLoginFirebase() {
-    if (this.firebaseAuth && typeof firebase.auth.GoogleAuthProvider !== 'undefined') {
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        
-        // Trigger popup
-        const result = await this.firebaseAuth.signInWithPopup(provider);
-        const gUser = result.user;
-
-        const userObj = {
-          username: gUser.displayName || gUser.email.split('@')[0],
-          email: gUser.email,
-          authType: "Google (Firebase)",
-          avatar: gUser.photoURL || "👤",
-          uid: gUser.uid,
-          loginTime: new Date().toISOString()
-        };
-
-        // Enforce single-user rule
-        const lockedUserJson = localStorage.getItem(this.storageKeyUser);
-        if (lockedUserJson) {
-          const lockedUser = JSON.parse(lockedUserJson);
-          if (lockedUser.email && lockedUser.email.toLowerCase() !== userObj.email.toLowerCase()) {
-            alert(
-              `⛔ AKSES DITOLAK (Single-User Lock):\n\n` +
-              `Aplikasi telah terkunci untuk akun Google: "${lockedUser.email}".\n` +
-              `Akun multi-user lain tidak diizinkan login bersamaan.`
-            );
-            await this.firebaseAuth.signOut();
-            return;
-          }
-        }
-
-        localStorage.setItem(this.storageKeyUser, JSON.stringify(userObj));
-        this.currentUser = userObj;
-        this.showActiveUserSession(userObj);
-        this.authOverlay.classList.add("hidden");
-
-        // Sync to Firestore
-        if (this.firestoreDb) {
-          this.firestoreDb.collection("users").doc(gUser.uid).set({
-            ...userObj,
-            lastActive: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true }).catch(() => {});
-        }
-        return;
-      } catch (authErr) {
-        console.warn("Firebase Google popup error or domain not yet whitelisted, opening fallback modal:", authErr);
-        // Fallback to simulated accounts if Google Popup is restricted on local file
-        this.openGoogleModal();
-      }
-    } else {
-      this.openGoogleModal();
-    }
-  }
-
-  handleCustomGoogleSelect(name, email, avatar = "👤") {
-    const lockedUserJson = localStorage.getItem(this.storageKeyUser);
-    if (lockedUserJson) {
-      const lockedUser = JSON.parse(lockedUserJson);
-      if (lockedUser.email && lockedUser.email.toLowerCase() !== email.toLowerCase()) {
-        alert(
-          `⛔ AKSES DITOLAK (Single-User Enforcement):\n\n` +
-          `Aplikasi GroceryIn telah terkunci untuk akun Google: "${lockedUser.email}".\n` +
-          `Akun multi-user lain tidak diizinkan login bersamaan.`
-        );
-        this.closeGoogleModal();
-        return;
-      }
-    }
-
-    const userObj = {
-      username: name,
-      email: email,
-      authType: "Google Sign-In",
-      avatar: avatar,
-      loginTime: new Date().toISOString()
-    };
-
-    localStorage.setItem(this.storageKeyUser, JSON.stringify(userObj));
-    this.currentUser = userObj;
-    this.closeGoogleModal();
-    this.showActiveUserSession(userObj);
-    this.authOverlay.classList.add("hidden");
-
-    if (this.firestoreDb) {
-      this.firestoreDb.collection("users").doc(name).set({
-        ...userObj,
-        lastActive: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(() => {});
-    }
-  }
-
-  showActiveUserSession(user) {
-    this.displayName.textContent = user.username;
-    if (user.avatar && user.avatar.startsWith("http")) {
-      this.userAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width: 20px; height: 20px; border-radius: 50%;">`;
-    } else {
-      this.userAvatar.textContent = user.avatar || "👤";
-    }
-  }
-
-  async handleLogout() {
-    const choice = confirm("Apakah Anda ingin keluar dari sesi akun tunggal GroceryIn?");
-    if (choice) {
-      if (this.firebaseAuth) {
-        try { await this.firebaseAuth.signOut(); } catch (e) {}
-      }
-      this.currentUser = null;
-      this.authOverlay.classList.remove("hidden");
-      const locked = localStorage.getItem(this.storageKeyUser);
-      if (locked) {
-        this.showAuthModal(JSON.parse(locked));
-      } else {
-        this.showAuthModal(null);
-      }
-    }
-  }
-
-  openGoogleModal() {
-    this.googleModal.classList.remove("hidden");
-  }
-
-  closeGoogleModal() {
-    this.googleModal.classList.add("hidden");
-  }
-
-  // ==================== TIERED DISCOUNT MATHEMATICAL LOGIC ====================
-  calculateTieredDiscount(grossPrice, tierInput) {
-    if (!tierInput || grossPrice <= 0) {
-      return {
-        finalPrice: grossPrice,
-        totalSaved: 0,
-        effectivePercent: 0,
-        tiers: [],
-        steps: []
-      };
-    }
-
-    let rawTiers = [];
-    if (Array.isArray(tierInput)) {
-      rawTiers = tierInput;
-    } else {
-      rawTiers = tierInput
-        .replace(/%/g, "")
-        .split(/[+,/ ]+/)
-        .map(t => parseFloat(t.trim()))
-        .filter(t => !isNaN(t) && t > 0);
-    }
-
-    if (rawTiers.length === 0) {
-      return {
-        finalPrice: grossPrice,
-        totalSaved: 0,
-        effectivePercent: 0,
-        tiers: [],
-        steps: []
-      };
-    }
-
-    let currentPrice = grossPrice;
-    const steps = [];
-
-    rawTiers.forEach((discPct, idx) => {
-      const clampedDisc = Math.min(100, Math.max(0, discPct));
-      const potongan = (currentPrice * clampedDisc) / 100;
-      const priceAfter = currentPrice - potongan;
-
-      steps.push({
-        stepNumber: idx + 1,
-        percent: clampedDisc,
-        baseForStep: currentPrice,
-        deduction: potongan,
-        priceAfter: priceAfter
-      });
-
-      currentPrice = priceAfter;
-    });
-
-    const totalSaved = grossPrice - currentPrice;
-    const effectivePercent = grossPrice > 0 ? (totalSaved / grossPrice) * 100 : 0;
-
-    return {
-      finalPrice: Math.round(currentPrice),
-      totalSaved: Math.round(totalSaved),
-      effectivePercent: parseFloat(effectivePercent.toFixed(1)),
-      tiers: rawTiers,
-      steps: steps
-    };
-  }
-
-  // ==================== PRICE FLUCTUATION DETECTION ====================
-  detectPriceFluctuation(currentPrice, lastMonthPrice) {
-    if (!lastMonthPrice || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
-      return {
-        status: "EQUAL",
-        arrow: "=",
-        diffNominal: 0,
-        diffPercent: 0,
-        cssClass: "fluc-equal",
-        label: "= Stabil (Tidak ada data)"
-      };
-    }
-
-    const diff = currentPrice - lastMonthPrice;
-    const diffPercent = parseFloat(((diff / lastMonthPrice) * 100).toFixed(1));
-
-    if (diff > 0) {
-      return {
-        status: "UP",
-        arrow: "↑",
-        diffNominal: diff,
-        diffPercent: Math.abs(diffPercent),
-        cssClass: "fluc-up",
-        label: `↑ Naik ${this.formatRupiah(diff)} (+${Math.abs(diffPercent)}%)`
-      };
-    } else if (diff < 0) {
-      return {
-        status: "DOWN",
-        arrow: "↓",
-        diffNominal: Math.abs(diff),
-        diffPercent: Math.abs(diffPercent),
-        cssClass: "fluc-down",
-        label: `↓ Turun ${this.formatRupiah(Math.abs(diff))} (-${Math.abs(diffPercent)}%)`
-      };
-    } else {
-      return {
-        status: "EQUAL",
-        arrow: "=",
-        diffNominal: 0,
-        diffPercent: 0,
-        cssClass: "fluc-equal",
-        label: `= Setara bulan lalu`
-      };
-    }
-  }
-
-  // ==================== REALTIME LIVE FORM CALCULATIONS ====================
-  updateLiveFormCalculations() {
-    const qty = parseFloat(this.inputQty.value) || 0;
-    const price = parseFloat(this.inputPrice.value) || 0;
-    const lastMonthPrice = parseFloat(this.inputLastMonthPrice.value) || 0;
-    const discountRaw = this.inputDiscountTiers.value.trim();
-
-    // 1. Calculate Gross & Tiered Discounts
-    const grossItemTotal = qty * price;
-    const discountResult = this.calculateTieredDiscount(grossItemTotal, discountRaw);
-
-    // 2. Update Live Subtotal Display
-    this.calcSubtotalNote.textContent = `${qty} x ${this.formatRupiah(price)}`;
-    if (discountResult.totalSaved > 0) {
-      this.calcOriginalStrike.textContent = this.formatRupiah(grossItemTotal);
-      this.calcFinalItemTotal.textContent = this.formatRupiah(discountResult.finalPrice);
-    } else {
-      this.calcOriginalStrike.textContent = "";
-      this.calcFinalItemTotal.textContent = this.formatRupiah(grossItemTotal);
-    }
-
-    // 3. Update Discount Mathematical Breakdown
-    if (discountResult.steps.length > 0 && grossItemTotal > 0) {
-      let breakdownHtml = `<div class="math-step"><strong>Harga Awal:</strong> ${this.formatRupiah(grossItemTotal)}</div>`;
-      discountResult.steps.forEach(s => {
-        breakdownHtml += `
-          <div class="math-step">
-            👉 Diskon ke-${s.stepNumber} (${s.percent}%): Potongan ${this.formatRupiah(s.deduction)} &rarr; Sisa ${this.formatRupiah(s.priceAfter)}
-          </div>
-        `;
-      });
-      breakdownHtml += `
-        <div class="math-step" style="margin-top: 4px; color: #15803d; font-weight: 700;">
-          🎉 Total Hemat: ${this.formatRupiah(discountResult.totalSaved)} (Efektif ${discountResult.effectivePercent}%, BUKAN flat ${discountResult.tiers.reduce((a,b)=>a+b, 0)}%)
-        </div>
-      `;
-      this.discountMathContent.innerHTML = breakdownHtml;
-    } else {
-      this.discountMathContent.textContent = "Tidak ada promo aktif. Total dihitung normal (Kuantitas x Harga Satuan).";
-    }
-
-    // 4. Update Realtime Price Fluctuation Preview Box
-    const fluc = this.detectPriceFluctuation(price, lastMonthPrice);
-    this.flucPreviewCard.className = `fluctuation-preview-card state-${fluc.status.toLowerCase()}`;
-
-    if (fluc.status === "UP") {
-      this.flucIconBox.textContent = "🔺";
-      this.flucTitle.innerHTML = `<span style="color: #b91c1c;">Harga Naik Dibanding Bulan Lalu!</span>`;
-      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (+${this.formatRupiah(fluc.diffNominal)})`;
-      this.flucBadge.className = "fluc-badge badge-up";
-      this.flucBadge.textContent = fluc.label;
-    } else if (fluc.status === "DOWN") {
-      this.flucIconBox.textContent = "🔻";
-      this.flucTitle.innerHTML = `<span style="color: #047857;">Harga Turun Lebih Murah!</span>`;
-      this.flucSub.textContent = `Bulan lalu: ${this.formatRupiah(lastMonthPrice)} | Saat ini: ${this.formatRupiah(price)} (Hemat ${this.formatRupiah(fluc.diffNominal)})`;
-      this.flucBadge.className = "fluc-badge badge-down";
-      this.flucBadge.textContent = fluc.label;
-    } else {
-      this.flucIconBox.textContent = "⚖️";
-      this.flucTitle.textContent = "Harga Stabil / Tidak Ada Fluktuasi";
-      if (lastMonthPrice > 0) {
-        this.flucSub.textContent = `Harga tepat sama dengan bulan lalu: ${this.formatRupiah(lastMonthPrice)}.`;
-      } else {
-        this.flucSub.textContent = "Masukkan harga bulan lalu untuk melihat analisa perbandingan otomatis.";
-      }
-      this.flucBadge.className = "fluc-badge badge-equal";
-      this.flucBadge.textContent = fluc.label;
-    }
-  }
-
-  // ==================== BUDGET SAFETY CAP CONTROLLER ====================
-  renderBudgetSafetyCap() {
-    let totalCartNet = 0;
-    let totalGross = 0;
-
-    this.items.forEach(item => {
-      const gross = item.quantity * item.price;
-      const discount = this.calculateTieredDiscount(gross, item.discountTiers);
-      totalGross += gross;
-      totalCartNet += discount.finalPrice;
-    });
-
-    const totalSaved = totalGross - totalCartNet;
-    const remaining = this.budgetCap - totalCartNet;
-    const spentPercent = this.budgetCap > 0 ? (totalCartNet / this.budgetCap) * 100 : 0;
-    const clampedWidth = Math.min(100, Math.max(0, spentPercent));
-
-    // Update displays
-    this.budgetSpentText.textContent = this.formatRupiah(totalCartNet);
-    this.budgetPercentText.textContent = `${spentPercent.toFixed(1)}%`;
-    this.budgetRemainingText.textContent = this.formatRupiah(remaining);
-    this.budgetProgressBar.style.width = `${clampedWidth}%`;
-
-    // Overview stats
-    this.totalCartPrice.textContent = this.formatRupiah(totalCartNet);
-    this.totalDiscountSaved.textContent = this.formatRupiah(totalSaved);
-    this.totalItemsCount.textContent = `${this.items.length} Item`;
-
-    // Mobile specific indicators
-    if (this.tabCartCount) this.tabCartCount.textContent = this.items.length;
-    if (this.mobileBottomPrice) this.mobileBottomPrice.textContent = this.formatRupiah(totalCartNet);
-
-    // Remove existing state classes
-    this.budgetCard.classList.remove("status-safe", "status-warning", "status-danger");
-    this.budgetProgressBar.classList.remove("safe", "warning", "danger");
-    this.budgetAlertBanner.classList.remove("safe", "warning", "danger");
-
-    // DYNAMIC DANGER CAP LOGIC
-    if (spentPercent > 100) {
-      this.budgetCard.classList.add("status-danger");
-      this.budgetProgressBar.classList.add("danger");
-      this.budgetAlertBanner.classList.add("danger");
-      this.alertIcon.textContent = "🚨";
-      this.alertMessage.innerHTML = `<strong>BAHAYA: Anggaran Terlampaui!</strong> Total belanjaan melebihi batas uang dompet sebesar <strong>${this.formatRupiah(Math.abs(remaining))}</strong> (${spentPercent.toFixed(1)}%). Segera kurangi item sebelum menuju kasir!`;
-      this.budgetStatusBadge.className = "badge-percent";
-      this.budgetStatusBadge.style.background = "#fee2e2";
-      this.budgetStatusBadge.style.color = "#dc2626";
-      this.budgetStatusBadge.textContent = "⚠️ Over Budget!";
-    } else if (spentPercent >= 85) {
-      this.budgetCard.classList.add("status-danger");
-      this.budgetProgressBar.classList.add("danger");
-      this.budgetAlertBanner.classList.add("danger");
-      this.alertIcon.textContent = "⚠️";
-      this.alertMessage.innerHTML = `<strong>PERINGATAN KRITIS:</strong> Saldo saku hampir habis! Anda telah memakai <strong>${spentPercent.toFixed(1)}%</strong> dari limit dompet. Sisa uang tunai tinggal ${this.formatRupiah(remaining)}.`;
-      this.budgetStatusBadge.className = "badge-percent";
-      this.budgetStatusBadge.style.background = "#fffbeb";
-      this.budgetStatusBadge.style.color = "#b45309";
-      this.budgetStatusBadge.textContent = "Hampir Penuh";
-    } else if (spentPercent >= 65) {
-      this.budgetCard.classList.add("status-warning");
-      this.budgetProgressBar.classList.add("warning");
-      this.budgetAlertBanner.classList.add("warning");
-      this.alertIcon.textContent = "⚡";
-      this.alertMessage.textContent = `Peringatan: Belanjaan telah mencapai ${spentPercent.toFixed(1)}% batas dompet. Pantau item tambahan berikutnya.`;
-      this.budgetStatusBadge.className = "badge-status-safe";
-      this.budgetStatusBadge.textContent = "Waspada";
-    } else {
-      this.budgetCard.classList.add("status-safe");
-      this.budgetProgressBar.classList.add("safe");
-      this.budgetAlertBanner.classList.add("safe");
-      this.alertIcon.textContent = "✅";
-      this.alertMessage.textContent = "Pengeluaran belanja Anda dalam batas aman dan terkendali.";
-      this.budgetStatusBadge.className = "badge-status-safe";
-      this.budgetStatusBadge.textContent = "Aman";
-    }
-  }
-
-  // ==================== ITEM CRUD OPERATIONS ====================
-  handleSaveItem() {
-    const name = this.inputItemName.value.trim();
-    const category = this.inputCategory.value;
-    const unit = this.inputUnit.value;
-    const qty = parseFloat(this.inputQty.value) || 1;
-    const price = parseFloat(this.inputPrice.value) || 0;
-    const lastMonthPrice = parseFloat(this.inputLastMonthPrice.value) || 0;
-    const discountTiers = this.inputDiscountTiers.value.trim();
-    const notes = this.inputNotes.value.trim();
-
-    if (!name) {
-      alert("Nama barang belanjaan wajib diisi!");
-      this.inputItemName.focus();
-      return;
-    }
-
-    if (price <= 0) {
-      alert("Harga satuan saat ini harus lebih besar dari Rp 0!");
-      this.inputPrice.focus();
-      return;
-    }
-
-    if (this.editingId) {
-      const index = this.items.findIndex(it => it.id === this.editingId);
-      if (index !== -1) {
-        this.items[index] = {
-          ...this.items[index],
-          name,
-          category,
-          unit,
-          quantity: qty,
-          price,
-          lastMonthPrice,
-          discountTiers,
-          notes,
-          updatedAt: new Date().toISOString()
-        };
-      }
-      this.editingId = null;
-    } else {
-      const newItem = {
-        id: "item-" + Date.now(),
-        name,
-        category,
-        unit,
-        quantity: qty,
-        price,
-        lastMonthPrice,
-        discountTiers,
-        notes,
-        isBought: false,
-        createdAt: new Date().toISOString()
-      };
-      this.items.unshift(newItem);
-    }
-
-    this.saveItems();
-    this.resetForm();
-    this.renderGroceryList();
-    this.renderBudgetSafetyCap();
-
-    // Auto-switch to cart tab on mobile for seamless flow
-    if (window.innerWidth <= 840) {
-      this.switchMobileTab("cart");
-    }
-  }
-
-  editItem(id) {
-    const item = this.items.find(it => it.id === id);
-    if (!item) return;
-
-    this.editingId = item.id;
-    this.formTitle.textContent = "✏️ Edit: " + item.name;
-    this.btnSaveText.textContent = "💾 Simpan Perubahan";
-    this.btnCancelEdit.classList.remove("hidden");
-
-    this.inputItemName.value = item.name;
-    this.inputCategory.value = item.category;
-    this.inputUnit.value = item.unit;
-    this.inputQty.value = item.quantity;
-    this.inputPrice.value = item.price;
-    this.inputLastMonthPrice.value = item.lastMonthPrice || "";
-    this.inputDiscountTiers.value = item.discountTiers || "";
-    this.inputNotes.value = item.notes || "";
-
-    this.updateLiveFormCalculations();
-
-    if (window.innerWidth <= 840) {
-      this.switchMobileTab("add");
-    }
-    this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
-  deleteItem(id) {
-    const item = this.items.find(it => it.id === id);
-    if (!item) return;
-
-    if (confirm(`Hapus "${item.name}" dari daftar belanja?`)) {
-      this.items = this.items.filter(it => it.id !== id);
-      if (this.editingId === id) this.resetForm();
-      this.saveItems();
-      this.renderGroceryList();
-      this.renderBudgetSafetyCap();
-    }
-  }
-
-  toggleBought(id) {
-    const item = this.items.find(it => it.id === id);
-    if (!item) return;
-    item.isBought = !item.isBought;
-    this.saveItems();
-    this.renderGroceryList();
-  }
-
-  resetForm() {
-    this.editingId = null;
-    this.formTitle.textContent = "📝 Catat / Tambah Belanjaan";
-    this.btnSaveText.textContent = "➕ Masukkan ke Keranjang";
-    this.btnCancelEdit.classList.add("hidden");
-    this.groceryForm.reset();
-    this.inputQty.value = 1;
-    this.inputDiscountTiers.value = "";
-    this.updateLiveFormCalculations();
-  }
-
-  // ==================== RENDERING LIST & CATALOG ====================
-  renderGroceryList() {
-    const query = this.searchCart.value.trim().toLowerCase();
-    const cat = this.filterCategory.value;
-
-    const filtered = this.items.filter(it => {
-      const matchSearch = it.name.toLowerCase().includes(query) || (it.notes && it.notes.toLowerCase().includes(query));
-      const matchCat = cat === "ALL" || it.category === cat;
-      return matchSearch && matchCat;
-    });
-
-    if (filtered.length === 0) {
-      this.groceryListContainer.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <h3>Tidak ada barang yang cocok</h3>
-          <p>Coba gunakan kata kunci pencarian lain atau pilih kategori Semua.</p>
-        </div>
-      `;
-      return;
-    }
-
-    let html = "";
-    filtered.forEach(it => {
-      const gross = it.quantity * it.price;
-      const discount = this.calculateTieredDiscount(gross, it.discountTiers);
-      const fluc = this.detectPriceFluctuation(it.price, it.lastMonthPrice);
-
-      let flucPillHtml = "";
-      if (fluc.status === "UP") {
-        flucPillHtml = `<span class="price-fluc-pill fluc-up" title="Harga naik dari bulan lalu ${this.formatRupiah(it.lastMonthPrice)}">↑ +${this.formatRupiah(fluc.diffNominal)} (+${fluc.diffPercent}%)</span>`;
-      } else if (fluc.status === "DOWN") {
-        flucPillHtml = `<span class="price-fluc-pill fluc-down" title="Harga turun dari bulan lalu ${this.formatRupiah(it.lastMonthPrice)}">↓ -${this.formatRupiah(fluc.diffNominal)} (-${fluc.diffPercent}%)</span>`;
-      } else {
-        flucPillHtml = `<span class="price-fluc-pill fluc-equal" title="Harga stabil setara bulan lalu">= Stabil</span>`;
-      }
-
-      let discountPillHtml = "";
-      if (discount.totalSaved > 0) {
-        discountPillHtml = `<span class="item-discount-pill" title="Diskon bertingkat hemat ${this.formatRupiah(discount.totalSaved)}">Promo ${it.discountTiers}% (-${this.formatRupiah(discount.totalSaved)})</span>`;
-      }
-
-      html += `
-        <div class="grocery-item-card ${it.isBought ? 'is-bought' : ''}" data-id="${it.id}">
-          <div class="item-left-col">
-            <input type="checkbox" class="item-checkbox" ${it.isBought ? 'checked' : ''} onchange="app.toggleBought('${it.id}')" title="Tandai sudah dibeli">
-            <div class="item-main-info">
-              <div class="item-title-row">
-                <span class="item-title">${this.escapeHtml(it.name)}</span>
-                <span class="item-cat-badge">${it.category}</span>
-                ${flucPillHtml}
-                ${discountPillHtml}
-              </div>
-              <div class="item-details-row">
-                <span>Kuantitas: <strong>${it.quantity} ${it.unit}</strong></span>
-                <span>Harga: <strong>${this.formatRupiah(it.price)}</strong> / ${it.unit}</span>
-                ${it.lastMonthPrice ? `<span>Bulan lalu: ${this.formatRupiah(it.lastMonthPrice)}</span>` : ''}
-              </div>
-              ${it.notes ? `<div class="item-notes">💬 ${this.escapeHtml(it.notes)}</div>` : ''}
-            </div>
-          </div>
-
-          <div class="item-right-col">
-            <div class="item-pricing-box">
-              ${discount.totalSaved > 0 ? `<span class="item-original-price">${this.formatRupiah(gross)}</span>` : ''}
-              <span class="item-total-price">${this.formatRupiah(discount.finalPrice)}</span>
-            </div>
-            <div class="item-actions">
-              <button type="button" class="btn-icon" onclick="app.editItem('${it.id}')" title="Edit belanjaan">✏️</button>
-              <button type="button" class="btn-icon btn-delete" onclick="app.deleteItem('${it.id}')" title="Hapus belanjaan">🗑️</button>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-
-    this.groceryListContainer.innerHTML = html;
-  }
-
-  renderQuickCatalog() {
-    let html = "";
-    BENCHMARK_CATALOG.forEach(item => {
-      html += `
-        <div class="quick-catalog-item" onclick="app.fillFromCatalog('${item.name}')">
-          <span class="quick-icon">${item.icon}</span>
-          <div class="quick-details">
-            <span class="quick-name">${item.name}</span>
-            <span class="quick-price">${this.formatRupiah(item.currentPrice)} / ${item.unit}</span>
-            <span class="quick-benchmark">Bulan lalu: ${this.formatRupiah(item.lastMonthPrice)}</span>
-          </div>
-        </div>
-      `;
-    });
-    this.quickCatalogGrid.innerHTML = html;
-  }
-
-  fillFromCatalog(itemName) {
-    const found = BENCHMARK_CATALOG.find(i => i.name === itemName);
-    if (!found) return;
-
-    this.inputItemName.value = found.name;
-    this.inputCategory.value = found.category;
-    this.inputUnit.value = found.unit;
-    this.inputQty.value = found.defaultQty;
-    this.inputPrice.value = found.currentPrice;
-    this.inputLastMonthPrice.value = found.lastMonthPrice;
-    this.inputDiscountTiers.value = found.discount || "";
-    this.inputNotes.value = `Acuan pasar bulan lalu ${this.formatRupiah(found.lastMonthPrice)}`;
-
-    this.updateLiveFormCalculations();
-
-    if (window.innerWidth <= 840) {
-      this.switchMobileTab("add");
-    }
-    this.inputItemName.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
-  // ==================== RECEIPT PRINT ENGINE ====================
-  openReceiptModal() {
-    let totalGross = 0;
-    let totalNet = 0;
-    let totalDiscount = 0;
-
-    let itemsHtml = "";
-    this.items.forEach(it => {
-      const gross = it.quantity * it.price;
-      const disc = this.calculateTieredDiscount(gross, it.discountTiers);
-      totalGross += gross;
-      totalNet += disc.finalPrice;
-      totalDiscount += disc.totalSaved;
-
-      itemsHtml += `
-        <div class="r-item">
-          <div>
-            <strong>${this.escapeHtml(it.name)}</strong><br>
-            <small>${it.quantity} ${it.unit} x ${this.formatRupiah(it.price)}${disc.totalSaved > 0 ? ` (Disc: -${this.formatRupiah(disc.totalSaved)})` : ''}</small>
-          </div>
-          <div><strong>${this.formatRupiah(disc.finalPrice)}</strong></div>
-        </div>
-      `;
-    });
-
-    this.receiptItemsTable.innerHTML = itemsHtml || "<p>Belum ada barang di keranjang.</p>";
-    this.receiptUser.textContent = this.currentUser ? this.currentUser.username : "Pengguna Tunggal";
-    const now = new Date();
-    this.receiptDate.textContent = `${now.toLocaleDateString("id-ID")} ${now.toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}`;
-
-    this.rBudget.textContent = this.formatRupiah(this.budgetCap);
-    this.rGross.textContent = this.formatRupiah(totalGross);
-    this.rDiscount.textContent = `-${this.formatRupiah(totalDiscount)}`;
-    this.rNet.textContent = this.formatRupiah(totalNet);
-
-    const remaining = this.budgetCap - totalNet;
-    this.rRemaining.textContent = this.formatRupiah(remaining);
-    if (remaining < 0) {
-      this.rRemaining.style.color = "#dc2626";
-      this.rRemaining.textContent = `${this.formatRupiah(remaining)} (OVER LIMIT)`;
-    } else {
-      this.rRemaining.style.color = "#166534";
-    }
-
-    this.receiptModal.classList.remove("hidden");
-  }
-
-  closeReceiptModal() {
-    this.receiptModal.classList.add("hidden");
-  }
-
-  // ==================== UTILS & CLOUD PERSISTENCE ====================
-  saveItems() {
-    // 1. Save to Local Storage immediately
-    localStorage.setItem(this.storageKeyItems, JSON.stringify(this.items));
-
-    // 2. Sync to Cloud Firestore Database in real time
-    if (this.firestoreDb) {
-      this.firestoreDb.collection("groceries_shared").doc("current_cart").set({
-        items: this.items,
-        budgetCap: this.budgetCap,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedBy: this.currentUser ? this.currentUser.username : "Guest"
-      }, { merge: true }).then(() => {
-        this.isCloudSyncActive = true;
-        this.updateCloudStatusIndicator();
-      }).catch(err => {
-        console.warn("Firestore save warning (stored locally):", err);
-      });
-    }
-  }
-
-  saveBudget() {
-    localStorage.setItem(this.storageKeyBudget, this.budgetCap.toString());
-
-    if (this.firestoreDb) {
-      this.firestoreDb.collection("groceries_shared").doc("current_cart").set({
-        budgetCap: this.budgetCap,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(() => {});
-    }
-  }
-
-  formatRupiah(number) {
-    if (isNaN(number)) return "Rp 0";
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0
-    }).format(number);
-  }
-
-  escapeHtml(str) {
-    if (!str) return "";
-    return str
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-}
-
-// Global instance for inline button handlers
-let app;
-document.addEventListener("DOMContentLoaded", () => {
-  app = new GroceryInApp();
-});
-
-  </script>
+  <!-- App Script with Firebase & PWA Integration -->
+  <script src="app.js"></script>
 </body>
 </html>
