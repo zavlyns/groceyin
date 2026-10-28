@@ -1,9 +1,9 @@
 /**
  * GroceryIn PWA Service Worker
- * Provides offline capabilities & caching for aesthetic mobile experience.
+ * Provides offline capabilities & caching for mobile experience.
  */
 
-const CACHE_NAME = 'groceryin-rantau-v2';
+const CACHE_NAME = 'groceryin-rantau-v3';
 
 const STATIC_ASSETS = [
   './',
@@ -21,7 +21,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching GroceryIn aesthetic app shell');
+      console.log('[SW] Pre-caching GroceryIn app shell');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
         console.warn('[SW] Pre-cache partial warning:', err);
       });

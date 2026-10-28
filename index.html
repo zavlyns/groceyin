@@ -8,10 +8,10 @@
   
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#8C6239">
+  <meta name="theme-color" content="#0D0D0D">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GroceryIn">
   
   <!-- Icons -->
@@ -22,9 +22,9 @@
   <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- External Stylesheet (Aesthetic Cream / Soft Brown Palette) -->
+  <!-- External Stylesheet (Dark Black Background with Crimson Red Lists & Accents) -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -46,10 +46,24 @@
             <span class="store-badge-name" id="displayStoreName">Alfamart</span>
             <span class="store-badge-city" id="displayStoreCity">Bandung</span>
           </div>
+
+          <!-- User Profile Badge Pill -->
+          <div class="user-badge-pill" id="headerUserBadge" title="Profil Akun Anda">
+            <span class="user-avatar-circle" id="headerUserAvatar">👤</span>
+            <span class="user-badge-name" id="headerUserName">Akun</span>
+          </div>
         </div>
 
-        <!-- Right Side: Live Budget Pill & Log Out Button -->
+        <!-- Right Side: Install Button, Live Budget Pill & Log Out Button -->
         <div class="header-right-group">
+          <!-- Install Button in Header -->
+          <button type="button" class="btn-header-install" id="btnHeaderInstall" title="Instal Aplikasi ke Layar HP" aria-label="Instal Aplikasi">
+            <svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 7v6"/><path d="m9 10 3 3 3-3"/>
+            </svg>
+            <span class="header-install-text">Instal</span>
+          </button>
+
           <!-- Live Budget Display -->
           <div class="live-budget-pill" id="liveBudgetPill" title="Sisa Budget Belanja Anda">
             <span class="budget-label">Sisa:</span>
@@ -116,7 +130,7 @@
           <div class="list-section-header">
             <div>
               <h3>Troli Belanja Anda</h3>
-              <p>Barang yang siap dimasukkan ke keranjang kasir.</p>
+              <p>Rincian barang, satuan, kuantitas, dan diskon terpilih.</p>
             </div>
             <button type="button" class="btn-clear-list" id="btnClearList" title="Kosongkan List Belanja">
               <svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -140,7 +154,7 @@
               </svg>
             </div>
             <h4>List Belanja Masih Kosong</h4>
-            <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"Add to list"</strong> pada barang yang ingin Anda beli.</p>
+            <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"+ Add to list"</strong> untuk mengatur satuan, kuantitas, dan diskon.</p>
             <button type="button" class="btn-primary-action" id="btnGoToStore">
               <span>Ke Halaman Store</span>
             </button>
@@ -181,23 +195,23 @@
 
       </main>
 
-      <!-- ==================== LIST BOTTOM FIXED BAR (Border Hitam, Total Harga Transisi Warna & Checkout) ==================== -->
+      <!-- ==================== LIST BOTTOM FIXED BAR (Border Merah/Hitam, Total Harga Transisi & Checkout) ==================== -->
       <footer class="list-bottom-bar hidden" id="listBottomSummaryBar">
         <div class="list-summary-info">
           <span class="summary-label">Total Belanja:</span>
-          <!-- Fading color dynamic text: Green -> Yellow -> Red as budget exhausts -->
+          <!-- Dynamic budget color indicator -->
           <strong class="summary-total-price" id="listTotalPriceText">Rp 0</strong>
           <small class="summary-budget-status" id="listBudgetStatusText">Aman dalam budget</small>
         </div>
         <button type="button" class="btn-checkout-action" id="btnCheckoutList" title="Kunci List & Selesaikan Belanja">
-          <svg class="lucide-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="lucide-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 6 9 17l-5-5"/>
           </svg>
           <span>Checkout</span>
         </button>
       </footer>
 
-      <!-- ==================== FLOATING BOTTOM NAVIGATION BAR (Lucide Icons) ==================== -->
+      <!-- ==================== FLOATING BOTTOM NAVIGATION BAR ==================== -->
       <nav class="floating-bottom-nav" id="floatingBottomNav" aria-label="Menu Navigasi Bawah">
         <!-- Store Tab -->
         <button type="button" class="nav-tab-btn active" data-tab="store" id="bottomNavStore">
@@ -232,18 +246,90 @@
         </button>
       </nav>
 
-      <!-- ==================== ONBOARDING / SETUP MODAL (PEMILIHAN SUPERMARKET & BUDGET) ==================== -->
+      <!-- ==================== ONBOARDING / LOBBY SETUP MODAL ==================== -->
       <div class="setup-modal-overlay" id="setupModalOverlay">
         <div class="setup-card" id="setupCard">
           
           <div class="setup-header">
             <div class="setup-brand-icon">
-              <svg class="lucide-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="lucide-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
               </svg>
             </div>
             <h2>GroceryIn</h2>
             <p class="setup-tagline">Smart Grocery & Budget Safety Tracker Anak Rantau</p>
+          </div>
+
+          <!-- Feature PWA: "Instal aplikasi ini ke handphone" Banner di Lobby -->
+          <div class="lobby-install-card" id="lobbyInstallBanner">
+            <div class="lobby-install-icon">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/><path d="M12 7v6"/><path d="m9 10 3 3 3-3"/>
+              </svg>
+            </div>
+            <div class="lobby-install-text">
+              <strong>Instal aplikasi ini ke handphone</strong>
+              <small>Klik untuk pasang langsung di layar HP Anda</small>
+            </div>
+            <button type="button" class="btn-lobby-install-action" id="btnLobbyInstallNow">
+              <span>Instal</span>
+            </button>
+          </div>
+
+          <!-- ==================== SEBELUM MEMILIH LOKASI: PILIHAN SIGN IN ==================== -->
+          <div class="setup-auth-box" id="setupAuthBox">
+            <!-- Unauthenticated View -->
+            <div id="authUnauthenticatedView" class="auth-subview">
+              <div class="auth-section-title">
+                <svg class="lucide-icon-sm" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Sign In Akun Pengguna</span>
+              </div>
+              <p class="auth-subtitle">Masuk untuk simpan riwayat belanja & anggaran Anda.</p>
+              
+              <div class="auth-input-group">
+                <div class="auth-field-row">
+                  <input type="text" id="inputAuthUsername" class="setup-input auth-field" placeholder="Username (misal: Rian Rantau)">
+                </div>
+                <div class="auth-field-row">
+                  <input type="email" id="inputAuthEmail" class="setup-input auth-field" placeholder="Email (misal: rian@email.com)">
+                </div>
+                <button type="button" class="btn-auth-signin" id="btnSignInEmail">
+                  <span>Masuk dengan Username & Email</span>
+                </button>
+              </div>
+
+              <div class="auth-divider">
+                <span>atau</span>
+              </div>
+
+              <!-- Sign In with Google Button -->
+              <button type="button" class="btn-google-signin" id="btnSignInGoogle">
+                <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                <span>Sign In dengan Google</span>
+              </button>
+            </div>
+
+            <!-- Authenticated View (When User is Logged In) -->
+            <div id="authAuthenticatedView" class="auth-subview hidden">
+              <div class="user-profile-card">
+                <div class="user-avatar-wrap" id="userCardAvatar">
+                  <span id="userAvatarText">👤</span>
+                </div>
+                <div class="user-info-wrap">
+                  <div class="user-logged-tag">✅ Sudah Sign In</div>
+                  <strong class="user-card-name" id="userCardName">Rian Rantau</strong>
+                  <small class="user-card-email" id="userCardEmail">rian@email.com</small>
+                </div>
+                <button type="button" class="btn-switch-account" id="btnSwitchAccount" title="Ganti / Keluar Akun">Ganti</button>
+              </div>
+            </div>
           </div>
 
           <form id="setupForm" onsubmit="return false;" class="setup-form-body">
@@ -308,7 +394,7 @@
 
             <!-- 4. Tombol Confirm -->
             <button type="submit" id="btnConfirmSetup" class="btn-confirm-setup">
-              <span id="btnConfirmText">Confirm & Unduh Katalog</span>
+              <span id="btnConfirmText">Mulai Belanja & Unduh Katalog</span>
               <svg class="lucide-icon-sm" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
               </svg>
@@ -316,6 +402,295 @@
 
           </form>
 
+        </div>
+      </div>
+
+      <!-- ==================== MODAL: ATUR SATUAN, KUANTITAS & DISKON (ADD TO LIST) ==================== -->
+      <div class="modal-backdrop-custom hidden" id="addItemModalOverlay">
+        <div class="modal-bottom-sheet" id="addItemModal">
+          <div class="sheet-drag-handle"></div>
+          
+          <div class="sheet-header">
+            <div class="sheet-title-group">
+              <h3 id="addItemModalTitle">Tambah ke List Belanja</h3>
+              <p>Tentukan satuan, kuantitas, dan diskon barang.</p>
+            </div>
+            <button type="button" class="btn-modal-close" id="btnCloseAddItemModal" aria-label="Tutup">✕</button>
+          </div>
+
+          <!-- Product Preview Header -->
+          <div class="modal-product-header">
+            <img src="" alt="" id="modalProductImg" class="modal-prod-img">
+            <div class="modal-prod-info">
+              <strong id="modalProductName">Nama Barang</strong>
+              <div class="modal-prod-meta">
+                <span class="modal-prod-cat" id="modalProductCategory">Kategori</span>
+                <span class="modal-prod-base-price" id="modalProductBasePrice">Rp 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1. Tentukan Satuan yang Diinginkan -->
+          <div class="modal-config-section">
+            <label class="modal-section-label">
+              <span>📏 Pilih Satuan Ukuran:</span>
+            </label>
+            <div class="unit-chips-selector" id="unitChipsContainer">
+              <button type="button" class="unit-chip active" data-unit="pcs">pcs</button>
+              <button type="button" class="unit-chip" data-unit="kg">kg</button>
+              <button type="button" class="unit-chip" data-unit="gram">gram</button>
+              <button type="button" class="unit-chip" data-unit="liter">liter</button>
+              <button type="button" class="unit-chip" data-unit="ml">ml</button>
+              <button type="button" class="unit-chip" data-unit="pack">pack</button>
+              <button type="button" class="unit-chip" data-unit="botol">botol</button>
+              <button type="button" class="unit-chip" data-unit="ikat">ikat</button>
+              <button type="button" class="unit-chip" data-unit="custom">Lainnya...</button>
+            </div>
+            <div class="custom-unit-input-wrap hidden" id="customUnitWrap">
+              <input type="text" id="customUnitInput" class="setup-input input-sm" placeholder="Ketik satuan kustom (misal: dus, kaleng, butir)">
+            </div>
+          </div>
+
+          <!-- 2. Tentukan Quantity yang Diinginkan -->
+          <div class="modal-config-section">
+            <div class="modal-section-label-row">
+              <label class="modal-section-label">
+                <span>🔢 Tentukan Kuantitas (Quantity):</span>
+              </label>
+              <span class="selected-unit-label" id="currentSelectedUnitDisplay">pcs</span>
+            </div>
+            <div class="modal-stepper-row">
+              <button type="button" class="btn-qty-step" id="btnModalQtyMinus" aria-label="Kurangi kuantitas">−</button>
+              <input type="number" id="inputModalQuantity" class="input-modal-qty" min="1" max="999" step="1" value="1">
+              <button type="button" class="btn-qty-step" id="btnModalQtyPlus" aria-label="Tambah kuantitas">+</button>
+
+              <div class="quick-qty-chips">
+                <button type="button" class="btn-quick-qty" data-add="1">+1</button>
+                <button type="button" class="btn-quick-qty" data-add="2">+2</button>
+                <button type="button" class="btn-quick-qty" data-add="5">+5</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Tentukan Diskon (Bisa dipilih / ditentukan) -->
+          <div class="modal-config-section">
+            <div class="modal-section-label-row">
+              <label class="modal-section-label">
+                <span>🏷️ Diskon / Potongan Promo:</span>
+              </label>
+              <span class="discount-calc-preview" id="discountCalculatedPreview">-Rp 0</span>
+            </div>
+
+            <!-- Discount Mode Toggle: Persen (%) vs Nominal Rupiah (Rp) -->
+            <div class="discount-mode-tabs">
+              <button type="button" class="btn-disc-mode active" data-mode="percent" id="btnModePercent">Persen (%)</button>
+              <button type="button" class="btn-disc-mode" data-mode="nominal" id="btnModeNominal">Nominal (Rp)</button>
+            </div>
+
+            <!-- Preset Discount Chips (Persentase) -->
+            <div class="discount-presets-scroller" id="discountPresetsContainer">
+              <button type="button" class="disc-preset-chip active" data-disc="0">0% (Normal)</button>
+              <button type="button" class="disc-preset-chip" data-disc="5">5%</button>
+              <button type="button" class="disc-preset-chip" data-disc="10">10%</button>
+              <button type="button" class="disc-preset-chip" data-disc="15">15%</button>
+              <button type="button" class="disc-preset-chip" data-disc="20">20%</button>
+              <button type="button" class="disc-preset-chip" data-disc="25">25%</button>
+              <button type="button" class="disc-preset-chip" data-disc="50">50%</button>
+              <button type="button" class="disc-preset-chip" data-disc="custom">Kustom</button>
+            </div>
+
+            <!-- Custom Discount Input -->
+            <div class="custom-discount-row">
+              <div class="input-discount-wrapper">
+                <span class="disc-prefix" id="discountPrefixSymbol">%</span>
+                <input type="number" id="inputModalDiscount" class="setup-input input-disc-field" placeholder="0" min="0" max="100" value="0">
+              </div>
+              <small class="field-hint" id="discountFieldHint">Pilih dari preset di atas atau ketik nominal diskon sendiri.</small>
+            </div>
+          </div>
+
+          <!-- Calculation Summary Box -->
+          <div class="modal-summary-box">
+            <div class="modal-summary-row">
+              <span>Harga Normal:</span>
+              <span id="modalSummaryOriginalPrice">Rp 0</span>
+            </div>
+            <div class="modal-summary-row text-discount-row">
+              <span>Potongan Diskon:</span>
+              <span id="modalSummaryDiscountAmount">-Rp 0</span>
+            </div>
+            <div class="modal-summary-row modal-summary-final">
+              <span>Total Pembelian:</span>
+              <strong id="modalSummaryFinalTotal">Rp 0</strong>
+            </div>
+            <div class="modal-summary-row modal-summary-budget">
+              <span>Sisa Budget Dompet:</span>
+              <span id="modalSummaryRemainingBudget">Rp 0</span>
+            </div>
+            <div class="budget-warning-banner hidden" id="modalBudgetWarningBanner">
+              ⚠️ Melebihi sisa budget saku! Kurangi kuantitas barang ini.
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="modal-action-buttons">
+            <button type="button" class="btn-modal-cancel" id="btnCancelAddItem">Batal</button>
+            <button type="button" class="btn-modal-confirm" id="btnConfirmAddItem">
+              <span id="btnConfirmAddItemText">🛒 Tambahkan ke List</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ==================== MODAL: INSTAL APLIKASI KE HANDPHONE ==================== -->
+      <div class="modal-backdrop-custom hidden" id="installModalOverlay">
+        <div class="install-sheet-card" id="installSheetCard">
+          <button type="button" class="btn-modal-close" id="btnCloseInstallModal" aria-label="Tutup">✕</button>
+
+          <div class="install-sheet-header">
+            <div class="install-phone-graphic">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#EF4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+                <path d="M12 18h.01"/>
+                <circle cx="12" cy="9" r="2"/>
+                <path d="m9 13 3 3 3-3"/>
+              </svg>
+            </div>
+            <h3>Instal GroceryIn ke Layar Handphone</h3>
+            <p>Aplikasi akan langsung muncul di layar utama HP Anda dan dapat dibuka instan tanpa perlu browser.</p>
+          </div>
+
+          <!-- Primary Direct Install Action Button -->
+          <div class="install-primary-action-wrap">
+            <button type="button" class="btn-trigger-native-install" id="btnTriggerNativeInstall">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+              </svg>
+              <span>📲 Pasang Langsung ke Layar HP</span>
+            </button>
+            
+            <button type="button" class="btn-download-apk-shortcut" id="btnDownloadApkShortcut">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>
+              </svg>
+              <span>Unduh File Launcher / WebAPK HP</span>
+            </button>
+          </div>
+
+          <!-- Step by Step Guide Tabs -->
+          <div class="install-os-tabs">
+            <button type="button" class="os-tab-btn active" data-os="android" id="tabGuideAndroid">Android</button>
+            <button type="button" class="os-tab-btn" data-os="ios" id="tabGuideIOS">iPhone (iOS)</button>
+            <button type="button" class="os-tab-btn" data-os="qr" id="tabGuideQR">Scan QR HP</button>
+          </div>
+
+          <!-- Android Instructions -->
+          <div class="os-guide-content active" id="guideAndroidContent">
+            <ol class="install-steps-list">
+              <li>
+                <span class="step-num">1</span>
+                <div>Buka menu browser dengan mengetuk <strong>titik 3 (⋮)</strong> di pojok kanan atas Chrome / browser HP Anda.</div>
+              </li>
+              <li>
+                <span class="step-num">2</span>
+                <div>Pilih <strong>"Instal aplikasi"</strong> atau <strong>"Tambahkan ke Layar Utama" (Add to Home screen)</strong>.</div>
+              </li>
+              <li>
+                <span class="step-num">3</span>
+                <div>Klik <strong>"Instal"</strong>. Ikon GroceryIn langsung muncul di layar utama & app drawer HP Anda!</div>
+              </li>
+            </ol>
+          </div>
+
+          <!-- iOS Instructions -->
+          <div class="os-guide-content hidden" id="guideIOSContent">
+            <ol class="install-steps-list">
+              <li>
+                <span class="step-num">1</span>
+                <div>Buka di <strong>Safari</strong> iPhone Anda, lalu ketuk tombol <strong>Bagikan (Share)</strong> di bilah bawah.</div>
+              </li>
+              <li>
+                <span class="step-num">2</span>
+                <div>Gulir daftar menu ke bawah dan ketuk <strong>"Tambah ke Layar Utama" (Add to Home Screen)</strong>.</div>
+              </li>
+              <li>
+                <span class="step-num">3</span>
+                <div>Ketuk <strong>"Tambah" (Add)</strong> di pojok kanan atas. Selesai!</div>
+              </li>
+            </ol>
+          </div>
+
+          <!-- QR Code Guide (If user is viewing on Laptop/Desktop) -->
+          <div class="os-guide-content hidden" id="guideQRContent">
+            <div class="qr-guide-box">
+              <p>Arahkan kamera smartphone Anda ke QR code berikut untuk langsung membuka & menginstal di HP:</p>
+              <div class="qr-image-container" id="qrContainer">
+                <!-- Populated via JS -->
+              </div>
+              <small id="qrUrlText" class="qr-url-text">Buka di ponsel Anda</small>
+            </div>
+          </div>
+
+          <div class="install-footer-action">
+            <button type="button" class="btn-install-done" id="btnCloseInstallSuccess">Saya Mengerti</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== MODAL: GOOGLE SIGN IN SIMULATION ==================== -->
+      <div class="modal-backdrop-custom hidden" id="googleAuthModalOverlay">
+        <div class="google-auth-card" id="googleAuthCard">
+          <div class="google-auth-header">
+            <svg class="google-icon-lg" viewBox="0 0 24 24" width="32" height="32">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <h4>Pilih Akun Google</h4>
+            <p>Untuk melanjutkan ke GroceryIn Tracker</p>
+          </div>
+
+          <div class="google-accounts-list">
+            <!-- Account 1 -->
+            <div class="google-account-item" onclick="app.selectGoogleAccount('Rian Maulana', 'rian.rantau@gmail.com', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80')">
+              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" alt="Rian" class="google-acc-avatar">
+              <div class="google-acc-meta">
+                <strong>Rian Maulana</strong>
+                <span>rian.rantau@gmail.com</span>
+              </div>
+            </div>
+
+            <!-- Account 2 -->
+            <div class="google-account-item" onclick="app.selectGoogleAccount('Daffa Mahasiswa', 'daffa.student@gmail.com', 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&q=80')">
+              <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&q=80" alt="Daffa" class="google-acc-avatar">
+              <div class="google-acc-meta">
+                <strong>Daffa Mahasiswa</strong>
+                <span>daffa.student@gmail.com</span>
+              </div>
+            </div>
+
+            <!-- Account 3: Custom / New -->
+            <div class="google-account-item" id="btnCustomGoogleAccount">
+              <div class="google-acc-avatar-icon">➕</div>
+              <div class="google-acc-meta">
+                <strong>Gunakan Akun Google Lain</strong>
+                <span>Masukkan nama & email Anda</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden Form for Custom Google Account -->
+          <div class="custom-google-form hidden" id="customGoogleForm">
+            <input type="text" id="inputGoogleName" class="setup-input input-sm" placeholder="Nama Lengkap Google">
+            <input type="email" id="inputGoogleEmail" class="setup-input input-sm" placeholder="alamat@gmail.com">
+            <button type="button" class="btn-confirm-custom-google" id="btnSubmitCustomGoogle">Masuk dengan Akun Ini</button>
+          </div>
+
+          <div class="google-auth-footer">
+            <button type="button" class="btn-cancel-google" id="btnCancelGoogleAuth">Batal</button>
+          </div>
         </div>
       </div>
 
@@ -330,6 +705,10 @@
               <div class="receipt-date-row">
                 <span>Waktu:</span>
                 <span id="receiptTimestamp">27/10/2026 21:00</span>
+              </div>
+              <div class="receipt-date-row" id="receiptUserRow">
+                <span>Pelanggan:</span>
+                <span id="receiptUserName">Tamu Rantau</span>
               </div>
               <div class="receipt-dashed-line">--------------------------------</div>
             </div>

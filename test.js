@@ -60,9 +60,6 @@ function calculateTieredDiscount(grossPrice, tierInput) {
 }
 
 // 3. Price Fluctuation Detection Logic Test
-// a) ⬆ (berwarna merah), emot ini muncul bila harga produk meningkat dibanding harga bulan lalu
-// b) ⬇︎ (berwarna hijau), emot ini muncul bila harga produk menurun dibanding harga bulan lalu
-// c) = (warna kuning), emot ini muncul bila harga produk masih sama dengan bulan lalu
 function detectPriceFluctuation(currentPrice, lastMonthPrice) {
   if (!lastMonthPrice || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
     return { status: "EQUAL", emote: "=", color: "yellow", diffNominal: 0, diffPercent: 0 };
@@ -106,12 +103,25 @@ const CITY_SUPERMARKETS = {
   "Surabaya": ["Indomaret", "Alfamart", "Alfamidi", "Family Mart"]
 };
 
+// 6. Custom Unit (Satuan), Quantity & Discount Calculation Logic Test
+function calculateItemSubtotal(basePrice, unit, quantity, discountMode, discountVal) {
+  let discountPerUnit = 0;
+  if (discountMode === "percent") {
+    const pct = Math.min(100, Math.max(0, discountVal));
+    discountPerUnit = Math.round(basePrice * (pct / 100));
+  } else {
+    discountPerUnit = Math.min(basePrice, Math.max(0, discountVal));
+  }
+  const netPrice = Math.max(0, basePrice - discountPerUnit);
+  const subtotal = netPrice * quantity;
+  const totalSaved = discountPerUnit * quantity;
+  return { netPrice, subtotal, totalSaved, unit, quantity };
+}
+
 // ==================== RUNNING TESTS ====================
 console.log("=== RUNNING GROCERYIN LOGIC UNIT TESTS ===");
 
 // Test 1: Rumus Harga2 = Harga - (Diskon * Harga)
-// Contoh: Susu Ultra Milk seharga Rp 20.000 dengan diskon 15% (0.15)
-// Harga2 = 20.000 - (0.15 * 20.000) = 17.000
 const testHarga2 = calculateHarga2(20000, 0.15);
 console.log("Test 1 (Rumus Harga2 pada Rp 20.000 diskon 15%):", testHarga2);
 assert.strictEqual(testHarga2.hasDiscount, true);
@@ -164,5 +174,26 @@ assert.strictEqual(capCritical.state, "DANGER_CRITICAL");
 const capExceeded = evaluateBudgetSafetyCap(320000, 300000); // 106%
 assert.strictEqual(capExceeded.state, "DANGER_EXCEEDED");
 console.log("✔ Test 5 Passed: Budget safety cap (Aman, Waspada, Bahaya saat budget habis) valid.");
+
+// Test 6: Custom Unit (Satuan), Quantity, and Discount Calculation
+// Case A: 2 kg Telur Ayam base Rp 28.500, discount 10%
+const itemA = calculateItemSubtotal(28500, "kg", 2, "percent", 10);
+assert.strictEqual(itemA.netPrice, 25650, "Net price per kg after 10% discount");
+assert.strictEqual(itemA.subtotal, 51300, "Subtotal for 2 kg must be Rp 51.300");
+assert.strictEqual(itemA.totalSaved, 5700, "Total discount saved must be Rp 5.700");
+
+// Case B: 3 liter Minyak base Rp 36.000, nominal discount Rp 4.000
+const itemB = calculateItemSubtotal(36000, "liter", 3, "nominal", 4000);
+assert.strictEqual(itemB.netPrice, 32000, "Net price per liter after Rp 4.000 discount");
+assert.strictEqual(itemB.subtotal, 96000, "Subtotal for 3 liter must be Rp 96.000");
+assert.strictEqual(itemB.totalSaved, 12000, "Total discount saved must be Rp 12.000");
+
+// Case C: 500 ml Sabun base Rp 14.000, 0% discount
+const itemC = calculateItemSubtotal(14000, "ml", 1, "percent", 0);
+assert.strictEqual(itemC.netPrice, 14000);
+assert.strictEqual(itemC.subtotal, 14000);
+assert.strictEqual(itemC.totalSaved, 0);
+
+console.log("✔ Test 6 Passed: Pemilihan satuan (kg, liter, ml, pcs), kuantitas, dan diskon (persen & nominal) akurat.");
 
 console.log("🎉 ALL TESTS PASSED SUCCESSFULLY!");
