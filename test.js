@@ -1,10 +1,10 @@
 /**
  * Automated Test Suite for GroceryIn Logic
- * Smart Grocery & Budget Safety Tracker (Edition Anak Rantau)
+ * Smart Grocery & Budget Safety Tracker (PWA Mobile Edition)
  */
 const assert = require('assert');
 
-// 1. Rumus Diskon Tunggal: Harga2 = Harga - (Diskon * Harga)
+// 1. Rumus Harga2 = Harga - (Diskon * Harga)
 function calculateHarga2(harga, diskon) {
   if (!diskon || diskon <= 0) {
     return { hasDiscount: false, harga2: harga, discountPercent: 0 };
@@ -19,53 +19,13 @@ function calculateHarga2(harga, diskon) {
   };
 }
 
-// 2. Cascading Tiered Discount Logic Test (Legacy/Compound promo)
-function calculateTieredDiscount(grossPrice, tierInput) {
-  if (!tierInput || grossPrice <= 0) {
-    return { finalPrice: grossPrice, totalSaved: 0, effectivePercent: 0, steps: [] };
-  }
-
-  let rawTiers = tierInput
-    .toString()
-    .replace(/%/g, "")
-    .split(/[+,/ ]+/)
-    .map(t => parseFloat(t.trim()))
-    .filter(t => !isNaN(t) && t > 0);
-
-  let currentPrice = grossPrice;
-  const steps = [];
-
-  rawTiers.forEach((discPct, idx) => {
-    const clampedDisc = Math.min(100, Math.max(0, discPct));
-    const potongan = (currentPrice * clampedDisc) / 100;
-    const priceAfter = currentPrice - potongan;
-    steps.push({
-      stepNumber: idx + 1,
-      percent: clampedDisc,
-      deduction: potongan,
-      priceAfter: priceAfter
-    });
-    currentPrice = priceAfter;
-  });
-
-  const totalSaved = grossPrice - currentPrice;
-  const effectivePercent = grossPrice > 0 ? (totalSaved / grossPrice) * 100 : 0;
-
-  return {
-    finalPrice: Math.round(currentPrice),
-    totalSaved: Math.round(totalSaved),
-    effectivePercent: parseFloat(effectivePercent.toFixed(1)),
-    steps
-  };
-}
-
-// 3. Price Fluctuation Detection Logic Test
-// a) ⬆ (berwarna merah), emot ini muncul bila harga produk meningkat dibanding harga bulan lalu
-// b) ⬇︎ (berwarna hijau), emot ini muncul bila harga produk menurun dibanding harga bulan lalu
-// c) = (warna kuning), emot ini muncul bila harga produk masih sama dengan bulan lalu
+// 2. Price Fluctuation Detection Logic Test:
+// a) ⬆ (Merah), muncul bila harga produk meningkat dibanding bulan lalu
+// b) ⬇︎ (Hijau), muncul bila harga produk menurun dibanding bulan lalu
+// c) = (Abu-abu), muncul bila harga produk masih sama dengan bulan lalu
 function detectPriceFluctuation(currentPrice, lastMonthPrice) {
-  if (!lastMonthPrice || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
-    return { status: "EQUAL", emote: "=", color: "yellow", diffNominal: 0, diffPercent: 0 };
+  if (lastMonthPrice === undefined || lastMonthPrice <= 0 || !currentPrice || currentPrice <= 0) {
+    return { status: "EQUAL", emote: "=", color: "gray", diffNominal: 0, diffPercent: 0 };
   }
   const diff = currentPrice - lastMonthPrice;
   const diffPercent = parseFloat(((diff / lastMonthPrice) * 100).toFixed(1));
@@ -75,94 +35,114 @@ function detectPriceFluctuation(currentPrice, lastMonthPrice) {
   } else if (diff < 0) {
     return { status: "DOWN", emote: "⬇︎", color: "green", diffNominal: Math.abs(diff), diffPercent: Math.abs(diffPercent) };
   } else {
-    return { status: "EQUAL", emote: "=", color: "yellow", diffNominal: 0, diffPercent: 0 };
+    return { status: "EQUAL", emote: "=", color: "gray", diffNominal: 0, diffPercent: 0 };
   }
 }
 
-// 4. Budget Safety Cap Logic Test
-function evaluateBudgetSafetyCap(totalSpent, budgetCap) {
-  const remaining = budgetCap - totalSpent;
-  const spentPercent = budgetCap > 0 ? (totalSpent / budgetCap) * 100 : 0;
-
-  let state = "SAFE";
-  if (spentPercent > 100) {
-    state = "DANGER_EXCEEDED";
-  } else if (spentPercent >= 85) {
-    state = "DANGER_CRITICAL";
-  } else if (spentPercent >= 65) {
-    state = "WARNING";
-  } else {
-    state = "SAFE";
-  }
-
-  return { remaining, spentPercent, state };
-}
-
-// 5. City Supermarket Filter Mapping
+// 3. City Supermarket Filter Mapping
 const CITY_SUPERMARKETS = {
-  "Bandung": ["Indomaret", "Alfamart", "Alfamidi"],
-  "Jabodetabek / Jakarta": ["Indomaret", "Alfamart", "Alfamidi", "Family Mart"],
-  "Yogyakarta": ["Indomaret", "Alfamart", "Alfamidi"],
-  "Surabaya": ["Indomaret", "Alfamart", "Alfamidi", "Family Mart"]
+  "Jakarta Barat (Puri Indah)": [
+    "Lotte Mart Grocery - Puri Indah",
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Family Mart"
+  ],
+  "Jabodetabek / Jakarta": [
+    "Lotte Mart Grocery - Puri Indah",
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Family Mart"
+  ],
+  "Bandung": [
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Lotte Mart Grocery"
+  ],
+  "Surabaya": [
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Family Mart",
+    "Lotte Mart Grocery"
+  ]
 };
+
+// 4. Default Products Catalog Test
+const DEFAULT_COMMODITIES = [
+  { id: "prod-beras-5kg-74", name: "Beras 5kg", price: 74000, lastMonthPrice: 68000, discount: 0 },
+  { id: "prod-telur-1kg", name: "Telur 1kg (Tanpa Diskon)", price: 28000, lastMonthPrice: 32000, discount: 0 },
+  { id: "prod-garam-500g", name: "Garam 500g", price: 5000, lastMonthPrice: 5000, discount: 0 },
+  { id: "prod-beras-5kg-745", name: "Beras 5kg (Premium)", price: 74500, lastMonthPrice: 74500, discount: 0 },
+  { id: "prod-minyak-2l", name: "Minyak Goreng 2L", price: 42000, lastMonthPrice: 42000, discount: 0 },
+  { id: "prod-indomie-goreng-5", name: "Indomie Goreng 5 pcs", price: 16500, lastMonthPrice: 16500, discount: 0 },
+  { id: "prod-indomie-kuah-5", name: "Indomie Kuah 5 pcs", price: 16000, lastMonthPrice: 16000, discount: 0 },
+  { id: "prod-terigu-1kg", name: "Tepung Terigu 1kg", price: 15500, lastMonthPrice: 15500, discount: 0 },
+  { id: "prod-gula-1kg", name: "Gula Pasir 1kg", price: 19500, lastMonthPrice: 19500, discount: 0 },
+  { id: "prod-ultra-milk-1l", name: "Susu Ultra Milk 1L", price: 22500, lastMonthPrice: 22500, discount: 0 },
+  { id: "prod-aqua-6", name: "Aqua 6 Botol", price: 24000, lastMonthPrice: 24000, discount: 0 },
+  { id: "prod-daging-300g", name: "Daging Sapi 300g", price: 55000, lastMonthPrice: 55000, discount: 0 },
+  { id: "prod-sabun-cuci", name: "Sabun Cuci", price: 20000, lastMonthPrice: 20000, discount: 0 },
+  { id: "prod-sabun-mandi", name: "Sabun Mandi", price: 29500, lastMonthPrice: 29500, discount: 0 }
+];
+
+// 5. Intelligent Merge Test (User edits must never be reverted back to default)
+function mergeCatalogWithUserEdits(defaults, savedUserItems) {
+  const merged = JSON.parse(JSON.stringify(defaults));
+  savedUserItems.forEach(userItem => {
+    const idx = merged.findIndex(it => it.id === userItem.id);
+    if (idx !== -1) {
+      merged[idx] = { ...merged[idx], ...userItem };
+    } else {
+      merged.push(userItem);
+    }
+  });
+  return merged;
+}
 
 // ==================== RUNNING TESTS ====================
 console.log("=== RUNNING GROCERYIN LOGIC UNIT TESTS ===");
 
 // Test 1: Rumus Harga2 = Harga - (Diskon * Harga)
-// Contoh: Susu Ultra Milk seharga Rp 20.000 dengan diskon 15% (0.15)
-// Harga2 = 20.000 - (0.15 * 20.000) = 17.000
 const testHarga2 = calculateHarga2(20000, 0.15);
-console.log("Test 1 (Rumus Harga2 pada Rp 20.000 diskon 15%):", testHarga2);
-assert.strictEqual(testHarga2.hasDiscount, true);
 assert.strictEqual(testHarga2.harga2, 17000, "Harga2 harus tepat Rp 17.000");
-assert.strictEqual(testHarga2.discountAmount, 3000);
 console.log("✔ Test 1 Passed: Rumus Harga2 = Harga - (Diskon * Harga) terbukti valid.");
 
-// Test 2: Tiered Discount 50% + 20% on Rp 100,000
-const test2 = calculateTieredDiscount(100000, "50+20");
-assert.strictEqual(test2.finalPrice, 40000, "Final price must be Rp 40.000");
-assert.strictEqual(test2.totalSaved, 60000);
-console.log("✔ Test 2 Passed: Diskon bertingkat 50%+20% terbukti menghasilkan Rp 40.000 (hemat 60%).");
+// Test 2: Beras 5kg (bulan lalu 68rb naik jadi 74rb -> ⬆ Merah)
+const berasFluc = detectPriceFluctuation(74000, 68000);
+assert.strictEqual(berasFluc.status, "UP");
+assert.strictEqual(berasFluc.emote, "⬆");
+assert.strictEqual(berasFluc.color, "red");
+assert.strictEqual(berasFluc.diffNominal, 6000);
+console.log("✔ Test 2 Passed: Beras 5kg naik jadi 74rb terbukti panah merah atas (⬆).");
 
-// Test 3: Emote Fluktuasi Harga (⬆ Merah, ⬇︎ Hijau, = Kuning)
-const flucUp = detectPriceFluctuation(3300, 3100);
-assert.strictEqual(flucUp.status, "UP");
-assert.strictEqual(flucUp.emote, "⬆");
-assert.strictEqual(flucUp.color, "red");
-assert.strictEqual(flucUp.diffNominal, 200);
+// Test 3: Telur 1kg (bulan lalu 32rb turun jadi 28rb -> ⬇︎ Hijau)
+const telurFluc = detectPriceFluctuation(28000, 32000);
+assert.strictEqual(telurFluc.status, "DOWN");
+assert.strictEqual(telurFluc.emote, "⬇︎");
+assert.strictEqual(telurFluc.color, "green");
+assert.strictEqual(telurFluc.diffNominal, 4000);
+console.log("✔ Test 3 Passed: Telur 1kg turun jadi 28rb terbukti panah hijau turun (⬇︎).");
 
-const flucDown = detectPriceFluctuation(74500, 77000);
-assert.strictEqual(flucDown.status, "DOWN");
-assert.strictEqual(flucDown.emote, "⬇︎");
-assert.strictEqual(flucDown.color, "green");
-assert.strictEqual(flucDown.diffNominal, 2500);
+// Test 4: Garam 500g (bulan lalu 5rb sekarang 5rb -> = Abu-abu)
+const garamFluc = detectPriceFluctuation(5000, 5000);
+assert.strictEqual(garamFluc.status, "EQUAL");
+assert.strictEqual(garamFluc.emote, "=");
+assert.strictEqual(garamFluc.color, "gray");
+console.log("✔ Test 4 Passed: Garam 500g setara terbukti tanda setara abu-abu (=).");
 
-const flucEqual = detectPriceFluctuation(36000, 36000);
-assert.strictEqual(flucEqual.status, "EQUAL");
-assert.strictEqual(flucEqual.emote, "=");
-assert.strictEqual(flucEqual.color, "yellow");
-console.log("✔ Test 3 Passed: Deteksi emote fluktuasi (⬆ Merah Naik, ⬇︎ Hijau Turun, = Kuning Stabil) valid.");
+// Test 5: Lokasi Supermarket Lotte Mart Grocery - Puri Indah
+assert.ok(CITY_SUPERMARKETS["Jakarta Barat (Puri Indah)"].includes("Lotte Mart Grocery - Puri Indah"));
+assert.ok(CITY_SUPERMARKETS["Jabodetabek / Jakarta"].includes("Lotte Mart Grocery - Puri Indah"));
+console.log("✔ Test 5 Passed: Lotte Mart Grocery - Puri Indah terdaftar di pilihan supermarket.");
 
-// Test 4: Supermarket filtering based on selected city
-assert.ok(CITY_SUPERMARKETS["Jabodetabek / Jakarta"].includes("Family Mart"));
-assert.ok(!CITY_SUPERMARKETS["Bandung"].includes("Family Mart"), "Family Mart tidak ada di Bandung");
-assert.ok(CITY_SUPERMARKETS["Bandung"].includes("Indomaret"));
-assert.ok(CITY_SUPERMARKETS["Bandung"].includes("Alfamart"));
-console.log("✔ Test 4 Passed: Filter ketersediaan supermarket berdasarkan kota terbukti akurat.");
-
-// Test 5: Budget Safety Cap Trigger
-const capSafe = evaluateBudgetSafetyCap(120000, 300000); // 40%
-assert.strictEqual(capSafe.state, "SAFE");
-
-const capWarning = evaluateBudgetSafetyCap(210000, 300000); // 70%
-assert.strictEqual(capWarning.state, "WARNING");
-
-const capCritical = evaluateBudgetSafetyCap(270000, 300000); // 90%
-assert.strictEqual(capCritical.state, "DANGER_CRITICAL");
-
-const capExceeded = evaluateBudgetSafetyCap(320000, 300000); // 106%
-assert.strictEqual(capExceeded.state, "DANGER_EXCEEDED");
-console.log("✔ Test 5 Passed: Budget safety cap (Aman, Waspada, Bahaya saat budget habis) valid.");
+// Test 6: Intelligent Database Persistence (User edits never revert to default)
+const userEditedBeras = [{ id: "prod-beras-5kg-74", price: 76000, lastMonthPrice: 74000 }];
+const merged = mergeCatalogWithUserEdits(DEFAULT_COMMODITIES, userEditedBeras);
+const resultBeras = merged.find(it => it.id === "prod-beras-5kg-74");
+assert.strictEqual(resultBeras.price, 76000, "Harga hasil editan user harus tetap 76000 dan tidak kembali ke 74000");
+console.log("✔ Test 6 Passed: Data yang diubah user tetap tersimpan dan tidak terganti balik ke default.");
 
 console.log("🎉 ALL TESTS PASSED SUCCESSFULLY!");

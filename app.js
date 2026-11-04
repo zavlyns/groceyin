@@ -3,382 +3,249 @@
  * Native Mobile PWA Edition for Anak Rantau
  * 
  * Features:
- * - Dynamic Supermarket Filtering by City (Family Mart, Indomaret, Alfamart, Alfamidi)
+ * - Dynamic Supermarket Filtering by City (Lotte Mart Grocery - Puri Indah, Indomaret, Alfamart, Alfamidi, Family Mart)
  * - Locked Initial Budget Enforcement (Safety Cap)
  * - Live Remaining Budget Updates across Store & List tabs
  * - Fading Color Transition (Green -> Yellow/Orange -> Full Red as budget exhausts)
  * - Add to list with automatic budget check & block when out of budget
  * - Interactive Quantity Stepper (-[]+) & X delete with budget refund
  * - Checkout locking list & archiving to History with printable receipt
- * - LocalStorage Offline Persistence & PWA Service Worker
+ * - Realtime Product & Price Editor with Permanent Database Persistence (never reverted on updates)
+ * - Fluctuation Emotes: ⬆ (Merah Naik), ⬇︎ (Hijau Turun), = (Abu-abu Setara)
  */
 
 // ==================== 1. CITY & SUPERMARKET MAPPING ====================
 const CITY_SUPERMARKETS = {
-  "Bandung": ["Indomaret", "Alfamart", "Alfamidi"],
-  "Jabodetabek / Jakarta": ["Indomaret", "Alfamart", "Alfamidi", "Family Mart"],
-  "Yogyakarta": ["Indomaret", "Alfamart", "Alfamidi"],
-  "Surabaya": ["Indomaret", "Alfamart", "Alfamidi", "Family Mart"],
-  "Malang": ["Indomaret", "Alfamart", "Alfamidi"],
-  "Semarang": ["Indomaret", "Alfamart"],
-  "Medan": ["Indomaret", "Alfamart", "Alfamidi"],
-  "Bali": ["Indomaret", "Alfamart", "Family Mart"]
-};
-
-// ==================== 2. MASTER PRODUCT DATABASE ====================
-// Authentic goods tailored for anak rantau across Indonesian supermarkets
-const MASTER_CATALOG = {
-  "Indomaret": [
-    {
-      id: "ind-1",
-      name: "Indomie Goreng Spesial 85g",
-      category: "Mie & Instan",
-      price: 3300,
-      discount: 0.10, // 10%
-      lastMonthPrice: 3100, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-2",
-      name: "Beras Sania Premium 5kg",
-      category: "Sembako",
-      price: 74500,
-      discount: 0.05,
-      lastMonthPrice: 77000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-3",
-      name: "Minyak Goreng Bimoli 2 Liter",
-      category: "Sembako",
-      price: 36000,
-      discount: 0,
-      lastMonthPrice: 36000, // = Stabil
-      image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-4",
-      name: "Telur Ayam Negeri 1kg (Isi 16)",
-      category: "Sembako",
-      price: 28500,
-      discount: 0,
-      lastMonthPrice: 27000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-5",
-      name: "Ultra Milk UHT Full Cream 1L",
-      category: "Minuman",
-      price: 19500,
-      discount: 0.15, // 15%
-      lastMonthPrice: 20000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-6",
-      name: "Sosis Kanzler Singles Keju 65g",
-      category: "Snack",
-      price: 9000,
-      discount: 0.20, // 20%
-      lastMonthPrice: 9000, // = Stabil
-      image: "https://images.unsplash.com/photo-1585325701165-351af916e581?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-7",
-      name: "Kopi Kapal Api Spesial Mix 10x24g",
-      category: "Minuman",
-      price: 14500,
-      discount: 0,
-      lastMonthPrice: 13500, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-8",
-      name: "Sabun Cuci Sunlight Jeruk Nipis 700ml",
-      category: "Kebersihan",
-      price: 14000,
-      discount: 0.10,
-      lastMonthPrice: 15500, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-9",
-      name: "Roti Tawar Kupas Mr. Bread",
-      category: "Sembako",
-      price: 15000,
-      discount: 0,
-      lastMonthPrice: 15000, // = Stabil
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "ind-10",
-      name: "Bumbu Racik Sayur Asem Indofood",
-      category: "Dapur & Masak",
-      price: 2500,
-      discount: 0,
-      lastMonthPrice: 2500, // = Stabil
-      image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=400&q=80"
-    }
+  "Jakarta Barat (Puri Indah)": [
+    "Lotte Mart Grocery - Puri Indah",
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Family Mart"
   ],
-
-  "Alfamart": [
-    {
-      id: "alf-1",
-      name: "Indomie Kuah Ayam Bawang 69g",
-      category: "Mie & Instan",
-      price: 3200,
-      discount: 0.10,
-      lastMonthPrice: 3000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-2",
-      name: "Minyak Goreng Tropical Pouch 2L",
-      category: "Sembako",
-      price: 35500,
-      discount: 0.08,
-      lastMonthPrice: 37500, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-3",
-      name: "Beras Ramos Alfamart 5kg",
-      category: "Sembako",
-      price: 73000,
-      discount: 0,
-      lastMonthPrice: 70000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-4",
-      name: "Susu Frisian Flag Cokelat 900ml",
-      category: "Minuman",
-      price: 18000,
-      discount: 0.15,
-      lastMonthPrice: 19000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-5",
-      name: "Biskuit Roma Kelapa 300g",
-      category: "Snack",
-      price: 11500,
-      discount: 0,
-      lastMonthPrice: 11500, // = Stabil
-      image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-6",
-      name: "Kecap Manis Bango Refill 520ml",
-      category: "Dapur & Masak",
-      price: 24500,
-      discount: 0.12,
-      lastMonthPrice: 25000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-7",
-      name: "Shampo Pantene Anti Dandruff 160ml",
-      category: "Kebersihan",
-      price: 26000,
-      discount: 0.25, // Promo JSM 25%
-      lastMonthPrice: 26000, // = Stabil
-      image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-8",
-      name: "Sarden ABC Saus Tomat 155g",
-      category: "Dapur & Masak",
-      price: 11000,
-      discount: 0,
-      lastMonthPrice: 10000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-9",
-      name: "Air Mineral Le Minerale 1500ml",
-      category: "Minuman",
-      price: 6500,
-      discount: 0,
-      lastMonthPrice: 6500, // = Stabil
-      image: "https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "alf-10",
-      name: "Sabun Mandi Dettol Original 100g",
-      category: "Kebersihan",
-      price: 8500,
-      discount: 0.10,
-      lastMonthPrice: 9000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1607006314644-77a834b6b669?auto=format&fit=crop&w=400&q=80"
-    }
+  "Jabodetabek / Jakarta": [
+    "Lotte Mart Grocery - Puri Indah",
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Family Mart"
   ],
-
-  "Alfamidi": [
-    {
-      id: "mid-1",
-      name: "Daging Ayam Broiler Segar 1 Ekor",
-      category: "Sembako",
-      price: 38000,
-      discount: 0.10,
-      lastMonthPrice: 35000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "mid-2",
-      name: "Fiesta Crispy Nugget 500g",
-      category: "Sembako",
-      price: 49500,
-      discount: 0.15,
-      lastMonthPrice: 52000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "mid-3",
-      name: "Beras Pandan Wangi 5kg",
-      category: "Sembako",
-      price: 78000,
-      discount: 0,
-      lastMonthPrice: 78000, // = Stabil
-      image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "mid-4",
-      name: "Cimory Fresh Milk Full Cream 950ml",
-      category: "Minuman",
-      price: 21500,
-      discount: 0.12,
-      lastMonthPrice: 22000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "mid-5",
-      name: "Sedaap Goreng Rasa Ayam Krispi 88g",
-      category: "Mie & Instan",
-      price: 3200,
-      discount: 0,
-      lastMonthPrice: 3200, // = Stabil
-      image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "mid-6",
-      name: "Telur Puyuh Segar Pack 20 Butir",
-      category: "Sembako",
-      price: 12000,
-      discount: 0,
-      lastMonthPrice: 11000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "mid-7",
-      name: "Bawang Merah Brebes Pack 250g",
-      category: "Dapur & Masak",
-      price: 13500,
-      discount: 0.05,
-      lastMonthPrice: 16000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "mid-8",
-      name: "Deterjen Daia Putih 850g",
-      category: "Kebersihan",
-      price: 18500,
-      discount: 0.20,
-      lastMonthPrice: 18500, // = Stabil
-      image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=400&q=80"
-    }
+  "Bandung": [
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Lotte Mart Grocery"
   ],
-
-  "Family Mart": [
-    {
-      id: "fm-1",
-      name: "FamiCafe Kopi Susu Keluarga",
-      category: "Minuman",
-      price: 15000,
-      discount: 0.20, // Diskon promo 20%
-      lastMonthPrice: 15000, // = Stabil
-      image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "fm-2",
-      name: "Onigiri Salmon Mayo",
-      category: "Snack",
-      price: 13000,
-      discount: 0.10,
-      lastMonthPrice: 12000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "fm-3",
-      name: "Crispy Chicken Dada Bento",
-      category: "Sembako",
-      price: 24000,
-      discount: 0.15,
-      lastMonthPrice: 25000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "fm-4",
-      name: "Samyang Hot Chicken Ramen Bowl",
-      category: "Mie & Instan",
-      price: 22500,
-      discount: 0,
-      lastMonthPrice: 21000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "fm-5",
-      name: "Green Tea FamiCafe Ice",
-      category: "Minuman",
-      price: 15000,
-      discount: 0.20,
-      lastMonthPrice: 15000, // = Stabil
-      image: "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "fm-6",
-      name: "Sandwich Telur Mayo Soft Bread",
-      category: "Snack",
-      price: 16000,
-      discount: 0,
-      lastMonthPrice: 17000, // ⬇︎ Turun
-      image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "fm-7",
-      name: "Pocky Cokelat Glico 47g",
-      category: "Snack",
-      price: 8500,
-      discount: 0.10,
-      lastMonthPrice: 8500, // = Stabil
-      image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "fm-8",
-      name: "Tisu Basah Dettol Wipes 10s",
-      category: "Kebersihan",
-      price: 9500,
-      discount: 0,
-      lastMonthPrice: 9000, // ⬆ Naik
-      image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=400&q=80"
-    }
+  "Yogyakarta": [
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi"
+  ],
+  "Surabaya": [
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Family Mart",
+    "Lotte Mart Grocery"
+  ],
+  "Malang": [
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi"
+  ],
+  "Semarang": [
+    "Indomaret",
+    "Alfamart"
+  ],
+  "Medan": [
+    "Indomaret",
+    "Alfamart",
+    "Alfamidi",
+    "Lotte Mart Grocery"
+  ],
+  "Bali": [
+    "Indomaret",
+    "Alfamart",
+    "Family Mart"
   ]
 };
 
-// ==================== 3. GROCERYIN APP CLASS ====================
+// ==================== 2. DEFAULT COMMODITY PRODUCTS ====================
+// Default items tailored per user instructions:
+// - Beras 5kg: Rp 74.000 (bulan lalu 68.000 -> ⬆ Merah)
+// - Telur 1kg: Rp 28.000 (bulan lalu 32.000 -> ⬇︎ Hijau, tanpa diskon)
+// - Garam 500g: Rp 5.000 (bulan lalu 5.000 -> = Abu-abu)
+// - Beras 5kg: Rp 74.500
+// - Minyak goreng 2L: Rp 42.000
+// - Indomie Goreng 5 pcs: Rp 16.500
+// - Indomie kuah 5 pcs: Rp 16.000
+// - Tepung terigu 1kg: Rp 15.500
+// - Gula pasir 1kg: Rp 19.500
+// - Susu ultra milk 1L: Rp 22.500
+// - Aqua 6 botol: Rp 24.000
+// - Daging sapi 300g: Rp 55.000
+// - Sabun cuci: Rp 20.000
+// - Sabun mandi: Rp 29.500
+const DEFAULT_COMMODITIES = [
+  {
+    id: "prod-beras-5kg-74",
+    name: "Beras 5kg",
+    category: "Sembako",
+    price: 74000,
+    lastMonthPrice: 68000, // ⬆ Merah (Naik dari 68rb jadi 74rb)
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-telur-1kg",
+    name: "Telur 1kg (Tanpa Diskon)",
+    category: "Sembako",
+    price: 28000,
+    lastMonthPrice: 32000, // ⬇︎ Hijau (Turun dari 32rb jadi 28rb)
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-garam-500g",
+    name: "Garam 500g",
+    category: "Dapur & Masak",
+    price: 5000,
+    lastMonthPrice: 5000, // = Abu-abu (Setara / Sama dengan bulan lalu)
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-beras-5kg-745",
+    name: "Beras 5kg (Premium)",
+    category: "Sembako",
+    price: 74500,
+    lastMonthPrice: 74500, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-minyak-2l",
+    name: "Minyak Goreng 2L",
+    category: "Sembako",
+    price: 42000,
+    lastMonthPrice: 42000, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-indomie-goreng-5",
+    name: "Indomie Goreng 5 pcs",
+    category: "Mie & Instan",
+    price: 16500,
+    lastMonthPrice: 15500, // ⬆ Merah
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-indomie-kuah-5",
+    name: "Indomie Kuah 5 pcs",
+    category: "Mie & Instan",
+    price: 16000,
+    lastMonthPrice: 15000, // ⬆ Merah
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-terigu-1kg",
+    name: "Tepung Terigu 1kg",
+    category: "Dapur & Masak",
+    price: 15500,
+    lastMonthPrice: 15500, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-gula-1kg",
+    name: "Gula Pasir 1kg",
+    category: "Sembako",
+    price: 19500,
+    lastMonthPrice: 18000, // ⬆ Merah
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-ultra-milk-1l",
+    name: "Susu Ultra Milk 1L",
+    category: "Minuman",
+    price: 22500,
+    lastMonthPrice: 22000, // ⬆ Merah
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-aqua-6",
+    name: "Aqua 6 Botol",
+    category: "Minuman",
+    price: 24000,
+    lastMonthPrice: 24000, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-daging-300g",
+    name: "Daging Sapi 300g",
+    category: "Sembako",
+    price: 55000,
+    lastMonthPrice: 52000, // ⬆ Merah
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-sabun-cuci",
+    name: "Sabun Cuci",
+    category: "Kebersihan",
+    price: 20000,
+    lastMonthPrice: 21000, // ⬇︎ Hijau
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: "prod-sabun-mandi",
+    name: "Sabun Mandi",
+    category: "Kebersihan",
+    price: 29500,
+    lastMonthPrice: 32000, // ⬇︎ Hijau
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1607006314644-77a834b6b669?auto=format&fit=crop&w=400&q=80"
+  }
+];
+
+// Helper to generate full catalog for any store
+function buildDefaultCatalogForStore() {
+  return JSON.parse(JSON.stringify(DEFAULT_COMMODITIES));
+}
+
+// Master Default Catalog Map
+const INITIAL_MASTER_CATALOG = {
+  "Lotte Mart Grocery - Puri Indah": buildDefaultCatalogForStore(),
+  "Lotte Mart Grocery": buildDefaultCatalogForStore(),
+  "Indomaret": buildDefaultCatalogForStore(),
+  "Alfamart": buildDefaultCatalogForStore(),
+  "Alfamidi": buildDefaultCatalogForStore(),
+  "Family Mart": buildDefaultCatalogForStore()
+};
+
+// ==================== 3. GROCERYIN APP ENGINE ====================
 class SmartGroceryApp {
   constructor() {
     // Storage keys
     this.STORAGE_SESSION = "groceryin_rantau_session";
     this.STORAGE_CART = "groceryin_rantau_cart";
     this.STORAGE_HISTORY = "groceryin_rantau_history";
+    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v2";
 
     // State
-    this.city = "Bandung";
-    this.supermarket = "Alfamart";
+    this.city = "Jakarta Barat (Puri Indah)";
+    this.supermarket = "Lotte Mart Grocery - Puri Indah";
     this.initialBudget = 300000;
     this.isSessionLocked = false;
 
+    this.catalog = {}; // Stores items per supermarket
     this.cart = []; // [{ id, name, price, discount, finalPrice, quantity, image, supermarket }]
     this.history = []; // [{ id, date, store, city, totalSpent, initialBudget, items: [] }]
     
@@ -387,11 +254,12 @@ class SmartGroceryApp {
 
     this.initDOM();
     this.initPWA();
+    this.loadCatalogDatabase(); // Load & merge without ever reverting user changes
     this.initEvents();
     this.loadState();
   }
 
-  // ==================== PWA INITIALIZATION ====================
+  // ==================== PWA SERVICE WORKER ====================
   initPWA() {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -402,16 +270,61 @@ class SmartGroceryApp {
     }
   }
 
-  // ==================== DOM BINDING ====================
+  // ==================== DATABASE CATALOG LOADER (PRESERVES USER EDITS) ====================
+  loadCatalogDatabase() {
+    // 1. Start with fresh defaults
+    this.catalog = JSON.parse(JSON.stringify(INITIAL_MASTER_CATALOG));
+
+    // 2. Load saved modifications from localStorage
+    const savedCatalogJson = localStorage.getItem(this.STORAGE_CUSTOM_CATALOG);
+    if (savedCatalogJson) {
+      try {
+        const savedCatalog = JSON.parse(savedCatalogJson);
+        // Merge intelligently: user edits override defaults, never lose customized prices/items!
+        for (const storeName of Object.keys(savedCatalog)) {
+          if (!this.catalog[storeName]) {
+            this.catalog[storeName] = savedCatalog[storeName];
+          } else {
+            const savedItems = savedCatalog[storeName];
+            savedItems.forEach(savedItem => {
+              const defIdx = this.catalog[storeName].findIndex(it => it.id === savedItem.id);
+              if (defIdx !== -1) {
+                // Override with user's modified price, lastMonthPrice, discount, name, etc.
+                this.catalog[storeName][defIdx] = {
+                  ...this.catalog[storeName][defIdx],
+                  ...savedItem
+                };
+              } else {
+                // User added custom item
+                this.catalog[storeName].push(savedItem);
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Error parsing saved catalog, using defaults with safe fallback:", e);
+      }
+    }
+
+    // Save back to ensure consistency
+    this.saveCatalogDatabase();
+  }
+
+  saveCatalogDatabase() {
+    localStorage.setItem(this.STORAGE_CUSTOM_CATALOG, JSON.stringify(this.catalog));
+  }
+
+  // ==================== DOM ELEMENTS BINDING ====================
   initDOM() {
-    // Header
+    // Header & Sub-bar
     this.displayStoreName = document.getElementById("displayStoreName");
     this.displayStoreCity = document.getElementById("displayStoreCity");
     this.headerRemainingBudget = document.getElementById("headerRemainingBudget");
     this.liveBudgetPill = document.getElementById("liveBudgetPill");
     this.btnLogout = document.getElementById("btnLogout");
+    this.btnOpenAddProduct = document.getElementById("btnOpenAddProduct");
 
-    // Top Tabs
+    // Top Tabs (Store, List, History di Kiri)
     this.topTabStore = document.getElementById("topTabStore");
     this.topTabList = document.getElementById("topTabList");
     this.topTabHistory = document.getElementById("topTabHistory");
@@ -425,8 +338,6 @@ class SmartGroceryApp {
     // Store View Elements
     this.productTilesContainer = document.getElementById("productTilesContainer");
     this.categoryChipBar = document.getElementById("categoryChipBar");
-    this.promoStoreTitle = document.getElementById("promoStoreTitle");
-    this.promoStoreSubtitle = document.getElementById("promoStoreSubtitle");
 
     // List View Elements
     this.activeGroceryListContainer = document.getElementById("activeGroceryListContainer");
@@ -458,6 +369,21 @@ class SmartGroceryApp {
     this.btnConfirmSetup = document.getElementById("btnConfirmSetup");
     this.btnConfirmText = document.getElementById("btnConfirmText");
 
+    // Realtime Product Edit Modal Elements
+    this.productEditModalBackdrop = document.getElementById("productEditModalBackdrop");
+    this.modalProductTitle = document.getElementById("modalProductTitle");
+    this.editProductId = document.getElementById("editProductId");
+    this.editProductName = document.getElementById("editProductName");
+    this.editProductPrice = document.getElementById("editProductPrice");
+    this.editProductLastPrice = document.getElementById("editProductLastPrice");
+    this.editProductDiscount = document.getElementById("editProductDiscount");
+    this.editProductCategory = document.getElementById("editProductCategory");
+    this.previewHarga2Text = document.getElementById("previewHarga2Text");
+    this.previewFlucBadge = document.getElementById("previewFlucBadge");
+    this.btnSaveProductChanges = document.getElementById("btnSaveProductChanges");
+    this.btnCancelProductChanges = document.getElementById("btnCancelProductChanges");
+    this.btnCloseProductModal = document.getElementById("btnCloseProductModal");
+
     // Receipt Modal
     this.receiptModalBackdrop = document.getElementById("receiptModalBackdrop");
     this.receiptStoreHeader = document.getElementById("receiptStoreHeader");
@@ -479,7 +405,7 @@ class SmartGroceryApp {
 
   // ==================== EVENT LISTENERS ====================
   initEvents() {
-    // 1. City selection changes supermarket options
+    // 1. City selection dynamically filters supermarket options
     this.selectCity.addEventListener("change", () => {
       this.populateSupermarketsForCity(this.selectCity.value);
     });
@@ -507,7 +433,7 @@ class SmartGroceryApp {
     // 4. Logout / Ganti Toko & Budget
     this.btnLogout.addEventListener("click", () => this.handleLogout());
 
-    // 5. Tab Navigation (Top Segment & Floating Bottom Bar)
+    // 5. Tab Navigation (Top Tabs & Floating Bottom Bar)
     this.topTabStore.addEventListener("click", () => this.switchTab("store"));
     this.topTabList.addEventListener("click", () => this.switchTab("list"));
     this.topTabHistory.addEventListener("click", () => this.switchTab("history"));
@@ -562,6 +488,20 @@ class SmartGroceryApp {
       this.receiptModalBackdrop.classList.add("hidden");
       this.switchTab("history");
     });
+
+    // 10. Realtime Product Edit Modal Listeners
+    this.btnOpenAddProduct.addEventListener("click", () => this.openAddProductModal());
+    this.btnCloseProductModal.addEventListener("click", () => this.closeProductModal());
+    this.btnCancelProductChanges.addEventListener("click", () => this.closeProductModal());
+
+    this.editProductPrice.addEventListener("input", () => this.updateModalLivePreview());
+    this.editProductLastPrice.addEventListener("input", () => this.updateModalLivePreview());
+    this.editProductDiscount.addEventListener("input", () => this.updateModalLivePreview());
+
+    document.getElementById("productEditForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      this.saveProductChanges();
+    });
   }
 
   // ==================== STATE MANAGEMENT ====================
@@ -571,8 +511,8 @@ class SmartGroceryApp {
     if (savedSession) {
       try {
         const session = JSON.parse(savedSession);
-        this.city = session.city || "Bandung";
-        this.supermarket = session.supermarket || "Alfamart";
+        this.city = session.city || "Jakarta Barat (Puri Indah)";
+        this.supermarket = session.supermarket || "Lotte Mart Grocery - Puri Indah";
         this.initialBudget = parseFloat(session.initialBudget) || 300000;
         this.isSessionLocked = true;
         this.setupModalOverlay.classList.add("hidden");
@@ -604,8 +544,7 @@ class SmartGroceryApp {
     }
 
     // 4. Update Header Displays
-    this.displayStoreName.textContent = this.supermarket;
-    this.displayStoreCity.textContent = this.city;
+    this.updateHeaderStoreDisplay();
 
     // 5. Initial Render
     this.updateBudgetAndCartUI();
@@ -615,18 +554,31 @@ class SmartGroceryApp {
     this.switchTab("store");
   }
 
+  updateHeaderStoreDisplay() {
+    this.displayStoreName.textContent = this.supermarket;
+    this.displayStoreCity.textContent = `• ${this.city}`;
+  }
+
   openSetupModal() {
     this.setupModalOverlay.classList.remove("hidden");
     this.populateSupermarketsForCity(this.selectCity.value);
   }
 
   populateSupermarketsForCity(city) {
-    const list = CITY_SUPERMARKETS[city] || ["Indomaret", "Alfamart"];
+    const list = CITY_SUPERMARKETS[city] || [
+      "Lotte Mart Grocery - Puri Indah",
+      "Indomaret",
+      "Alfamart",
+      "Alfamidi"
+    ];
     this.selectSupermarket.innerHTML = "";
     list.forEach(sm => {
       const opt = document.createElement("option");
       opt.value = sm;
       opt.textContent = `🏬 ${sm}`;
+      if (sm === "Lotte Mart Grocery - Puri Indah") {
+        opt.selected = true;
+      }
       this.selectSupermarket.appendChild(opt);
     });
   }
@@ -643,7 +595,7 @@ class SmartGroceryApp {
     }
 
     // Feedback simulating fetching data from database
-    this.btnConfirmText.textContent = `Mengunduh Promo ${supermarket}...`;
+    this.btnConfirmText.textContent = `Mengunduh Data ${supermarket}...`;
     this.btnConfirmSetup.disabled = true;
 
     setTimeout(() => {
@@ -651,6 +603,12 @@ class SmartGroceryApp {
       this.supermarket = supermarket;
       this.initialBudget = budgetVal;
       this.isSessionLocked = true;
+
+      // Ensure store has catalog
+      if (!this.catalog[this.supermarket]) {
+        this.catalog[this.supermarket] = buildDefaultCatalogForStore();
+        this.saveCatalogDatabase();
+      }
 
       // Persist session
       const session = {
@@ -666,10 +624,7 @@ class SmartGroceryApp {
       this.saveCart();
 
       // UI updates
-      this.displayStoreName.textContent = this.supermarket;
-      this.displayStoreCity.textContent = this.city;
-      this.promoStoreTitle.textContent = `Katalog & Promo Spesial ${this.supermarket}`;
-      this.promoStoreSubtitle.textContent = `Cabang ${this.city} • Update Fluktuasi Harga Realtime`;
+      this.updateHeaderStoreDisplay();
 
       this.btnConfirmText.textContent = "Confirm & Unduh Katalog";
       this.btnConfirmSetup.disabled = false;
@@ -680,7 +635,7 @@ class SmartGroceryApp {
       this.renderCartList();
       this.switchTab("store");
 
-      this.showToast("✅", `Katalog ${this.supermarket} (${this.city}) siap! Budget: ${this.formatRupiah(this.initialBudget)}`);
+      this.showToast("✅", `Katalog ${this.supermarket} siap! Budget: ${this.formatRupiah(this.initialBudget)}`);
     }, 450);
   }
 
@@ -710,7 +665,7 @@ class SmartGroceryApp {
       if (el) el.classList.toggle("active-view", v.name === tabName);
     });
 
-    // Toggle Top Segment Buttons
+    // Toggle Top Nav Tab Buttons (di Kiri)
     const topButtons = [
       { el: this.topTabStore, name: "store" },
       { el: this.topTabList, name: "list" },
@@ -731,7 +686,6 @@ class SmartGroceryApp {
     });
 
     // On List view: show bottom summary bar with black border & checkout button!
-    // On Store & History views: hide summary bar so floating nav has clean view
     if (this.listBottomSummaryBar) {
       if (tabName === "list" && this.cart.length > 0) {
         this.listBottomSummaryBar.classList.remove("hidden");
@@ -742,7 +696,6 @@ class SmartGroceryApp {
       }
     }
 
-    // Scroll to top
     const mainArea = document.getElementById("mainContentArea");
     if (mainArea) mainArea.scrollTop = 0;
   }
@@ -771,12 +724,6 @@ class SmartGroceryApp {
   getDynamicBudgetColor(totalSpent, budget) {
     if (budget <= 0) return "#DC2626";
     const ratio = Math.min(1.0, totalSpent / budget);
-
-    // Color checkpoints:
-    // Ratio 0.0 -> Green #16A34A (rgb(22, 163, 74))
-    // Ratio 0.6 -> Amber/Yellow #CA8A04 (rgb(202, 138, 4))
-    // Ratio 0.85 -> Orange #EA580C (rgb(234, 88, 12))
-    // Ratio 1.0 -> Red #DC2626 (rgb(220, 38, 38))
 
     let r, g, b;
     if (ratio <= 0.6) {
@@ -864,10 +811,16 @@ class SmartGroceryApp {
   }
 
   // ==================== TAB 1: RENDER STORE PRODUCTS ====================
-  renderStoreProducts() {
-    const products = MASTER_CATALOG[this.supermarket] || MASTER_CATALOG["Alfamart"];
-    const filtered = products.filter(p => this.currentCategory === "ALL" || p.category === this.currentCategory);
+  getCurrentStoreProducts() {
+    if (!this.catalog[this.supermarket]) {
+      this.catalog[this.supermarket] = buildDefaultCatalogForStore();
+    }
+    return this.catalog[this.supermarket];
+  }
 
+  renderStoreProducts() {
+    const products = this.getCurrentStoreProducts();
+    const filtered = products.filter(p => this.currentCategory === "ALL" || p.category === this.currentCategory);
     const remainingBudget = this.getRemainingBudget();
 
     let html = "";
@@ -878,20 +831,22 @@ class SmartGroceryApp {
       const harga2 = hasDiscount ? Math.round(item.price * (1 - item.discount)) : item.price;
 
       // Emote Fluktuasi Harga vs Bulan Lalu:
-      // a) ⬆ (merah): jika harga meningkat
-      // b) ⬇︎ (hijau): jika harga menurun
-      // c) = (kuning): jika harga masih sama
+      // a) ⬆ (Merah): jika harga produk meningkat dibanding bulan lalu
+      // b) ⬇︎ (Hijau): jika harga produk menurun dibanding bulan lalu
+      // c) = (Abu-abu): jika harga produk masih sama dengan bulan lalu
       let emoteSymbol = "=";
       let emoteClass = "emote-equal";
-      if (item.price > item.lastMonthPrice) {
+      const lastPrice = item.lastMonthPrice !== undefined ? item.lastMonthPrice : item.price;
+
+      if (item.price > lastPrice) {
         emoteSymbol = "⬆";
         emoteClass = "emote-up";
-      } else if (item.price < item.lastMonthPrice) {
+      } else if (item.price < lastPrice) {
         emoteSymbol = "⬇︎";
         emoteClass = "emote-down";
       } else {
         emoteSymbol = "=";
-        emoteClass = "emote-equal";
+        emoteClass = "emote-equal"; // Abu-abu
       }
 
       // Check if user has enough budget to add this item
@@ -900,8 +855,15 @@ class SmartGroceryApp {
       html += `
         <div class="product-tile" data-id="${item.id}">
           <div class="product-image-wrap">
-            <img src="${item.image}" alt="${this.escapeHtml(item.name)}" class="product-tile-img" loading="lazy">
+            <img src="${item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80'}" 
+                 alt="${this.escapeHtml(item.name)}" class="product-tile-img" loading="lazy">
+            
             ${hasDiscount ? `<span class="product-discount-pill">-${discountPercent}%</span>` : ''}
+
+            <!-- Tombol Edit Cepat (✏️) pada kartu -->
+            <button type="button" class="btn-tile-edit-quick" onclick="app.openEditProductModal('${item.id}')" title="Ubah harga atau detail barang ini">
+              ✏️
+            </button>
           </div>
 
           <div class="product-tile-name" title="${this.escapeHtml(item.name)}">
@@ -915,7 +877,7 @@ class SmartGroceryApp {
                 ${this.formatRupiah(item.price)}
               </span>
               ${hasDiscount ? `<span class="product-price-final">${this.formatRupiah(harga2)}</span>` : ''}
-              <span class="price-fluctuation-emote ${emoteClass}" title="Dibanding bulan lalu ${this.formatRupiah(item.lastMonthPrice)}">${emoteSymbol}</span>
+              <span class="price-fluctuation-emote ${emoteClass}" title="Bulan lalu: ${this.formatRupiah(lastPrice)}">${emoteSymbol}</span>
             </div>
           </div>
 
@@ -931,9 +893,137 @@ class SmartGroceryApp {
     this.productTilesContainer.innerHTML = html;
   }
 
+  // ==================== REALTIME PRODUCT EDIT & ADD SYSTEM ====================
+  openEditProductModal(productId) {
+    const products = this.getCurrentStoreProducts();
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    this.modalProductTitle.textContent = "✏️ Ubah Harga & Detail Produk";
+    this.editProductId.value = product.id;
+    this.editProductName.value = product.name;
+    this.editProductPrice.value = product.price;
+    this.editProductLastPrice.value = product.lastMonthPrice !== undefined ? product.lastMonthPrice : product.price;
+    this.editProductDiscount.value = Math.round((product.discount || 0) * 100);
+    this.editProductCategory.value = product.category || "Sembako";
+
+    this.updateModalLivePreview();
+    this.productEditModalBackdrop.classList.remove("hidden");
+  }
+
+  openAddProductModal() {
+    this.modalProductTitle.textContent = "➕ Tambah Barang Baru ke Katalog";
+    this.editProductId.value = "";
+    this.editProductName.value = "";
+    this.editProductPrice.value = "";
+    this.editProductLastPrice.value = "";
+    this.editProductDiscount.value = "0";
+    this.editProductCategory.value = "Sembako";
+
+    this.updateModalLivePreview();
+    this.productEditModalBackdrop.classList.remove("hidden");
+  }
+
+  closeProductModal() {
+    this.productEditModalBackdrop.classList.add("hidden");
+  }
+
+  updateModalLivePreview() {
+    const price = parseFloat(this.editProductPrice.value) || 0;
+    const lastPrice = parseFloat(this.editProductLastPrice.value) || price;
+    const discountPct = parseFloat(this.editProductDiscount.value) || 0;
+
+    const discountRate = Math.min(0.99, Math.max(0, discountPct / 100));
+    const harga2 = Math.round(price * (1 - discountRate));
+
+    this.previewHarga2Text.textContent = this.formatRupiah(harga2);
+
+    if (price > lastPrice) {
+      const diff = price - lastPrice;
+      this.previewFlucBadge.className = "fluc-pill-preview fluc-up";
+      this.previewFlucBadge.textContent = `⬆ Naik (+${this.formatRupiah(diff)})`;
+    } else if (price < lastPrice) {
+      const diff = lastPrice - price;
+      this.previewFlucBadge.className = "fluc-pill-preview fluc-down";
+      this.previewFlucBadge.textContent = `⬇︎ Turun (-${this.formatRupiah(diff)})`;
+    } else {
+      this.previewFlucBadge.className = "fluc-pill-preview fluc-equal";
+      this.previewFlucBadge.textContent = `= Setara / Stabil (Abu-abu)`;
+    }
+  }
+
+  saveProductChanges() {
+    const id = this.editProductId.value.trim();
+    const name = this.editProductName.value.trim();
+    const price = parseFloat(this.editProductPrice.value);
+    const lastPrice = parseFloat(this.editProductLastPrice.value) || price;
+    const discountPct = parseFloat(this.editProductDiscount.value) || 0;
+    const category = this.editProductCategory.value;
+
+    if (!name) {
+      alert("Nama barang wajib diisi!");
+      this.editProductName.focus();
+      return;
+    }
+
+    if (isNaN(price) || price < 0) {
+      alert("Harga satuan saat ini harus valid!");
+      this.editProductPrice.focus();
+      return;
+    }
+
+    const discountRate = Math.min(0.99, Math.max(0, discountPct / 100));
+    const products = this.getCurrentStoreProducts();
+
+    if (id) {
+      // Edit existing product
+      const index = products.findIndex(p => p.id === id);
+      if (index !== -1) {
+        products[index].name = name;
+        products[index].price = price;
+        products[index].lastMonthPrice = lastPrice;
+        products[index].discount = discountRate;
+        products[index].category = category;
+
+        // If this item is currently in active cart, update its price & recalculate
+        const cartItem = this.cart.find(it => it.id === id);
+        if (cartItem) {
+          cartItem.name = name;
+          cartItem.price = price;
+          cartItem.discount = discountRate;
+          cartItem.finalPrice = Math.round(price * (1 - discountRate));
+          this.saveCart();
+        }
+      }
+    } else {
+      // Add new custom product
+      const newProd = {
+        id: "custom-" + Date.now(),
+        name: name,
+        category: category,
+        price: price,
+        lastMonthPrice: lastPrice,
+        discount: discountRate,
+        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"
+      };
+      products.unshift(newProd);
+    }
+
+    // Save to permanent Database (localStorage)
+    this.saveCatalogDatabase();
+
+    // Re-render UI in realtime
+    this.closeProductModal();
+    this.updateBudgetAndCartUI();
+    this.renderStoreProducts();
+    this.renderCartList();
+
+    this.showToast("💾", `Perubahan "${name}" berhasil disimpan ke database!`);
+  }
+
   // ==================== CART ACTIONS (Add, Stepper, Delete) ====================
   addToCart(productId) {
-    const products = MASTER_CATALOG[this.supermarket] || MASTER_CATALOG["Alfamart"];
+    const products = this.getCurrentStoreProducts();
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
@@ -1095,7 +1185,8 @@ class SmartGroceryApp {
 
           <!-- Body: Gambar barang | Nama barang, Hargatotal, Stepper -[]+ -->
           <div class="list-item-body-row">
-            <img src="${item.image}" alt="${this.escapeHtml(item.name)}" class="list-item-thumb">
+            <img src="${item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80'}" 
+                 alt="${this.escapeHtml(item.name)}" class="list-item-thumb">
             
             <div class="list-item-details">
               <div class="list-item-name">${this.escapeHtml(item.name)}</div>
@@ -1233,7 +1324,8 @@ class SmartGroceryApp {
         const itemTotal = it.finalPrice * it.quantity;
         itemsHtml += `
           <div class="history-item-row">
-            <img src="${it.image}" alt="${this.escapeHtml(it.name)}" class="history-item-thumb">
+            <img src="${it.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80'}" 
+                 alt="${this.escapeHtml(it.name)}" class="history-item-thumb">
             <div class="history-item-details">
               <div class="history-item-name">${this.escapeHtml(it.name)}</div>
               <div class="history-item-bottom-info">
