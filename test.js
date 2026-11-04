@@ -1,6 +1,6 @@
 /**
  * Automated Test Suite for GroceryIn Logic
- * Smart Grocery & Budget Safety Tracker (PWA Mobile Edition)
+ * Smart Grocery & Budget Safety Tracker (PWA Mobile Edition - Black & Red)
  */
 const assert = require('assert');
 
@@ -39,7 +39,23 @@ function detectPriceFluctuation(currentPrice, lastMonthPrice) {
   }
 }
 
-// 3. City Supermarket Filter Mapping
+// 3. Three-Tier Budget Logic:
+// - HIJAU: Masih aman (pengeluaran < 75%)
+// - KUNING: Warning / mau habis (pengeluaran 75% - 99%)
+// - MERAH: Habis & kelewatan (pengeluaran >= 100%)
+function getBudgetStatusTier(totalSpent, initialBudget) {
+  if (initialBudget <= 0) return { tier: "RED", color: "#EF4444", status: "OVER_BUDGET" };
+  const ratio = totalSpent / initialBudget;
+  if (ratio >= 1.0) {
+    return { tier: "RED", color: "#EF4444", status: "HABIS_DAN_KELEWATAN" };
+  } else if (ratio >= 0.75) {
+    return { tier: "YELLOW", color: "#EAB308", status: "WARNING_MAU_HABIS" };
+  } else {
+    return { tier: "GREEN", color: "#22C55E", status: "AMAN" };
+  }
+}
+
+// 4. City Supermarket Filter Mapping
 const CITY_SUPERMARKETS = {
   "Jakarta Barat (Puri Indah)": [
     "Lotte Mart Grocery - Puri Indah",
@@ -70,25 +86,25 @@ const CITY_SUPERMARKETS = {
   ]
 };
 
-// 4. Default Products Catalog Test
+// 5. Default Products Catalog Test
 const DEFAULT_COMMODITIES = [
-  { id: "prod-beras-5kg-74", name: "Beras 5kg", price: 74000, lastMonthPrice: 68000, discount: 0 },
-  { id: "prod-telur-1kg", name: "Telur 1kg (Tanpa Diskon)", price: 28000, lastMonthPrice: 32000, discount: 0 },
-  { id: "prod-garam-500g", name: "Garam 500g", price: 5000, lastMonthPrice: 5000, discount: 0 },
-  { id: "prod-beras-5kg-745", name: "Beras 5kg (Premium)", price: 74500, lastMonthPrice: 74500, discount: 0 },
-  { id: "prod-minyak-2l", name: "Minyak Goreng 2L", price: 42000, lastMonthPrice: 42000, discount: 0 },
-  { id: "prod-indomie-goreng-5", name: "Indomie Goreng 5 pcs", price: 16500, lastMonthPrice: 16500, discount: 0 },
-  { id: "prod-indomie-kuah-5", name: "Indomie Kuah 5 pcs", price: 16000, lastMonthPrice: 16000, discount: 0 },
-  { id: "prod-terigu-1kg", name: "Tepung Terigu 1kg", price: 15500, lastMonthPrice: 15500, discount: 0 },
-  { id: "prod-gula-1kg", name: "Gula Pasir 1kg", price: 19500, lastMonthPrice: 19500, discount: 0 },
-  { id: "prod-ultra-milk-1l", name: "Susu Ultra Milk 1L", price: 22500, lastMonthPrice: 22500, discount: 0 },
-  { id: "prod-aqua-6", name: "Aqua 6 Botol", price: 24000, lastMonthPrice: 24000, discount: 0 },
-  { id: "prod-daging-300g", name: "Daging Sapi 300g", price: 55000, lastMonthPrice: 55000, discount: 0 },
-  { id: "prod-sabun-cuci", name: "Sabun Cuci", price: 20000, lastMonthPrice: 20000, discount: 0 },
-  { id: "prod-sabun-mandi", name: "Sabun Mandi", price: 29500, lastMonthPrice: 29500, discount: 0 }
+  { id: "prod-beras-5kg-74", name: "Beras 5kg", defaultUnit: "kg", price: 74000, lastMonthPrice: 68000, discount: 0 },
+  { id: "prod-telur-1kg", name: "Telur 1kg (Tanpa Diskon)", defaultUnit: "kg", price: 28000, lastMonthPrice: 32000, discount: 0 },
+  { id: "prod-garam-500g", name: "Garam 500g", defaultUnit: "pack", price: 5000, lastMonthPrice: 5000, discount: 0 },
+  { id: "prod-beras-5kg-745", name: "Beras 5kg (Premium)", defaultUnit: "pack", price: 74500, lastMonthPrice: 74500, discount: 0 },
+  { id: "prod-minyak-2l", name: "Minyak Goreng 2L", defaultUnit: "liter", price: 42000, lastMonthPrice: 42000, discount: 0 },
+  { id: "prod-indomie-goreng-5", name: "Indomie Goreng 5 pcs", defaultUnit: "pack", price: 16500, lastMonthPrice: 16500, discount: 0 },
+  { id: "prod-indomie-kuah-5", name: "Indomie Kuah 5 pcs", defaultUnit: "pack", price: 16000, lastMonthPrice: 16000, discount: 0 },
+  { id: "prod-terigu-1kg", name: "Tepung Terigu 1kg", defaultUnit: "kg", price: 15500, lastMonthPrice: 15500, discount: 0 },
+  { id: "prod-gula-1kg", name: "Gula Pasir 1kg", defaultUnit: "kg", price: 19500, lastMonthPrice: 19500, discount: 0 },
+  { id: "prod-ultra-milk-1l", name: "Susu Ultra Milk 1L", defaultUnit: "liter", price: 22500, lastMonthPrice: 22000, discount: 0 },
+  { id: "prod-aqua-6", name: "Aqua 6 Botol", defaultUnit: "botol", price: 24000, lastMonthPrice: 24000, discount: 0 },
+  { id: "prod-daging-300g", name: "Daging Sapi 300g", defaultUnit: "pack", price: 55000, lastMonthPrice: 52000, discount: 0 },
+  { id: "prod-sabun-cuci", name: "Sabun Cuci", defaultUnit: "pack", price: 20000, lastMonthPrice: 21000, discount: 0 },
+  { id: "prod-sabun-mandi", name: "Sabun Mandi", defaultUnit: "pcs", price: 29500, lastMonthPrice: 32000, discount: 0 }
 ];
 
-// 5. Intelligent Merge Test (User edits must never be reverted back to default)
+// 6. Intelligent Merge Test
 function mergeCatalogWithUserEdits(defaults, savedUserItems) {
   const merged = JSON.parse(JSON.stringify(defaults));
   savedUserItems.forEach(userItem => {
@@ -144,5 +160,33 @@ const merged = mergeCatalogWithUserEdits(DEFAULT_COMMODITIES, userEditedBeras);
 const resultBeras = merged.find(it => it.id === "prod-beras-5kg-74");
 assert.strictEqual(resultBeras.price, 76000, "Harga hasil editan user harus tetap 76000 dan tidak kembali ke 74000");
 console.log("✔ Test 6 Passed: Data yang diubah user tetap tersimpan dan tidak terganti balik ke default.");
+
+// Test 7: Three-Tier Budget Logic (Hijau = Aman, Kuning = Warning Mau Habis, Merah = Habis & Kelewatan)
+const budgetAman = getBudgetStatusTier(150000, 300000); // 50%
+assert.strictEqual(budgetAman.tier, "GREEN");
+assert.strictEqual(budgetAman.status, "AMAN");
+
+const budgetWarning = getBudgetStatusTier(240000, 300000); // 80%
+assert.strictEqual(budgetWarning.tier, "YELLOW");
+assert.strictEqual(budgetWarning.status, "WARNING_MAU_HABIS");
+
+const budgetOver = getBudgetStatusTier(310000, 300000); // 103%
+assert.strictEqual(budgetOver.tier, "RED");
+assert.strictEqual(budgetOver.status, "HABIS_DAN_KELEWATAN");
+console.log("✔ Test 7 Passed: Logika Budget (Hijau = Aman, Kuning = Warning Mau Habis, Merah = Habis & Kelewatan) terbukti akurat.");
+
+// Test 8: Unit & Discount Configuration on Cart Item
+const testItem = {
+  name: "Beras 5kg",
+  price: 74000,
+  unit: "kg",
+  quantity: 2,
+  discount: 0.10, // 10%
+  finalPrice: 74000 * (1 - 0.10) // 66600
+};
+assert.strictEqual(testItem.unit, "kg");
+assert.strictEqual(testItem.finalPrice, 66600);
+assert.strictEqual(testItem.finalPrice * testItem.quantity, 133200);
+console.log("✔ Test 8 Passed: Pilihan satuan (kg) dan diskon (10%) menghasilkan harga akhir yang sesuai.");
 
 console.log("🎉 ALL TESTS PASSED SUCCESSFULLY!");

@@ -1,76 +1,53 @@
 # GroceryIn - Smart Grocery & Budget Safety Tracker (PWA)
 
-Aplikasi web mobile PWA bergaya *native app* dengan palet warna **Cream / Coklat Muda Estetik**, dirancang khusus untuk seorang **siswa rantau** yang belanja bulanan sambil mendorong troli supermarket.
+Aplikasi web mobile PWA bergaya *native app* dengan tema **Sleek Black & Vibrant Crimson Red**, dirancang khusus untuk seorang **siswa rantau** yang belanja bulanan sambil mendorong troli supermarket.
 
 ---
 
-## 🌟 Fitur Utama & Alur Pengguna
+## 🌟 Fitur Utama & Pembaruan
 
-### 1. 📱 Format Tampilan Mobile (Rasio 9:16 / 430px : 764px)
-- **Desain Mobile UI**: Dibatasi maksimal `430px` dan berada tepat di tengah layar jika dibuka lewat browser laptop/PC desktop dengan frame ponsel pintar estetik.
-- **PWA (Progressive Web App)**: Dilengkapi `manifest.json`, icon multi-resolusi, dan Service Worker (`sw.js`) untuk dukungan *Add to Home Screen* dan mode *offline*.
-- **Palet Warna Cream & Coklat Muda Estetik**:
-  - Background: `#FAF6F0` (warm cream)
-  - Surface: `#FFFFFF` dan `#F5EBE0` (soft latte foam)
-  - Aksen: `#8C6239` (warm caramel brown) dan `#5E3D21` (kopi moka pekat)
-  - Teks: `#2C221E` (espresso dark roast)
+### 1. 🎨 Tema Hitam & Merah (Black & Crimson Red Edition)
+- **Background Hitam Pekat**: `#000000` dan `#0C0C0E` dengan permukaan kartu `#141418`.
+- **Aksen Merah Crimson**: Tombol aksi, badge, outline kartu troli belanja, dan icon navigasi beraksen merah tajam (`#DC2626` / `#EF4444`).
+- **Desain Mobile UI 430px Centered**: Tampilan smartphone optimal di rasio 9:16 yang berada di tengah layar jika dibuka via browser laptop/PC desktop.
 
 ---
 
-### 2. 🏪 Pemilihan Supermarket & Kunci Budget (Setup Awal)
-1. **Pemilihan Daerah & Lokasi Supermarket**:
-   - Pilihan daerah: **Jakarta Barat (Puri Indah)**, **Jabodetabek / Jakarta**, **Bandung**, **Yogyakarta**, **Surabaya**, **Malang**, **Semarang**, **Medan**, **Bali**.
-   - Lokasi supermarket unggulan: **Lotte Mart Grocery - Puri Indah**, serta pilihan **Family Mart**, **Indomaret**, **Alfamart**, dan **Alfamidi** yang disaring otomatis sesuai ketersediaan di daerah yang dipilih.
-2. **Batas Budget Belanja (Safety Cap)**:
-   - Nominal uang maksimal yang menjadi pembatas belanja.
-   - **TIDAK BISA DIUBAH** setelah masuk ke tab berbelanja demi disiplin keuangan anak rantau.
-3. **Tombol "Confirm"**:
-   - Mengambil data katalog harga, promo diskon, dan fluktuasi harga acuan bulan lalu dari supermarket yang dipilih.
+### 2. 🚦 Tiga Tingkat Status Indikator Budget
+- **🟢 HIJAU (Masih Aman)**:
+  - Muncul saat pengeluaran belanja masih jauh di bawah batas budget (sisa budget dompet $> 25\%$).
+  - Status teks: `✅ Masih Aman (XX% terpakai)`.
+- **🟡 KUNING (Warning / Mau Habis)**:
+  - Muncul sebagai peringatan dini saat total belanjaan sudah mendekati limit (sisa budget dompet $\le 25\%$, pengeluaran $\ge 75\%$).
+  - Status teks: `⚠️ Warning: Budget hampir habis! (XX% terpakai)`.
+- **🔴 MERAH (Habis & Kelewatan)**:
+  - Muncul saat total belanjaan sudah mencapai atau melampaui sisa budget (sisa budget $\le 0$, pengeluaran $\ge 100\%$).
+  - Status teks: `🚨 Budget Habis & Kelewatan (+Rp XXX)!`.
 
 ---
 
-### 3. 🏠 Homepage Layout & Navigasi
-- **3 Tab di Kiri Atas**:
-  - **Store**: Tab berbelanja & melihat katalog barang.
-  - **List**: Tab troli aktif dengan counter badge jumlah barang.
-  - **History**: Tab riwayat transaksi yang sudah di-checkout.
-- **Diatas Kanan**:
-  - **Nominal Sisa Budget**: Menampilkan sisa budget secara realtime (`Sisa: Rp ...`).
-  - **Tombol "Log out"**: Berfungsi jika ada kesalahan input uang atau ingin berganti supermarket.
-- **Store Location Sub-Bar**:
-  - Menampilkan nama supermarket & cabang (misal: `🏬 Lotte Mart Grocery - Puri Indah • Jakarta Barat`).
-  - Tombol **`+ Tambah / Edit Barang`** untuk mengelola atau mengubah harga barang secara realtime.
-- **Floating Bottom Navigation Bar**:
-  - Menu melayang di bagian bawah dengan ikon Lucide untuk kenyamanan akses satu jempol tangan.
+### 3. 📏 Pilihan Satuan (Unit) Fleksibel Saat Ditambah ke List
+- Saat menekan tombol **"+ Add to list"** pada barang di katalog atau tombol **"✏️ Atur"** pada kartu troli:
+  - Pengguna dapat memilih satuan: **`kg`**, **`pcs`**, **`liter`**, **`pack`**, **`botol`**, **`gram`**, **`ml`**, **`ikat`**, atau **`Lainnya...`** (*ketik satuan custom seperti: dus, kaleng, butir, renteng*).
+  - Tentukan jumlah kuantitas dengan stepper `− [Qty] +` atau tombol cepat `+1`, `+2`, `+5`.
 
 ---
 
-### 4. 🏬 Tab 1: Store (Katalog Barang & Fluktuasi Harga)
-- Format tiles vertikal yang dapat di-scroll dari atas ke bawah:
-  - **Foto Barang**
-  - **Nama Barang**
-  - **Harga - Diskon - Harga2 - Emote**:
-    - **Harga**: Harga asli (dicoret & berubah abu-abu jika ada diskon).
-    - **Diskon**: Persentase potongan (misal: `-10%`, `-20%`).
-    - **Harga2**: Harga efektif setelah diskon dengan rumus:  
-      $$\text{Harga2} = \text{Harga} - (\text{Diskon} \times \text{Harga})$$
-    - **Emote Fluktuasi vs Bulan Lalu**:
-      - 🔺 **`⬆` (Merah)**: Jika harga produk meningkat dibanding bulan lalu.
-      - 🔻 **`⬇︎` (Hijau)**: Jika harga produk menurun dibanding bulan lalu (pilihan hemat).
-      - ⚖️ **`=` (Abu-abu)**: Jika harga produk stabil / sama dengan bulan lalu.
-  - **Tombol "Add to list"**:
-    - Menambahkan barang ke troli dan memotong sisa budget secara *realtime*.
-    - **Aturan Budget Habis**: Jika sisa budget tidak cukup, tombol otomatis dinonaktifkan (*disabled*) dan muncul peringatan untuk mengurangi barang di List terlebih dahulu.
-  - **Tombol Edit (✏️)**:
-    - Tersemat pada setiap kartu barang untuk mengubah harga, diskon, atau acuan bulan lalu secara langsung di toko.
+### 4. 🏷️ Pilihan Diskon Bebas & Harga Menyesuaikan
+- **Pilihan Preset Diskon**: `0% (Normal)`, `5%`, `10%`, `15%`, `20%`, `25%`, `50%`, atau persentase kustom.
+- **Mode Diskon Nominal (Rp)**: Masukkan langsung potongan harga dalam rupiah per satuan (misal: `-Rp 5.000/kg`).
+- **Kalkulasi Otomatis (Harga Menyesuaikan Diskon)**:
+  - Rumus harga efektif:  
+    $$\text{Harga2} = \text{Harga} - (\text{Diskon} \times \text{Harga})$$
+  - Menghitung total belanja per item: $\text{Total Item} = \text{Harga2} \times \text{Qty}$.
+  - Pengecekan realtime terhadap sisa budget sebelum barang dimasukkan ke list.
 
 ---
 
-### 5. 📦 Daftar Barang Default & Fluktuasi Acuan Pasar
-Aplikasi dilengkapi 14 komoditas bahan pokok default:
-1. **Beras 5kg**: Rp 74.000 *(Bulan lalu Rp 68.000 &rarr; 🔺 Naik: Panah Merah Atas `⬆`)*
-2. **Telur 1kg**: Rp 28.000 *(Bulan lalu Rp 32.000 &rarr; 🔻 Turun: Panah Hijau Bawah `⬇︎`, Tanpa Diskon)*
-3. **Garam 500g**: Rp 5.000 *(Bulan lalu Rp 5.000 &rarr; ⚖️ Setara: Tanda Setara Abu-abu `= `)*
+### 5. 🏬 14 Komoditas Sembako Default & Fluktuasi Harga
+1. **Beras 5kg**: Rp 74.000 (bulan lalu Rp 68.000 $\rightarrow$ `⬆` Merah Naik)
+2. **Telur 1kg (Tanpa Diskon)**: Rp 28.000 (bulan lalu Rp 32.000 $\rightarrow$ `⬇︎` Hijau Turun)
+3. **Garam 500g**: Rp 5.000 (bulan lalu Rp 5.000 $\rightarrow$ `=` Abu-abu Setara)
 4. **Beras 5kg (Premium)**: Rp 74.500
 5. **Minyak Goreng 2L**: Rp 42.000
 6. **Indomie Goreng 5 pcs**: Rp 16.500
@@ -83,49 +60,20 @@ Aplikasi dilengkapi 14 komoditas bahan pokok default:
 13. **Sabun Cuci**: Rp 20.000
 14. **Sabun Mandi**: Rp 29.500
 
-> 🛡️ **Jaminan Database Realtime**:  
-> Semua data di atas adalah nilai default. Pengguna dapat mengubah nama, harga saat ini, harga bulan lalu, maupun diskon secara realtime. Data yang sudah diubah **akan tersimpan permanen di database perangkat (`localStorage`)**. Ketika ada pembaruan atau perbaikan kode aplikasi, **data hasil editan pengguna TIDAK AKAN terganti atau kembali ke default**, melainkan tetap mempertahankan perubahan terakhir pengguna.
+---
+
+### 6. 🏪 Pemilihan Supermarket & Daerah
+- Daerah: **Jakarta Barat (Puri Indah)**, **Jabodetabek / Jakarta**, **Bandung**, **Yogyakarta**, **Surabaya**, **Malang**, **Semarang**, **Medan**, **Bali**.
+- Supermarket: **Lotte Mart Grocery - Puri Indah**, **Indomaret**, **Alfamart**, **Alfamidi**, dan **Family Mart**.
 
 ---
 
-### 6. 🛒 Tab 2: List (Troli Belanja & Ceklis)
-- Format kartu belanja:
-  ```
-  X --------------------
-   |Gambar barang| Nama barang
-   |             |
-   |             | Hargatotal   quantity -[]+
-    ---------------------
-  ```
-  - **`X`**: Tombol hapus item dari list (mengembalikan uang kembali ke sisa budget).
-  - **`Hargatotal`**: Subtotal harga barang ($\text{Harga2} \times \text{Quantity}$).
-  - **`quantity -[]+`**: Stepper kuantitas ramah jempol. Kotak `[]` dapat diketik manual maupun dinaik-turunkan dengan tombol minus (`-`) dan plus (`+`).
-- **Bottom Bar (Border Hitam, Fading Color & Checkout)**:
-  - Di bagian paling bawah terdapat border berwarna hitam yang memunculkan **Total Harga Belanja**.
-  - **Transisi Warna (*Fading Color Transition*)**: Semakin dekat total harga dengan batas budget, warna font yang awalnya **Hijau** memudar transisi menjadi **Kuning &rarr; Oranye &rarr; Merah Pekat** saat budget sudah habis.
-  - **Tombol "Checkout"**: Mengunci list belanja, menampilkan struk belanja kasir (*Receipt Printable*), mengarsipkan transaksi ke tab History, dan mengosongkan troli aktif.
-
----
-
-### 7. 📜 Tab 3: History (Riwayat Belanja)
-- Menyimpan seluruh transaksi belanja yang telah di-checkout lengkap dengan tanggal, supermarket, dan jumlah uang yang dibelanjakan.
-- Format tiles riwayat:
-  ```
-  Today/Yesterday/Tanggal - Total Harga
-   --------------------
-   |Gambar barang| Nama barang
-   |             |
-   |             | Hargatotal   [] quantity 
-    ---------------------
-  ```
-
----
-
-## 🚀 Cara Menjalankan
-
-1. Buka file `index.html` langsung di browser favorit Anda (Chrome, Edge, Safari, Firefox), atau
-2. Jalankan server lokal:
-   ```powershell
-   node server.js
-   ```
-   Lalu buka URL: `http://localhost:3000/`
+### 7. 🛒 Tab List Belanja (Kartu Berbingkai Merah) & Checkout
+- Format kartu list:
+  - Indeks urutan item (`Item #1`, `Item #2`).
+  - Badge satuan: `[Qty] [Satuan]` (contoh: `2 kg` atau `1 liter`).
+  - Badge diskon jika ada potongan.
+  - Stepper `- [Qty] +`.
+  - Tombol **`✏️ Atur`** untuk mengubah satuan/diskon sewaktu-waktu.
+  - Tombol **`✕`** untuk menghapus dan mengembalikan saldo ke budget.
+  - Tombol **Checkout** yang mengunci list dan menerbitkan struk kasir (*printable receipt*) ke tab **History**.

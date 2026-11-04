@@ -1,16 +1,19 @@
 /**
  * GROCERYIN - SMART GROCERY & BUDGET SAFETY TRACKER
- * Native Mobile PWA Edition for Anak Rantau
+ * Native Mobile PWA Edition - Sleek Black Background & Vibrant Crimson Red Accents
  * 
  * Features:
  * - Dynamic Supermarket Filtering by City (Lotte Mart Grocery - Puri Indah, Indomaret, Alfamart, Alfamidi, Family Mart)
  * - Locked Initial Budget Enforcement (Safety Cap)
- * - Live Remaining Budget Updates across Store & List tabs
- * - Fading Color Transition (Green -> Yellow/Orange -> Full Red as budget exhausts)
- * - Add to list with automatic budget check & block when out of budget
+ * - Three-Tier Budget Status Indicators:
+ *   * HIJAU: Masih aman (pengeluaran < 75%, sisa budget > 25%)
+ *   * KUNING: Warning, artinya sudah mau habis (pengeluaran 75% - 99%, sisa budget <= 25%)
+ *   * MERAH: Sudah habis dan kelewatan (pengeluaran >= 100%, over-budget)
+ * - Modal Penentuan Satuan (kg, pcs, liter, pack, botol, gram, ml, ikat, custom)
+ * - Modal Pemilihan Diskon Fleksibel (Preset %, Custom %, atau Nominal Rp) dengan kalkulasi harga otomatis
  * - Interactive Quantity Stepper (-[]+) & X delete with budget refund
  * - Checkout locking list & archiving to History with printable receipt
- * - Realtime Product & Price Editor with Permanent Database Persistence (never reverted on updates)
+ * - Realtime Product & Price Editor with Permanent Database Persistence
  * - Fluctuation Emotes: ⬆ (Merah Naik), ⬇︎ (Hijau Turun), = (Abu-abu Setara)
  */
 
@@ -70,27 +73,13 @@ const CITY_SUPERMARKETS = {
   ]
 };
 
-// ==================== 2. DEFAULT COMMODITY PRODUCTS ====================
-// Default items tailored per user instructions:
-// - Beras 5kg: Rp 74.000 (bulan lalu 68.000 -> ⬆ Merah)
-// - Telur 1kg: Rp 28.000 (bulan lalu 32.000 -> ⬇︎ Hijau, tanpa diskon)
-// - Garam 500g: Rp 5.000 (bulan lalu 5.000 -> = Abu-abu)
-// - Beras 5kg: Rp 74.500
-// - Minyak goreng 2L: Rp 42.000
-// - Indomie Goreng 5 pcs: Rp 16.500
-// - Indomie kuah 5 pcs: Rp 16.000
-// - Tepung terigu 1kg: Rp 15.500
-// - Gula pasir 1kg: Rp 19.500
-// - Susu ultra milk 1L: Rp 22.500
-// - Aqua 6 botol: Rp 24.000
-// - Daging sapi 300g: Rp 55.000
-// - Sabun cuci: Rp 20.000
-// - Sabun mandi: Rp 29.500
+// ==================== 2. DEFAULT COMMODITY PRODUCTS (14 ITEMS) ====================
 const DEFAULT_COMMODITIES = [
   {
     id: "prod-beras-5kg-74",
     name: "Beras 5kg",
     category: "Sembako",
+    defaultUnit: "kg",
     price: 74000,
     lastMonthPrice: 68000, // ⬆ Merah (Naik dari 68rb jadi 74rb)
     discount: 0,
@@ -100,6 +89,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-telur-1kg",
     name: "Telur 1kg (Tanpa Diskon)",
     category: "Sembako",
+    defaultUnit: "kg",
     price: 28000,
     lastMonthPrice: 32000, // ⬇︎ Hijau (Turun dari 32rb jadi 28rb)
     discount: 0,
@@ -109,6 +99,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-garam-500g",
     name: "Garam 500g",
     category: "Dapur & Masak",
+    defaultUnit: "pack",
     price: 5000,
     lastMonthPrice: 5000, // = Abu-abu (Setara / Sama dengan bulan lalu)
     discount: 0,
@@ -118,6 +109,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-beras-5kg-745",
     name: "Beras 5kg (Premium)",
     category: "Sembako",
+    defaultUnit: "pack",
     price: 74500,
     lastMonthPrice: 74500, // = Abu-abu
     discount: 0,
@@ -127,6 +119,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-minyak-2l",
     name: "Minyak Goreng 2L",
     category: "Sembako",
+    defaultUnit: "liter",
     price: 42000,
     lastMonthPrice: 42000, // = Abu-abu
     discount: 0,
@@ -136,6 +129,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-indomie-goreng-5",
     name: "Indomie Goreng 5 pcs",
     category: "Mie & Instan",
+    defaultUnit: "pack",
     price: 16500,
     lastMonthPrice: 15500, // ⬆ Merah
     discount: 0,
@@ -145,6 +139,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-indomie-kuah-5",
     name: "Indomie Kuah 5 pcs",
     category: "Mie & Instan",
+    defaultUnit: "pack",
     price: 16000,
     lastMonthPrice: 15000, // ⬆ Merah
     discount: 0,
@@ -154,6 +149,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-terigu-1kg",
     name: "Tepung Terigu 1kg",
     category: "Dapur & Masak",
+    defaultUnit: "kg",
     price: 15500,
     lastMonthPrice: 15500, // = Abu-abu
     discount: 0,
@@ -163,6 +159,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-gula-1kg",
     name: "Gula Pasir 1kg",
     category: "Sembako",
+    defaultUnit: "kg",
     price: 19500,
     lastMonthPrice: 18000, // ⬆ Merah
     discount: 0,
@@ -172,6 +169,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-ultra-milk-1l",
     name: "Susu Ultra Milk 1L",
     category: "Minuman",
+    defaultUnit: "liter",
     price: 22500,
     lastMonthPrice: 22000, // ⬆ Merah
     discount: 0,
@@ -181,6 +179,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-aqua-6",
     name: "Aqua 6 Botol",
     category: "Minuman",
+    defaultUnit: "botol",
     price: 24000,
     lastMonthPrice: 24000, // = Abu-abu
     discount: 0,
@@ -190,6 +189,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-daging-300g",
     name: "Daging Sapi 300g",
     category: "Sembako",
+    defaultUnit: "pack",
     price: 55000,
     lastMonthPrice: 52000, // ⬆ Merah
     discount: 0,
@@ -199,6 +199,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-sabun-cuci",
     name: "Sabun Cuci",
     category: "Kebersihan",
+    defaultUnit: "pack",
     price: 20000,
     lastMonthPrice: 21000, // ⬇︎ Hijau
     discount: 0,
@@ -208,6 +209,7 @@ const DEFAULT_COMMODITIES = [
     id: "prod-sabun-mandi",
     name: "Sabun Mandi",
     category: "Kebersihan",
+    defaultUnit: "pcs",
     price: 29500,
     lastMonthPrice: 32000, // ⬇︎ Hijau
     discount: 0,
@@ -215,12 +217,10 @@ const DEFAULT_COMMODITIES = [
   }
 ];
 
-// Helper to generate full catalog for any store
 function buildDefaultCatalogForStore() {
   return JSON.parse(JSON.stringify(DEFAULT_COMMODITIES));
 }
 
-// Master Default Catalog Map
 const INITIAL_MASTER_CATALOG = {
   "Lotte Mart Grocery - Puri Indah": buildDefaultCatalogForStore(),
   "Lotte Mart Grocery": buildDefaultCatalogForStore(),
@@ -233,7 +233,6 @@ const INITIAL_MASTER_CATALOG = {
 // ==================== 3. GROCERYIN APP ENGINE ====================
 class SmartGroceryApp {
   constructor() {
-    // Storage keys
     this.STORAGE_SESSION = "groceryin_rantau_session";
     this.STORAGE_CART = "groceryin_rantau_cart";
     this.STORAGE_HISTORY = "groceryin_rantau_history";
@@ -245,16 +244,24 @@ class SmartGroceryApp {
     this.initialBudget = 300000;
     this.isSessionLocked = false;
 
-    this.catalog = {}; // Stores items per supermarket
-    this.cart = []; // [{ id, name, price, discount, finalPrice, quantity, image, supermarket }]
-    this.history = []; // [{ id, date, store, city, totalSpent, initialBudget, items: [] }]
-    
-    this.currentTab = "store"; // store, list, history
+    this.catalog = {};
+    this.cart = [];
+    this.history = [];
+
+    this.currentTab = "store";
     this.currentCategory = "ALL";
+
+    // State untuk Add/Edit Item to List Modal (Satuan, Qty, Diskon)
+    this.modalProductId = null;
+    this.editingCartItemId = null;
+    this.modalUnit = "pcs";
+    this.modalQuantity = 1;
+    this.modalDiscountMode = "percent"; // "percent" atau "nominal"
+    this.modalDiscountValue = 0;
 
     this.initDOM();
     this.initPWA();
-    this.loadCatalogDatabase(); // Load & merge without ever reverting user changes
+    this.loadCatalogDatabase();
     this.initEvents();
     this.loadState();
   }
@@ -270,17 +277,14 @@ class SmartGroceryApp {
     }
   }
 
-  // ==================== DATABASE CATALOG LOADER (PRESERVES USER EDITS) ====================
+  // ==================== DATABASE CATALOG LOADER ====================
   loadCatalogDatabase() {
-    // 1. Start with fresh defaults
     this.catalog = JSON.parse(JSON.stringify(INITIAL_MASTER_CATALOG));
 
-    // 2. Load saved modifications from localStorage
     const savedCatalogJson = localStorage.getItem(this.STORAGE_CUSTOM_CATALOG);
     if (savedCatalogJson) {
       try {
         const savedCatalog = JSON.parse(savedCatalogJson);
-        // Merge intelligently: user edits override defaults, never lose customized prices/items!
         for (const storeName of Object.keys(savedCatalog)) {
           if (!this.catalog[storeName]) {
             this.catalog[storeName] = savedCatalog[storeName];
@@ -289,24 +293,21 @@ class SmartGroceryApp {
             savedItems.forEach(savedItem => {
               const defIdx = this.catalog[storeName].findIndex(it => it.id === savedItem.id);
               if (defIdx !== -1) {
-                // Override with user's modified price, lastMonthPrice, discount, name, etc.
                 this.catalog[storeName][defIdx] = {
                   ...this.catalog[storeName][defIdx],
                   ...savedItem
                 };
               } else {
-                // User added custom item
                 this.catalog[storeName].push(savedItem);
               }
             });
           }
         }
       } catch (e) {
-        console.warn("Error parsing saved catalog, using defaults with safe fallback:", e);
+        console.warn("Error parsing saved catalog, fallback to defaults:", e);
       }
     }
 
-    // Save back to ensure consistency
     this.saveCatalogDatabase();
   }
 
@@ -369,7 +370,7 @@ class SmartGroceryApp {
     this.btnConfirmSetup = document.getElementById("btnConfirmSetup");
     this.btnConfirmText = document.getElementById("btnConfirmText");
 
-    // Realtime Product Edit Modal Elements
+    // Realtime Product Edit Modal Elements (Katalog Editor)
     this.productEditModalBackdrop = document.getElementById("productEditModalBackdrop");
     this.modalProductTitle = document.getElementById("modalProductTitle");
     this.editProductId = document.getElementById("editProductId");
@@ -383,6 +384,38 @@ class SmartGroceryApp {
     this.btnSaveProductChanges = document.getElementById("btnSaveProductChanges");
     this.btnCancelProductChanges = document.getElementById("btnCancelProductChanges");
     this.btnCloseProductModal = document.getElementById("btnCloseProductModal");
+
+    // Modal Add / Edit Item to List (Satuan, Quantity, Diskon)
+    this.addItemModalOverlay = document.getElementById("addItemModalOverlay");
+    this.addItemModal = document.getElementById("addItemModal");
+    this.addItemModalTitle = document.getElementById("addItemModalTitle");
+    this.btnCloseAddItemModal = document.getElementById("btnCloseAddItemModal");
+    this.modalProductImg = document.getElementById("modalProductImg");
+    this.modalProductName = document.getElementById("modalProductName");
+    this.modalProductCategory = document.getElementById("modalProductCategory");
+    this.modalProductBasePrice = document.getElementById("modalProductBasePrice");
+    this.unitChipsContainer = document.getElementById("unitChipsContainer");
+    this.customUnitWrap = document.getElementById("customUnitWrap");
+    this.customUnitInput = document.getElementById("customUnitInput");
+    this.currentSelectedUnitDisplay = document.getElementById("currentSelectedUnitDisplay");
+    this.btnModalQtyMinus = document.getElementById("btnModalQtyMinus");
+    this.inputModalQuantity = document.getElementById("inputModalQuantity");
+    this.btnModalQtyPlus = document.getElementById("btnModalQtyPlus");
+    this.discountCalculatedPreview = document.getElementById("discountCalculatedPreview");
+    this.btnModePercent = document.getElementById("btnModePercent");
+    this.btnModeNominal = document.getElementById("btnModeNominal");
+    this.discountPresetsContainer = document.getElementById("discountPresetsContainer");
+    this.discountPrefixSymbol = document.getElementById("discountPrefixSymbol");
+    this.inputModalDiscount = document.getElementById("inputModalDiscount");
+    this.discountFieldHint = document.getElementById("discountFieldHint");
+    this.modalSummaryOriginalPrice = document.getElementById("modalSummaryOriginalPrice");
+    this.modalSummaryDiscountAmount = document.getElementById("modalSummaryDiscountAmount");
+    this.modalSummaryFinalTotal = document.getElementById("modalSummaryFinalTotal");
+    this.modalSummaryRemainingBudget = document.getElementById("modalSummaryRemainingBudget");
+    this.modalBudgetWarningBanner = document.getElementById("modalBudgetWarningBanner");
+    this.btnCancelAddItem = document.getElementById("btnCancelAddItem");
+    this.btnConfirmAddItem = document.getElementById("btnConfirmAddItem");
+    this.btnConfirmAddItemText = document.getElementById("btnConfirmAddItemText");
 
     // Receipt Modal
     this.receiptModalBackdrop = document.getElementById("receiptModalBackdrop");
@@ -433,7 +466,7 @@ class SmartGroceryApp {
     // 4. Logout / Ganti Toko & Budget
     this.btnLogout.addEventListener("click", () => this.handleLogout());
 
-    // 5. Tab Navigation (Top Tabs & Floating Bottom Bar)
+    // 5. Tab Navigation
     this.topTabStore.addEventListener("click", () => this.switchTab("store"));
     this.topTabList.addEventListener("click", () => this.switchTab("list"));
     this.topTabHistory.addEventListener("click", () => this.switchTab("history"));
@@ -482,14 +515,14 @@ class SmartGroceryApp {
       }
     });
 
-    // 9. Receipt Modal actions
+    // 9. Receipt Modal
     this.btnReceiptPrint.addEventListener("click", () => window.print());
     this.btnReceiptClose.addEventListener("click", () => {
       this.receiptModalBackdrop.classList.add("hidden");
       this.switchTab("history");
     });
 
-    // 10. Realtime Product Edit Modal Listeners
+    // 10. Realtime Product Edit Modal Listeners (Katalog Editor)
     this.btnOpenAddProduct.addEventListener("click", () => this.openAddProductModal());
     this.btnCloseProductModal.addEventListener("click", () => this.closeProductModal());
     this.btnCancelProductChanges.addEventListener("click", () => this.closeProductModal());
@@ -502,11 +535,143 @@ class SmartGroceryApp {
       e.preventDefault();
       this.saveProductChanges();
     });
+
+    // 11. Modal Add / Edit to List Events (Satuan, Quantity, Diskon)
+    this.initAddItemModalEvents();
+  }
+
+  // ==================== MODAL ADD / EDIT ITEM TO LIST EVENTS ====================
+  initAddItemModalEvents() {
+    this.btnCloseAddItemModal.addEventListener("click", () => this.closeAddItemModal());
+    this.btnCancelAddItem.addEventListener("click", () => this.closeAddItemModal());
+
+    // Unit selection chips (pcs, kg, liter, pack, botol, gram, ml, ikat, custom)
+    this.unitChipsContainer.querySelectorAll(".unit-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        this.unitChipsContainer.querySelectorAll(".unit-chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        const unitVal = chip.getAttribute("data-unit");
+
+        if (unitVal === "custom") {
+          this.customUnitWrap.classList.remove("hidden");
+          this.customUnitInput.focus();
+          this.modalUnit = this.customUnitInput.value.trim() || "unit";
+        } else {
+          this.customUnitWrap.classList.add("hidden");
+          this.modalUnit = unitVal;
+        }
+
+        this.currentSelectedUnitDisplay.textContent = this.modalUnit;
+        this.recalculateModalPricing();
+      });
+    });
+
+    this.customUnitInput.addEventListener("input", () => {
+      this.modalUnit = this.customUnitInput.value.trim() || "unit";
+      this.currentSelectedUnitDisplay.textContent = this.modalUnit;
+      this.recalculateModalPricing();
+    });
+
+    // Quantity Stepper
+    this.btnModalQtyMinus.addEventListener("click", () => {
+      if (this.modalQuantity > 1) {
+        this.modalQuantity -= 1;
+        this.inputModalQuantity.value = this.modalQuantity;
+        this.recalculateModalPricing();
+      }
+    });
+
+    this.btnModalQtyPlus.addEventListener("click", () => {
+      this.modalQuantity += 1;
+      this.inputModalQuantity.value = this.modalQuantity;
+      this.recalculateModalPricing();
+    });
+
+    this.inputModalQuantity.addEventListener("input", () => {
+      let val = parseInt(this.inputModalQuantity.value, 10);
+      if (isNaN(val) || val < 1) val = 1;
+      this.modalQuantity = val;
+      this.recalculateModalPricing();
+    });
+
+    // Quick quantity chips (+1, +2, +5)
+    document.querySelectorAll(".btn-quick-qty").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const add = parseInt(btn.getAttribute("data-add"), 10) || 1;
+        this.modalQuantity += add;
+        this.inputModalQuantity.value = this.modalQuantity;
+        this.recalculateModalPricing();
+      });
+    });
+
+    // Discount Mode Toggle: Persen (%) vs Nominal (Rp)
+    this.btnModePercent.addEventListener("click", () => {
+      this.modalDiscountMode = "percent";
+      this.btnModePercent.classList.add("active");
+      this.btnModeNominal.classList.remove("active");
+      this.discountPrefixSymbol.textContent = "%";
+      this.discountPresetsContainer.style.display = "flex";
+      this.discountFieldHint.textContent = "Pilih preset diskon di atas atau ketik persentase diskon (0-100%).";
+      this.inputModalDiscount.placeholder = "0";
+      this.inputModalDiscount.value = this.modalDiscountValue;
+      this.recalculateModalPricing();
+    });
+
+    this.btnModeNominal.addEventListener("click", () => {
+      this.modalDiscountMode = "nominal";
+      this.btnModeNominal.classList.add("active");
+      this.btnModePercent.classList.remove("active");
+      this.discountPrefixSymbol.textContent = "Rp";
+      this.discountPresetsContainer.style.display = "none";
+      this.discountFieldHint.textContent = "Ketik potongan rupiah langsung per satuan (misal: 5000).";
+      this.inputModalDiscount.placeholder = "0";
+      this.inputModalDiscount.value = this.modalDiscountValue;
+      this.recalculateModalPricing();
+    });
+
+    // Discount Presets Chips
+    this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        const val = chip.getAttribute("data-disc");
+
+        if (val === "custom") {
+          this.inputModalDiscount.focus();
+        } else {
+          this.modalDiscountValue = parseFloat(val) || 0;
+          this.inputModalDiscount.value = this.modalDiscountValue;
+          this.recalculateModalPricing();
+        }
+      });
+    });
+
+    this.inputModalDiscount.addEventListener("input", () => {
+      const val = parseFloat(this.inputModalDiscount.value) || 0;
+      this.modalDiscountValue = val;
+
+      if (this.modalDiscountMode === "percent") {
+        this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(chip => {
+          const chipVal = chip.getAttribute("data-disc");
+          if (chipVal !== "custom") {
+            chip.classList.toggle("active", parseFloat(chipVal) === val);
+          } else {
+            const hasMatch = Array.from(this.discountPresetsContainer.querySelectorAll(".disc-preset-chip"))
+              .some(c => c.getAttribute("data-disc") !== "custom" && parseFloat(c.getAttribute("data-disc")) === val);
+            chip.classList.toggle("active", !hasMatch && val > 0);
+          }
+        });
+      }
+
+      this.recalculateModalPricing();
+    });
+
+    // Confirm button inside modal
+    this.btnConfirmAddItem.addEventListener("click", () => this.handleConfirmAddItem());
   }
 
   // ==================== STATE MANAGEMENT ====================
   loadState() {
-    // 1. Check existing locked session
     const savedSession = localStorage.getItem(this.STORAGE_SESSION);
     if (savedSession) {
       try {
@@ -523,7 +688,6 @@ class SmartGroceryApp {
       this.openSetupModal();
     }
 
-    // 2. Load Cart
     const savedCart = localStorage.getItem(this.STORAGE_CART);
     if (savedCart) {
       try {
@@ -533,7 +697,6 @@ class SmartGroceryApp {
       }
     }
 
-    // 3. Load History
     const savedHistory = localStorage.getItem(this.STORAGE_HISTORY);
     if (savedHistory) {
       try {
@@ -543,10 +706,7 @@ class SmartGroceryApp {
       }
     }
 
-    // 4. Update Header Displays
     this.updateHeaderStoreDisplay();
-
-    // 5. Initial Render
     this.updateBudgetAndCartUI();
     this.renderStoreProducts();
     this.renderCartList();
@@ -594,7 +754,6 @@ class SmartGroceryApp {
       return;
     }
 
-    // Feedback simulating fetching data from database
     this.btnConfirmText.textContent = `Mengunduh Data ${supermarket}...`;
     this.btnConfirmSetup.disabled = true;
 
@@ -604,13 +763,11 @@ class SmartGroceryApp {
       this.initialBudget = budgetVal;
       this.isSessionLocked = true;
 
-      // Ensure store has catalog
       if (!this.catalog[this.supermarket]) {
         this.catalog[this.supermarket] = buildDefaultCatalogForStore();
         this.saveCatalogDatabase();
       }
 
-      // Persist session
       const session = {
         city: this.city,
         supermarket: this.supermarket,
@@ -619,13 +776,10 @@ class SmartGroceryApp {
       };
       localStorage.setItem(this.STORAGE_SESSION, JSON.stringify(session));
 
-      // Reset cart if store changed
       this.cart = [];
       this.saveCart();
 
-      // UI updates
       this.updateHeaderStoreDisplay();
-
       this.btnConfirmText.textContent = "Confirm & Unduh Katalog";
       this.btnConfirmSetup.disabled = false;
       this.setupModalOverlay.classList.add("hidden");
@@ -636,7 +790,7 @@ class SmartGroceryApp {
       this.switchTab("store");
 
       this.showToast("✅", `Katalog ${this.supermarket} siap! Budget: ${this.formatRupiah(this.initialBudget)}`);
-    }, 450);
+    }, 350);
   }
 
   handleLogout() {
@@ -653,7 +807,6 @@ class SmartGroceryApp {
   switchTab(tabName) {
     this.currentTab = tabName;
 
-    // Toggle Tab Views
     const views = [
       { id: "viewStore", name: "store" },
       { id: "viewList", name: "list" },
@@ -665,7 +818,6 @@ class SmartGroceryApp {
       if (el) el.classList.toggle("active-view", v.name === tabName);
     });
 
-    // Toggle Top Nav Tab Buttons (di Kiri)
     const topButtons = [
       { el: this.topTabStore, name: "store" },
       { el: this.topTabList, name: "list" },
@@ -675,7 +827,6 @@ class SmartGroceryApp {
       if (b.el) b.el.classList.toggle("active", b.name === tabName);
     });
 
-    // Toggle Floating Bottom Nav Buttons
     const bottomButtons = [
       { el: this.bottomNavStore, name: "store" },
       { el: this.bottomNavList, name: "list" },
@@ -685,7 +836,6 @@ class SmartGroceryApp {
       if (b.el) b.el.classList.toggle("active", b.name === tabName);
     });
 
-    // On List view: show bottom summary bar with black border & checkout button!
     if (this.listBottomSummaryBar) {
       if (tabName === "list" && this.cart.length > 0) {
         this.listBottomSummaryBar.classList.remove("hidden");
@@ -700,7 +850,7 @@ class SmartGroceryApp {
     if (mainArea) mainArea.scrollTop = 0;
   }
 
-  // ==================== CALCULATION & LIVE BUDGET ====================
+  // ==================== CALCULATION & THREE-TIER BUDGET LOGIC ====================
   getTotalCartPrice() {
     return this.cart.reduce((sum, item) => sum + (item.finalPrice * item.quantity), 0);
   }
@@ -717,36 +867,21 @@ class SmartGroceryApp {
   }
 
   /**
-   * Hitung transisi warna font dari Hijau -> Kuning/Oranye -> Merah Pekat
-   * Sesuai ketentuan: semakin dekat total harga dengan budget, warna memudar transisi
-   * sebelum menjadi full merah saat budget sudah habis!
+   * Status Warna Budget:
+   * - HIJAU: Masih aman (pengeluaran < 75%)
+   * - KUNING: Warning yang artinya sudah mau habis (pengeluaran 75% - 99%)
+   * - MERAH: Sudah habis dan kelewatan (pengeluaran >= 100%, over-budget)
    */
   getDynamicBudgetColor(totalSpent, budget) {
-    if (budget <= 0) return "#DC2626";
-    const ratio = Math.min(1.0, totalSpent / budget);
-
-    let r, g, b;
-    if (ratio <= 0.6) {
-      // Interpolate from Green (22, 163, 74) to Amber (202, 138, 4)
-      const t = ratio / 0.6;
-      r = Math.round(22 + (202 - 22) * t);
-      g = Math.round(163 + (138 - 163) * t);
-      b = Math.round(74 + (4 - 74) * t);
-    } else if (ratio <= 0.85) {
-      // Interpolate from Amber (202, 138, 4) to Orange (234, 88, 12)
-      const t = (ratio - 0.6) / 0.25;
-      r = Math.round(202 + (234 - 202) * t);
-      g = Math.round(138 + (88 - 138) * t);
-      b = Math.round(4 + (12 - 4) * t);
+    if (budget <= 0) return "#EF4444";
+    const ratio = totalSpent / budget;
+    if (ratio >= 1.0) {
+      return "#EF4444"; // Merah: Habis dan kelewatan
+    } else if (ratio >= 0.75) {
+      return "#EAB308"; // Kuning: Warning mau habis
     } else {
-      // Interpolate from Orange (234, 88, 12) to Red (220, 38, 38)
-      const t = (ratio - 0.85) / 0.15;
-      r = Math.round(234 + (220 - 234) * t);
-      g = Math.round(88 + (38 - 88) * t);
-      b = Math.round(12 + (38 - 12) * t);
+      return "#22C55E"; // Hijau: Masih aman
     }
-
-    return `rgb(${r}, ${g}, ${b})`;
   }
 
   updateBudgetAndCartUI() {
@@ -756,18 +891,22 @@ class SmartGroceryApp {
 
     // 1. Live Remaining Budget in Top Header
     this.headerRemainingBudget.textContent = this.formatRupiah(remaining);
+
     if (remaining <= 0) {
-      this.liveBudgetPill.style.background = "#FEE2E2";
-      this.liveBudgetPill.style.borderColor = "#FCA5A5";
-      this.headerRemainingBudget.style.color = "#DC2626";
-    } else if (remaining < this.initialBudget * 0.2) {
-      this.liveBudgetPill.style.background = "#FEF9C3";
-      this.liveBudgetPill.style.borderColor = "#FDE047";
-      this.headerRemainingBudget.style.color = "#B45309";
+      // MERAH: Sudah habis dan kelewatan
+      this.liveBudgetPill.style.background = "rgba(239, 68, 68, 0.2)";
+      this.liveBudgetPill.style.borderColor = "#EF4444";
+      this.headerRemainingBudget.style.color = "#EF4444";
+    } else if (remaining <= this.initialBudget * 0.25) {
+      // KUNING: Warning, artinya sudah mau habis
+      this.liveBudgetPill.style.background = "rgba(234, 179, 8, 0.2)";
+      this.liveBudgetPill.style.borderColor = "#EAB308";
+      this.headerRemainingBudget.style.color = "#EAB308";
     } else {
-      this.liveBudgetPill.style.background = "#FFFFFF";
-      this.liveBudgetPill.style.borderColor = "#E8DFD4";
-      this.headerRemainingBudget.style.color = "#8C6239";
+      // HIJAU: Masih aman
+      this.liveBudgetPill.style.background = "rgba(34, 197, 94, 0.15)";
+      this.liveBudgetPill.style.borderColor = "#22C55E";
+      this.headerRemainingBudget.style.color = "#22C55E";
     }
 
     // 2. Tab Badges
@@ -779,26 +918,27 @@ class SmartGroceryApp {
       this.bottomNavListBadge.classList.add("hidden");
     }
 
-    // 3. List Bottom Summary Bar Styling & Fading Transition
+    // 3. List Bottom Summary Bar Styling
     this.listTotalPriceText.textContent = this.formatRupiah(totalSpent);
     const dynamicColor = this.getDynamicBudgetColor(totalSpent, this.initialBudget);
     this.listTotalPriceText.style.color = dynamicColor;
 
     if (totalSpent >= this.initialBudget) {
-      this.listBudgetStatusText.textContent = "🚨 Budget Habis! Hapus item untuk beli barang lain.";
-      this.listBudgetStatusText.style.color = "#DC2626";
-    } else if (totalSpent >= this.initialBudget * 0.8) {
-      this.listBudgetStatusText.textContent = `⚠️ Mendekati limit saku (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
-      this.listBudgetStatusText.style.color = "#B45309";
+      const overAmount = totalSpent - this.initialBudget;
+      this.listBudgetStatusText.textContent = overAmount > 0
+        ? `🚨 Budget Habis & Kelewatan (+${this.formatRupiah(overAmount)})!`
+        : `🚨 Budget Habis (100% terpakai)!`;
+      this.listBudgetStatusText.style.color = "#EF4444";
+    } else if (totalSpent >= this.initialBudget * 0.75) {
+      this.listBudgetStatusText.textContent = `⚠️ Warning: Budget hampir habis! (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
+      this.listBudgetStatusText.style.color = "#EAB308";
     } else {
-      this.listBudgetStatusText.textContent = `✅ Aman (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
-      this.listBudgetStatusText.style.color = "#16A34A";
+      this.listBudgetStatusText.textContent = `✅ Masih Aman (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
+      this.listBudgetStatusText.style.color = "#22C55E";
     }
 
-    // Checkout button enabled if cart has items
     this.btnCheckoutList.disabled = (this.cart.length === 0);
 
-    // Refresh visibility of bottom summary bar if currently on list tab
     if (this.currentTab === "list") {
       if (this.cart.length > 0) {
         this.listBottomSummaryBar.classList.remove("hidden");
@@ -812,28 +952,40 @@ class SmartGroceryApp {
 
   // ==================== TAB 1: RENDER STORE PRODUCTS ====================
   getCurrentStoreProducts() {
-    if (!this.catalog[this.supermarket]) {
+    if (!this.catalog[this.supermarket] || !Array.isArray(this.catalog[this.supermarket]) || this.catalog[this.supermarket].length === 0) {
       this.catalog[this.supermarket] = buildDefaultCatalogForStore();
+      this.saveCatalogDatabase();
     }
     return this.catalog[this.supermarket];
   }
 
   renderStoreProducts() {
+    if (!this.productTilesContainer) {
+      this.productTilesContainer = document.getElementById("productTilesContainer");
+      if (!this.productTilesContainer) return;
+    }
+
     const products = this.getCurrentStoreProducts();
     const filtered = products.filter(p => this.currentCategory === "ALL" || p.category === this.currentCategory);
     const remainingBudget = this.getRemainingBudget();
 
+    if (filtered.length === 0) {
+      this.productTilesContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 36px 16px; color: var(--text-muted);">
+          <p style="font-size: 2rem; margin-bottom: 8px;">🛒</p>
+          <p style="font-weight: 600;">Tidak ada barang di kategori ini.</p>
+          <small>Gunakan tombol "+ Tambah / Edit" untuk menambahkan produk baru.</small>
+        </div>
+      `;
+      return;
+    }
+
     let html = "";
     filtered.forEach(item => {
-      // Rumus: Harga2 = Harga - (Diskon * Harga)
       const hasDiscount = item.discount > 0;
       const discountPercent = Math.round(item.discount * 100);
       const harga2 = hasDiscount ? Math.round(item.price * (1 - item.discount)) : item.price;
 
-      // Emote Fluktuasi Harga vs Bulan Lalu:
-      // a) ⬆ (Merah): jika harga produk meningkat dibanding bulan lalu
-      // b) ⬇︎ (Hijau): jika harga produk menurun dibanding bulan lalu
-      // c) = (Abu-abu): jika harga produk masih sama dengan bulan lalu
       let emoteSymbol = "=";
       let emoteClass = "emote-equal";
       const lastPrice = item.lastMonthPrice !== undefined ? item.lastMonthPrice : item.price;
@@ -846,11 +998,10 @@ class SmartGroceryApp {
         emoteClass = "emote-down";
       } else {
         emoteSymbol = "=";
-        emoteClass = "emote-equal"; // Abu-abu
+        emoteClass = "emote-equal";
       }
 
-      // Check if user has enough budget to add this item
-      const canAfford = (remainingBudget >= harga2);
+      const defaultUnit = item.defaultUnit || "pcs";
 
       html += `
         <div class="product-tile" data-id="${item.id}">
@@ -881,9 +1032,10 @@ class SmartGroceryApp {
             </div>
           </div>
 
+          <!-- Tombol Add to list: membuka modal pemilihan satuan (kg/pcs/liter) & diskon -->
           <button type="button" class="btn-add-to-list" 
-                  onclick="app.addToCart('${item.id}')" 
-                  ${!canAfford ? 'disabled title="Budget tidak mencukupi untuk membeli barang ini"' : ''}>
+                  onclick="app.openAddItemModal('${item.id}')" 
+                  title="Pilih satuan dan diskon sebelum dimasukkan ke list">
             <span>+ Add to list</span>
           </button>
         </div>
@@ -893,7 +1045,226 @@ class SmartGroceryApp {
     this.productTilesContainer.innerHTML = html;
   }
 
-  // ==================== REALTIME PRODUCT EDIT & ADD SYSTEM ====================
+  // ==================== ADD / EDIT ITEM MODAL (SATUAN, QUANTITY, DISKON) ====================
+  openAddItemModal(productId, editCartItem = null) {
+    const products = this.getCurrentStoreProducts();
+    const product = products.find(p => p.id === productId);
+    if (!product && !editCartItem) return;
+
+    const targetItem = product || editCartItem;
+    this.modalProductId = productId;
+    this.editingCartItemId = editCartItem ? (editCartItem.cartItemId || editCartItem.id) : null;
+
+    // Header info
+    this.modalProductName.textContent = targetItem.name;
+    this.modalProductImg.src = targetItem.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
+    this.modalProductCategory.textContent = targetItem.category || "Grocery";
+    this.modalProductBasePrice.textContent = `${this.formatRupiah(targetItem.price)} / satuan`;
+
+    // 1. Initial Satuan
+    let initialUnit = editCartItem ? editCartItem.unit : (targetItem.defaultUnit || "pcs");
+    this.modalUnit = initialUnit;
+
+    const commonUnits = ["pcs", "kg", "liter", "pack", "botol", "gram", "ml", "ikat"];
+    let isCommon = commonUnits.includes(initialUnit);
+
+    this.unitChipsContainer.querySelectorAll(".unit-chip").forEach(chip => {
+      const u = chip.getAttribute("data-unit");
+      if (isCommon && u === initialUnit) {
+        chip.classList.add("active");
+      } else if (!isCommon && u === "custom") {
+        chip.classList.add("active");
+      } else {
+        chip.classList.remove("active");
+      }
+    });
+
+    if (!isCommon) {
+      this.customUnitWrap.classList.remove("hidden");
+      this.customUnitInput.value = initialUnit;
+    } else {
+      this.customUnitWrap.classList.add("hidden");
+    }
+    this.currentSelectedUnitDisplay.textContent = this.modalUnit;
+
+    // 2. Initial Quantity
+    this.modalQuantity = editCartItem ? editCartItem.quantity : 1;
+    this.inputModalQuantity.value = this.modalQuantity;
+
+    // 3. Initial Discount
+    if (editCartItem) {
+      this.modalDiscountMode = editCartItem.discountMode || "percent";
+      this.modalDiscountValue = editCartItem.discountValue !== undefined ? editCartItem.discountValue : (editCartItem.discount ? Math.round(editCartItem.discount * 100) : 0);
+    } else {
+      this.modalDiscountMode = "percent";
+      this.modalDiscountValue = targetItem.discount ? Math.round(targetItem.discount * 100) : 0;
+    }
+
+    if (this.modalDiscountMode === "nominal") {
+      this.btnModeNominal.classList.add("active");
+      this.btnModePercent.classList.remove("active");
+      this.discountPrefixSymbol.textContent = "Rp";
+      this.discountPresetsContainer.style.display = "none";
+      this.discountFieldHint.textContent = "Ketik potongan rupiah langsung per satuan.";
+    } else {
+      this.btnModePercent.classList.add("active");
+      this.btnModeNominal.classList.remove("active");
+      this.discountPrefixSymbol.textContent = "%";
+      this.discountPresetsContainer.style.display = "flex";
+      this.discountFieldHint.textContent = "Pilih preset diskon di atas atau ketik persentase diskon (0-100%).";
+    }
+
+    this.inputModalDiscount.value = this.modalDiscountValue;
+
+    if (this.modalDiscountMode === "percent") {
+      this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(chip => {
+        const val = chip.getAttribute("data-disc");
+        if (val !== "custom") {
+          chip.classList.toggle("active", parseFloat(val) === this.modalDiscountValue);
+        }
+      });
+    }
+
+    // Modal title
+    if (this.editingCartItemId) {
+      this.addItemModalTitle.textContent = "✏️ Ubah Satuan & Diskon";
+      this.btnConfirmAddItemText.textContent = "💾 Simpan Perubahan";
+    } else {
+      this.addItemModalTitle.textContent = "🛒 Tambah ke List Belanja";
+      this.btnConfirmAddItemText.textContent = "🛒 Masukkan ke List";
+    }
+
+    this.recalculateModalPricing();
+    this.addItemModalOverlay.classList.remove("hidden");
+  }
+
+  closeAddItemModal() {
+    this.addItemModalOverlay.classList.add("hidden");
+  }
+
+  recalculateModalPricing() {
+    const products = this.getCurrentStoreProducts();
+    let product = products.find(p => p.id === this.modalProductId);
+    if (!product && this.editingCartItemId) {
+      product = this.cart.find(it => (it.cartItemId || it.id) === this.editingCartItemId);
+    }
+    if (!product) return;
+
+    const basePrice = product.price;
+    const qty = Math.max(1, this.modalQuantity);
+
+    let discountPerUnit = 0;
+    let discountFraction = 0;
+
+    if (this.modalDiscountMode === "percent") {
+      const pct = Math.min(100, Math.max(0, this.modalDiscountValue));
+      discountFraction = pct / 100;
+      discountPerUnit = Math.round(basePrice * discountFraction);
+    } else {
+      discountPerUnit = Math.min(basePrice, Math.max(0, this.modalDiscountValue));
+      discountFraction = basePrice > 0 ? (discountPerUnit / basePrice) : 0;
+    }
+
+    const netPricePerUnit = Math.max(0, basePrice - discountPerUnit);
+    const subtotal = netPricePerUnit * qty;
+    const totalOriginal = basePrice * qty;
+    const totalDiscountSaved = discountPerUnit * qty;
+
+    let availableBudget = this.getRemainingBudget();
+    if (this.editingCartItemId) {
+      const existingItem = this.cart.find(it => (it.cartItemId || it.id) === this.editingCartItemId);
+      if (existingItem) {
+        availableBudget += (existingItem.finalPrice * existingItem.quantity);
+      }
+    }
+
+    const remainingAfter = availableBudget - subtotal;
+    const isOverBudget = remainingAfter < 0;
+
+    this.discountCalculatedPreview.textContent = `-${this.formatRupiah(discountPerUnit)} / ${this.modalUnit}`;
+    this.modalSummaryOriginalPrice.textContent = `${this.formatRupiah(totalOriginal)} (${this.formatRupiah(basePrice)} x ${qty} ${this.modalUnit})`;
+    this.modalSummaryDiscountAmount.textContent = totalDiscountSaved > 0 ? `-${this.formatRupiah(totalDiscountSaved)}` : "Rp 0";
+    this.modalSummaryFinalTotal.textContent = this.formatRupiah(subtotal);
+    this.modalSummaryRemainingBudget.textContent = this.formatRupiah(remainingAfter);
+
+    if (isOverBudget) {
+      this.modalBudgetWarningBanner.classList.remove("hidden");
+      this.modalBudgetWarningBanner.textContent = `🚨 Over-budget! Melebihi sisa uang saku (${this.formatRupiah(Math.abs(remainingAfter))}).`;
+    } else {
+      this.modalBudgetWarningBanner.classList.add("hidden");
+    }
+
+    if (this.editingCartItemId) {
+      this.btnConfirmAddItemText.textContent = `💾 Simpan (${this.formatRupiah(subtotal)})`;
+    } else {
+      this.btnConfirmAddItemText.textContent = `🛒 Masukkan ke List (${this.formatRupiah(subtotal)})`;
+    }
+  }
+
+  handleConfirmAddItem() {
+    const products = this.getCurrentStoreProducts();
+    let product = products.find(p => p.id === this.modalProductId);
+    if (!product && this.editingCartItemId) {
+      product = this.cart.find(it => (it.cartItemId || it.id) === this.editingCartItemId);
+    }
+    if (!product) return;
+
+    const basePrice = product.price;
+    const qty = Math.max(1, this.modalQuantity);
+
+    let discountPerUnit = 0;
+    let discountFraction = 0;
+    if (this.modalDiscountMode === "percent") {
+      const pct = Math.min(100, Math.max(0, this.modalDiscountValue));
+      discountFraction = pct / 100;
+      discountPerUnit = Math.round(basePrice * discountFraction);
+    } else {
+      discountPerUnit = Math.min(basePrice, Math.max(0, this.modalDiscountValue));
+      discountFraction = basePrice > 0 ? (discountPerUnit / basePrice) : 0;
+    }
+
+    const netPrice = Math.max(0, basePrice - discountPerUnit);
+    const subtotal = netPrice * qty;
+
+    if (this.editingCartItemId) {
+      const itemIndex = this.cart.findIndex(it => (it.cartItemId || it.id) === this.editingCartItemId);
+      if (itemIndex !== -1) {
+        this.cart[itemIndex].unit = this.modalUnit;
+        this.cart[itemIndex].quantity = qty;
+        this.cart[itemIndex].discountMode = this.modalDiscountMode;
+        this.cart[itemIndex].discountValue = this.modalDiscountValue;
+        this.cart[itemIndex].discount = discountFraction;
+        this.cart[itemIndex].finalPrice = netPrice;
+        this.cart[itemIndex].totalPrice = subtotal;
+      }
+      this.showToast("✏️", `Rincian "${product.name}" (${qty} ${this.modalUnit}) diperbarui.`);
+    } else {
+      const cartItemId = `${product.id}_${Date.now()}`;
+      this.cart.push({
+        id: product.id,
+        cartItemId: cartItemId,
+        name: product.name,
+        price: product.price,
+        unit: this.modalUnit,
+        quantity: qty,
+        discountMode: this.modalDiscountMode,
+        discountValue: this.modalDiscountValue,
+        discount: discountFraction,
+        finalPrice: netPrice,
+        totalPrice: subtotal,
+        image: product.image
+      });
+      this.showToast("🛒", `"${product.name}" (${qty} ${this.modalUnit}) masuk ke troli.`);
+    }
+
+    this.saveCart();
+    this.closeAddItemModal();
+    this.updateBudgetAndCartUI();
+    this.renderCartList();
+    this.renderStoreProducts();
+  }
+
+  // ==================== REALTIME PRODUCT EDIT MODAL (KATALOG) ====================
   openEditProductModal(productId) {
     const products = this.getCurrentStoreProducts();
     const product = products.find(p => p.id === productId);
@@ -933,22 +1304,21 @@ class SmartGroceryApp {
     const lastPrice = parseFloat(this.editProductLastPrice.value) || price;
     const discountPct = parseFloat(this.editProductDiscount.value) || 0;
 
-    const discountRate = Math.min(0.99, Math.max(0, discountPct / 100));
-    const harga2 = Math.round(price * (1 - discountRate));
+    const discountDec = discountPct / 100;
+    const harga2 = Math.round(price * (1 - discountDec));
 
     this.previewHarga2Text.textContent = this.formatRupiah(harga2);
 
-    if (price > lastPrice) {
-      const diff = price - lastPrice;
+    const diff = price - lastPrice;
+    if (diff > 0) {
       this.previewFlucBadge.className = "fluc-pill-preview fluc-up";
       this.previewFlucBadge.textContent = `⬆ Naik (+${this.formatRupiah(diff)})`;
-    } else if (price < lastPrice) {
-      const diff = lastPrice - price;
+    } else if (diff < 0) {
       this.previewFlucBadge.className = "fluc-pill-preview fluc-down";
-      this.previewFlucBadge.textContent = `⬇︎ Turun (-${this.formatRupiah(diff)})`;
+      this.previewFlucBadge.textContent = `⬇︎ Turun (-${this.formatRupiah(Math.abs(diff))})`;
     } else {
       this.previewFlucBadge.className = "fluc-pill-preview fluc-equal";
-      this.previewFlucBadge.textContent = `= Setara / Stabil (Abu-abu)`;
+      this.previewFlucBadge.textContent = `= Sama dengan bulan lalu`;
     }
   }
 
@@ -960,197 +1330,93 @@ class SmartGroceryApp {
     const discountPct = parseFloat(this.editProductDiscount.value) || 0;
     const category = this.editProductCategory.value;
 
-    if (!name) {
-      alert("Nama barang wajib diisi!");
-      this.editProductName.focus();
+    if (!name || isNaN(price) || price < 0) {
+      alert("Harap isi nama dan harga yang valid!");
       return;
     }
 
-    if (isNaN(price) || price < 0) {
-      alert("Harga satuan saat ini harus valid!");
-      this.editProductPrice.focus();
-      return;
-    }
-
-    const discountRate = Math.min(0.99, Math.max(0, discountPct / 100));
-    const products = this.getCurrentStoreProducts();
+    const discountDec = Math.max(0, Math.min(0.99, discountPct / 100));
+    const storeProducts = this.getCurrentStoreProducts();
 
     if (id) {
-      // Edit existing product
-      const index = products.findIndex(p => p.id === id);
-      if (index !== -1) {
-        products[index].name = name;
-        products[index].price = price;
-        products[index].lastMonthPrice = lastPrice;
-        products[index].discount = discountRate;
-        products[index].category = category;
-
-        // If this item is currently in active cart, update its price & recalculate
-        const cartItem = this.cart.find(it => it.id === id);
-        if (cartItem) {
-          cartItem.name = name;
-          cartItem.price = price;
-          cartItem.discount = discountRate;
-          cartItem.finalPrice = Math.round(price * (1 - discountRate));
-          this.saveCart();
-        }
+      const idx = storeProducts.findIndex(p => p.id === id);
+      if (idx !== -1) {
+        storeProducts[idx] = {
+          ...storeProducts[idx],
+          name: name,
+          price: price,
+          lastMonthPrice: lastPrice,
+          discount: discountDec,
+          category: category
+        };
+        this.showToast("💾", `Data "${name}" berhasil diperbarui.`);
       }
     } else {
-      // Add new custom product
-      const newProd = {
-        id: "custom-" + Date.now(),
+      const newId = `custom-prod-${Date.now()}`;
+      storeProducts.unshift({
+        id: newId,
         name: name,
         category: category,
+        defaultUnit: "pcs",
         price: price,
         lastMonthPrice: lastPrice,
-        discount: discountRate,
+        discount: discountDec,
         image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"
-      };
-      products.unshift(newProd);
-    }
-
-    // Save to permanent Database (localStorage)
-    this.saveCatalogDatabase();
-
-    // Re-render UI in realtime
-    this.closeProductModal();
-    this.updateBudgetAndCartUI();
-    this.renderStoreProducts();
-    this.renderCartList();
-
-    this.showToast("💾", `Perubahan "${name}" berhasil disimpan ke database!`);
-  }
-
-  // ==================== CART ACTIONS (Add, Stepper, Delete) ====================
-  addToCart(productId) {
-    const products = this.getCurrentStoreProducts();
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    // Rumus Harga2 = Harga - (Diskon * Harga)
-    const hasDiscount = product.discount > 0;
-    const finalPrice = hasDiscount ? Math.round(product.price * (1 - product.discount)) : product.price;
-
-    const remainingBudget = this.getRemainingBudget();
-
-    // Validasi Aturan Budget:
-    // Bila budget habis maka tidak ada barang yang bisa ditambahkan ke list!
-    if (remainingBudget < finalPrice) {
-      this.showToast("⚠️", `Budget tidak cukup! Sisa budget ${this.formatRupiah(remainingBudget)}. Kurangi barang di List terlebih dahulu.`);
-      return;
-    }
-
-    // Check if already in cart
-    const existingIndex = this.cart.findIndex(it => it.id === product.id);
-    if (existingIndex !== -1) {
-      this.cart[existingIndex].quantity += 1;
-    } else {
-      this.cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        discount: product.discount,
-        finalPrice: finalPrice,
-        quantity: 1,
-        image: product.image,
-        supermarket: this.supermarket
       });
+      this.showToast("🎉", `Barang baru "${name}" berhasil ditambahkan.`);
     }
 
-    this.saveCart();
-    this.updateBudgetAndCartUI();
+    this.saveCatalogDatabase();
+    this.closeProductModal();
     this.renderStoreProducts();
-    this.renderCartList();
-
-    this.showToast("🛒", `+1 "${product.name}" dimasukkan ke list.`);
   }
 
-  updateItemQuantity(productId, newQty) {
-    const index = this.cart.findIndex(it => it.id === productId);
-    if (index === -1) return;
+  // ==================== TAB 2: CART / LIST (RED THEMED CARDS) ====================
+  updateItemQuantity(cartItemId, newQty) {
+    const itemIndex = this.cart.findIndex(i => (i.cartItemId || i.id) === cartItemId);
+    if (itemIndex === -1) return;
 
-    const item = this.cart[index];
-    const parsedQty = parseInt(newQty, 10);
-
-    if (isNaN(parsedQty) || parsedQty <= 0) {
-      // Hapus item
-      this.removeItemFromCart(productId);
+    if (newQty <= 0) {
+      this.removeItemFromCart(cartItemId);
       return;
     }
 
-    const currentQty = item.quantity;
-    const diff = parsedQty - currentQty;
-
-    if (diff > 0) {
-      // Memerlukan tambahan biaya
-      const costAddition = diff * item.finalPrice;
-      const remainingBudget = this.getRemainingBudget();
-      if (remainingBudget < costAddition) {
-        this.showToast("⚠️", `Budget saku tidak cukup untuk menambah kuantitas!`);
-        this.renderCartList();
-        return;
-      }
-    }
-
-    item.quantity = parsedQty;
+    this.cart[itemIndex].quantity = newQty;
+    this.cart[itemIndex].totalPrice = this.cart[itemIndex].finalPrice * newQty;
     this.saveCart();
     this.updateBudgetAndCartUI();
-    this.renderStoreProducts();
     this.renderCartList();
   }
 
-  incrementQuantity(productId) {
-    const item = this.cart.find(it => it.id === productId);
+  incrementQuantity(cartItemId) {
+    const item = this.cart.find(i => (i.cartItemId || i.id) === cartItemId);
     if (!item) return;
-
-    const remainingBudget = this.getRemainingBudget();
-    if (remainingBudget < item.finalPrice) {
-      this.showToast("⚠️", `Budget saku tidak cukup untuk menambah "${item.name}"!`);
-      return;
-    }
-
-    item.quantity += 1;
-    this.saveCart();
-    this.updateBudgetAndCartUI();
-    this.renderStoreProducts();
-    this.renderCartList();
+    this.updateItemQuantity(cartItemId, item.quantity + 1);
   }
 
-  decrementQuantity(productId) {
-    const index = this.cart.findIndex(it => it.id === productId);
-    if (index === -1) return;
-
-    if (this.cart[index].quantity > 1) {
-      this.cart[index].quantity -= 1;
-    } else {
-      // Jika dikurangi dari 1 -> hapus item
-      this.cart.splice(index, 1);
-    }
-
-    this.saveCart();
-    this.updateBudgetAndCartUI();
-    this.renderStoreProducts();
-    this.renderCartList();
-  }
-
-  removeItemFromCart(productId) {
-    const item = this.cart.find(it => it.id === productId);
+  decrementQuantity(cartItemId) {
+    const item = this.cart.find(i => (i.cartItemId || i.id) === cartItemId);
     if (!item) return;
+    this.updateItemQuantity(cartItemId, item.quantity - 1);
+  }
 
-    this.cart = this.cart.filter(it => it.id !== productId);
+  removeItemFromCart(cartItemId) {
+    const itemIndex = this.cart.findIndex(i => (i.cartItemId || i.id) === cartItemId);
+    if (itemIndex === -1) return;
+
+    const removedItem = this.cart[itemIndex];
+    this.cart.splice(itemIndex, 1);
     this.saveCart();
     this.updateBudgetAndCartUI();
-    this.renderStoreProducts();
     this.renderCartList();
-
-    this.showToast("↩️", `"${item.name}" dihapus. Uang dikembalikan ke sisa budget.`);
+    this.renderStoreProducts();
+    this.showToast("🗑️", `"${removedItem.name}" dihapus dari troli.`);
   }
 
   saveCart() {
     localStorage.setItem(this.STORAGE_CART, JSON.stringify(this.cart));
   }
 
-  // ==================== TAB 2: RENDER LIST VIEW ====================
   renderCartList() {
     if (this.cart.length === 0) {
       this.activeGroceryListContainer.innerHTML = "";
@@ -1163,50 +1429,72 @@ class SmartGroceryApp {
     let html = "";
     this.cart.forEach((item, index) => {
       const itemTotalPrice = item.finalPrice * item.quantity;
+      const unit = item.unit || "pcs";
+      const hasDiscount = (item.price > item.finalPrice);
+      const discountSaved = (item.price - item.finalPrice) * item.quantity;
 
-      /*
-        Format barang di list sesuai instruksi:
-        X --------------------
-         |Gambar barang| Nama barang
-         |             |
-         |             | Hargatotal   quantity -[]+
-          ---------------------
-      */
+      const discountLabel = item.discountMode === "nominal"
+        ? `Hemat ${this.formatRupiah(item.discountValue || (item.price - item.finalPrice))}/satuan`
+        : `Diskon ${Math.round((item.discount || 0) * 100)}%`;
+
+      const itemIdKey = item.cartItemId || item.id;
+
       html += `
-        <div class="list-item-card" data-id="${item.id}">
+        <div class="list-item-card" data-id="${itemIdKey}">
           
-          <!-- Top bar with X delete button -->
+          <!-- Top Header: Item Index + Edit Button + Delete Button -->
           <div class="list-item-top-header">
             <span class="item-index-label">Item #${index + 1}</span>
-            <button type="button" class="btn-remove-item" onclick="app.removeItemFromCart('${item.id}')" title="Hapus dari list">
-              X
-            </button>
+
+            <div class="list-item-actions-top">
+              <button type="button" class="btn-edit-item-config" 
+                      onclick="app.openAddItemModal('${item.id}', app.cart[${index}])" 
+                      title="Ubah Satuan, Qty atau Diskon">
+                <span>✏️ Atur</span>
+              </button>
+              <button type="button" class="btn-remove-item" 
+                      onclick="app.removeItemFromCart('${itemIdKey}')" 
+                      title="Hapus dari troli">
+                ✕
+              </button>
+            </div>
           </div>
 
-          <!-- Body: Gambar barang | Nama barang, Hargatotal, Stepper -[]+ -->
+          <!-- Body: Gambar | Nama, Satuan/Diskon Tags, Harga, Stepper -->
           <div class="list-item-body-row">
             <img src="${item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80'}" 
                  alt="${this.escapeHtml(item.name)}" class="list-item-thumb">
             
             <div class="list-item-details">
               <div class="list-item-name">${this.escapeHtml(item.name)}</div>
+              
+              <!-- Badges for Unit & Discount -->
+              <div class="list-item-meta-tags">
+                <span class="unit-badge-pill">${item.quantity} ${unit}</span>
+                ${hasDiscount ? `<span class="discount-badge-pill">${discountLabel} (-${this.formatRupiah(discountSaved)})</span>` : ''}
+              </div>
+
               <div class="list-item-unit-calc">
-                ${this.formatRupiah(item.finalPrice)} x ${item.quantity}
+                ${this.formatRupiah(item.finalPrice)} / ${unit}
               </div>
 
               <div class="list-item-action-bottom">
                 <span class="list-item-total-price">${this.formatRupiah(itemTotalPrice)}</span>
 
-                <!-- Stepper Kuantitas: quantity -[]+ -->
+                <!-- Stepper Kuantitas: - [ ] + -->
                 <div class="quantity-stepper-box">
-                  <button type="button" class="btn-stepper btn-minus" onclick="app.decrementQuantity('${item.id}')" aria-label="Kurangi kuantitas">−</button>
-                  <input type="number" class="input-qty-box" min="1" max="99" 
-                         value="${item.quantity}" 
-                         onchange="app.updateItemQuantity('${item.id}', this.value)" 
-                         aria-label="Kuantitas barang">
-                  <button type="button" class="btn-stepper btn-plus" onclick="app.incrementQuantity('${item.id}')" aria-label="Tambah kuantitas">+</button>
+                  <button type="button" class="btn-stepper btn-minus" 
+                          onclick="app.decrementQuantity('${itemIdKey}')" 
+                          aria-label="Kurangi kuantitas">−</button>
+                  <input type="number" class="input-qty-box" value="${item.quantity}" min="1" max="999"
+                         onchange="app.updateItemQuantity('${itemIdKey}', parseInt(this.value, 10))" 
+                         aria-label="Jumlah item">
+                  <button type="button" class="btn-stepper btn-plus" 
+                          onclick="app.incrementQuantity('${itemIdKey}')" 
+                          aria-label="Tambah kuantitas">+</button>
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -1217,85 +1505,82 @@ class SmartGroceryApp {
     this.activeGroceryListContainer.innerHTML = html;
   }
 
-  // ==================== CHECKOUT & HISTORY ARCHIVING ====================
+  // ==================== CHECKOUT & RECEIPT ====================
   handleCheckout() {
     if (this.cart.length === 0) {
-      alert("Troli belanja Anda masih kosong!");
+      alert("Troli belanja masih kosong!");
       return;
     }
 
     const totalSpent = this.getTotalCartPrice();
     const remainingBudget = this.getRemainingBudget();
-    const totalDiscountSaved = this.getTotalDiscountSaved();
 
-    if (confirm(`Kunci list belanja dan selesaikan transaksi sebesar ${this.formatRupiah(totalSpent)}? Data akan otomatis diarsipkan ke History.`)) {
-      const now = new Date();
-      const transactionId = "trx-" + Date.now();
-
-      const newHistoryEntry = {
-        id: transactionId,
-        date: now.toISOString(),
-        store: this.supermarket,
-        city: this.city,
-        totalSpent: totalSpent,
-        totalDiscountSaved: totalDiscountSaved,
-        initialBudget: this.initialBudget,
-        remainingBudget: remainingBudget,
-        items: JSON.parse(JSON.stringify(this.cart))
-      };
-
-      // Simpan ke History (di paling atas)
-      this.history.unshift(newHistoryEntry);
-      localStorage.setItem(this.STORAGE_HISTORY, JSON.stringify(this.history));
-
-      // Tampilkan Receipt Modal Printable
-      this.showReceiptModal(newHistoryEntry);
-
-      // Kosongkan Troli List Belanja (Sudah terkunci & selesai)
-      this.cart = [];
-      this.saveCart();
-
-      // UI Update
-      this.updateBudgetAndCartUI();
-      this.renderCartList();
-      this.renderHistory();
-      this.renderStoreProducts();
+    if (!confirm(`Kunci list belanja dan selesaikan belanjaan senilai ${this.formatRupiah(totalSpent)}? Data akan diarsipkan ke tab History.`)) {
+      return;
     }
+
+    const record = {
+      id: `rcpt-${Date.now()}`,
+      date: new Date().toISOString(),
+      supermarket: this.supermarket,
+      city: this.city,
+      initialBudget: this.initialBudget,
+      totalSpent: totalSpent,
+      totalDiscountSaved: this.getTotalDiscountSaved(),
+      remainingBudget: remainingBudget,
+      items: JSON.parse(JSON.stringify(this.cart))
+    };
+
+    this.history.unshift(record);
+    localStorage.setItem(this.STORAGE_HISTORY, JSON.stringify(this.history));
+
+    this.cart = [];
+    this.saveCart();
+
+    this.updateBudgetAndCartUI();
+    this.renderCartList();
+    this.renderHistory();
+
+    this.showReceiptModal(record);
   }
 
   showReceiptModal(record) {
-    this.receiptStoreHeader.textContent = record.store.toUpperCase();
+    this.receiptStoreHeader.textContent = record.supermarket.toUpperCase();
     this.receiptCityHeader.textContent = `Cabang ${record.city}`;
     
     const d = new Date(record.date);
-    this.receiptTimestamp.textContent = `${d.toLocaleDateString("id-ID")} ${d.toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}`;
+    this.receiptTimestamp.textContent = d.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }) + " " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
     let itemsHtml = "";
     record.items.forEach(it => {
-      const gross = it.price * it.quantity;
-      const net = it.finalPrice * it.quantity;
-      const disc = gross - net;
+      const unit = it.unit || "pcs";
       itemsHtml += `
-        <div class="r-item-line">
-          <div>
-            <strong>${this.escapeHtml(it.name)}</strong><br>
-            <small>${it.quantity}x @ ${this.formatRupiah(it.finalPrice)}${disc > 0 ? ` (Hemat: -${this.formatRupiah(disc)})` : ''}</small>
+        <div class="receipt-item-row">
+          <div class="r-item-left">
+            <span>${this.escapeHtml(it.name)}</span>
+            <small>${it.quantity} ${unit} x ${this.formatRupiah(it.finalPrice)}</small>
           </div>
-          <div><strong>${this.formatRupiah(net)}</strong></div>
+          <div class="r-item-right">
+            <strong>${this.formatRupiah(it.finalPrice * it.quantity)}</strong>
+          </div>
         </div>
       `;
     });
 
     this.receiptItemsListBody.innerHTML = itemsHtml;
     this.receiptInitialBudget.textContent = this.formatRupiah(record.initialBudget);
-    this.receiptTotalDiscount.textContent = `-${this.formatRupiah(record.totalDiscountSaved || 0)}`;
+    this.receiptTotalDiscount.textContent = `-${this.formatRupiah(record.totalDiscountSaved)}`;
     this.receiptFinalTotal.textContent = this.formatRupiah(record.totalSpent);
     this.receiptRemainingSafe.textContent = this.formatRupiah(record.remainingBudget);
 
     this.receiptModalBackdrop.classList.remove("hidden");
   }
 
-  // ==================== TAB 3: RENDER HISTORY VIEW ====================
+  // ==================== TAB 3: HISTORY ====================
   renderHistory() {
     if (this.history.length === 0) {
       this.historyTilesContainer.innerHTML = "";
@@ -1306,47 +1591,42 @@ class SmartGroceryApp {
     this.emptyHistoryCard.classList.add("hidden");
 
     let html = "";
-    this.history.forEach(entry => {
-      const d = new Date(entry.date);
-      const dateTitle = this.formatRelativeDate(d);
+    this.history.forEach(record => {
+      const recordDate = new Date(record.date);
+      const relativeDate = this.formatRelativeDate(recordDate);
 
-      /*
-        Format tiles history sesuai instruksi:
-        Today/Yesterday/Tanggal - Harga
-         --------------------
-         |Gambar barang| Nama barang
-         |             |
-         |             | Hargatotal   [] quantity 
-          ---------------------
-      */
-      let itemsHtml = "";
-      entry.items.forEach(it => {
-        const itemTotal = it.finalPrice * it.quantity;
-        itemsHtml += `
+      let itemsSummaryHtml = "";
+      record.items.forEach(it => {
+        const unit = it.unit || "pcs";
+        itemsSummaryHtml += `
           <div class="history-item-row">
-            <img src="${it.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80'}" 
-                 alt="${this.escapeHtml(it.name)}" class="history-item-thumb">
-            <div class="history-item-details">
-              <div class="history-item-name">${this.escapeHtml(it.name)}</div>
-              <div class="history-item-bottom-info">
-                <span class="history-item-price">${this.formatRupiah(itemTotal)}</span>
-                <span class="history-qty-tag">[] ${it.quantity} pcs</span>
-              </div>
+            <img src="${it.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80'}" alt="" class="history-item-thumb">
+            <div class="history-item-info">
+              <span class="history-item-name">${this.escapeHtml(it.name)}</span>
+              <span class="history-item-calc">${this.formatRupiah(it.finalPrice * it.quantity)} &bull; ${it.quantity} ${unit}</span>
             </div>
           </div>
         `;
       });
 
       html += `
-        <div class="history-group-card">
-          <div class="history-group-header">
-            <div>
-              <span class="history-group-date-title">${dateTitle} • ${entry.store}</span>
+        <div class="history-record-card">
+          <div class="history-record-header">
+            <div class="history-meta">
+              <span class="history-date-badge">${relativeDate}</span>
+              <small class="history-store-tag">🏬 ${this.escapeHtml(record.supermarket)}</small>
             </div>
-            <strong class="history-group-total">${this.formatRupiah(entry.totalSpent)}</strong>
+            <strong class="history-total-price">${this.formatRupiah(record.totalSpent)}</strong>
           </div>
+
           <div class="history-items-list">
-            ${itemsHtml}
+            ${itemsSummaryHtml}
+          </div>
+
+          <div class="history-card-footer">
+            <button type="button" class="btn-history-view-receipt" onclick="app.showReceiptModal(app.history.find(h => h.id === '${record.id}'))">
+              📄 Lihat Struk Pembelian
+            </button>
           </div>
         </div>
       `;

@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>GroceryIn - Smart Grocery & Budget Safety Tracker</title>
     <meta name="description"
-        content="Aplikasi mobile PWA Smart Grocery & Budget Safety Tracker estetik untuk siswa rantau. Pantau sisa budget dan diskon supermarket saat mendorong troli.">
+        content="Aplikasi mobile PWA Smart Grocery & Budget Safety Tracker tema Hitam & Merah untuk siswa rantau. Pantau sisa budget, pilih satuan (kg/pcs/liter), dan diskon otomatis.">
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#8C6239">
+    <meta name="theme-color" content="#DC2626">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="GroceryIn">
 
     <!-- Icons -->
@@ -28,7 +28,7 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <!-- External Stylesheet (Aesthetic Cream / Soft Brown Palette) -->
+    <!-- External Stylesheet (Hitam & Crimson Red) -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -58,7 +58,7 @@
 
                 <!-- Right Side: Nominal Uang Budget & Tombol Log Out -->
                 <div class="header-right-group">
-                    <!-- Live Budget Pill -->
+                    <!-- Live Budget Pill (Hijau = Aman, Kuning = Warning, Merah = Habis/Kelewatan) -->
                     <div class="live-budget-pill" id="liveBudgetPill" title="Sisa Budget Belanja Anda">
                         <span class="budget-label">Sisa:</span>
                         <strong class="budget-amount" id="headerRemainingBudget">Rp 0</strong>
@@ -111,8 +111,7 @@
                     <div class="store-announcement-card" id="storePromoBanner">
                         <div class="promo-text">
                             <strong id="promoStoreTitle">Katalog Harga & Promo Terverifikasi</strong>
-                            <small id="promoStoreSubtitle">Diskon dan fluktuasi harga acuan bulan lalu (⬆/⬇︎/=) otomatis
-                                diperbarui.</small>
+                            <small id="promoStoreSubtitle">Pilih satuan (kg/pcs/liter) & diskon fleksibel. Fluktuasi acuan: ⬆ Merah Naik | ⬇︎ Hijau Turun | = Stabil.</small>
                         </div>
                         <span class="promo-badge">Live</span>
                     </div>
@@ -130,7 +129,7 @@
                     <div class="list-section-header">
                         <div>
                             <h3>Troli Belanja Anda</h3>
-                            <p>Daftar barang yang siap dibawa ke kasir.</p>
+                            <p>Daftar barang berbingkai merah dengan rincian satuan & diskon.</p>
                         </div>
                         <button type="button" class="btn-clear-list" id="btnClearList" title="Kosongkan List Belanja">
                             <svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
@@ -155,8 +154,7 @@
                             </svg>
                         </div>
                         <h4>List Belanja Masih Kosong</h4>
-                        <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"+ Add to list"</strong> pada barang
-                            yang ingin Anda beli.</p>
+                        <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"+ Add to list"</strong> pada barang yang ingin Anda beli untuk memilih satuan dan diskonnya.</p>
                         <button type="button" class="btn-primary-action" id="btnGoToStore">
                             <span>Ke Halaman Store</span>
                         </button>
@@ -192,8 +190,7 @@
                             </svg>
                         </div>
                         <h4>Belum Ada Riwayat Belanja</h4>
-                        <p>Setelah Anda menyelesaikan belanja dan menekan tombol <strong>Checkout</strong>, rincian
-                            struk akan tersimpan di sini.</p>
+                        <p>Setelah Anda menyelesaikan belanja dan menekan tombol <strong>Checkout</strong>, rincian struk akan tersimpan di sini.</p>
                     </div>
 
                     <!-- History Grouped Tiles Container -->
@@ -205,11 +202,11 @@
 
             </main>
 
-            <!-- ==================== LIST BOTTOM FIXED BAR (Border Hitam, Total Harga Transisi Warna & Checkout) ==================== -->
+            <!-- ==================== LIST BOTTOM FIXED BAR (Border Hitam/Merah, Total Harga Transisi & Checkout) ==================== -->
             <footer class="list-bottom-bar hidden" id="listBottomSummaryBar">
                 <div class="list-summary-info">
                     <span class="summary-label">Total Belanja:</span>
-                    <!-- Fading color dynamic text: Green -> Yellow -> Orange -> Red -->
+                    <!-- Transisi Warna: Hijau (Aman) -> Kuning (Warning Mau Habis) -> Merah (Habis & Kelewatan) -->
                     <strong class="summary-total-price" id="listTotalPriceText">Rp 0</strong>
                     <small class="summary-budget-status" id="listBudgetStatusText">Aman dalam budget</small>
                 </div>
@@ -280,7 +277,7 @@
                             </svg>
                         </div>
                         <h2>GroceryIn</h2>
-                        <p class="setup-tagline">Smart Grocery & Budget Safety Tracker Anak Rantau</p>
+                        <p class="setup-tagline">Smart Grocery & Budget Safety Tracker (Black & Red Edition)</p>
                     </div>
 
                     <form id="setupForm" onsubmit="return false;" class="setup-form-body">
@@ -344,8 +341,7 @@
                                 <input type="number" id="inputInitialBudget" class="setup-input currency-field"
                                     placeholder="300000" min="10000" step="5000" value="300000" required>
                             </div>
-                            <small class="field-hint text-warning-note">⚠️ Nominal ini TIDAK bisa diubah setelah masuk ke
-                                tab berbelanja demi disiplin keuangan anak rantau.</small>
+                            <small class="field-hint text-warning-note">⚠️ Nominal ini TIDAK bisa diubah setelah masuk ke tab berbelanja demi disiplin keuangan anak rantau.</small>
 
                             <!-- Quick Budget Chips -->
                             <div class="quick-preset-budget">
@@ -368,6 +364,146 @@
                         </button>
 
                     </form>
+
+                </div>
+            </div>
+
+            <!-- ==================== MODAL: ADD / EDIT ITEM TO LIST (SATUAN, QUANTITY, DISKON) ==================== -->
+            <div class="modal-backdrop-custom hidden" id="addItemModalOverlay">
+                <div class="modal-bottom-sheet" id="addItemModal">
+                    <div class="sheet-drag-handle"></div>
+
+                    <div class="sheet-header">
+                        <div class="sheet-title-group">
+                            <h3 id="addItemModalTitle">Tambah ke List Belanja</h3>
+                            <p>Tentukan pilihan satuan (kg/pcs/liter), kuantitas, dan diskon barang.</p>
+                        </div>
+                        <button type="button" class="btn-modal-close" id="btnCloseAddItemModal" aria-label="Tutup">✕</button>
+                    </div>
+
+                    <!-- Product Preview Header -->
+                    <div class="modal-product-header">
+                        <img src="" alt="" id="modalProductImg" class="modal-prod-img">
+                        <div class="modal-prod-info">
+                            <strong id="modalProductName">Nama Barang</strong>
+                            <div class="modal-prod-meta">
+                                <span class="modal-prod-cat" id="modalProductCategory">Kategori</span>
+                                <span class="modal-prod-base-price" id="modalProductBasePrice">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1. Tentukan Satuan yang Diinginkan (kg, pcs, liter, pack, dll) -->
+                    <div class="modal-config-section">
+                        <label class="modal-section-label">
+                            <span>📏 Pilih Satuan Ukuran:</span>
+                        </label>
+                        <div class="unit-chips-selector" id="unitChipsContainer">
+                            <button type="button" class="unit-chip active" data-unit="pcs">pcs</button>
+                            <button type="button" class="unit-chip" data-unit="kg">kg</button>
+                            <button type="button" class="unit-chip" data-unit="liter">liter</button>
+                            <button type="button" class="unit-chip" data-unit="pack">pack</button>
+                            <button type="button" class="unit-chip" data-unit="botol">botol</button>
+                            <button type="button" class="unit-chip" data-unit="gram">gram</button>
+                            <button type="button" class="unit-chip" data-unit="ml">ml</button>
+                            <button type="button" class="unit-chip" data-unit="ikat">ikat</button>
+                            <button type="button" class="unit-chip" data-unit="custom">Lainnya...</button>
+                        </div>
+                        <div class="custom-unit-input-wrap hidden" id="customUnitWrap">
+                            <input type="text" id="customUnitInput" class="setup-input input-sm"
+                                placeholder="Ketik satuan kustom (misal: dus, kaleng, butir, renteng)">
+                        </div>
+                    </div>
+
+                    <!-- 2. Tentukan Quantity yang Diinginkan -->
+                    <div class="modal-config-section">
+                        <div class="modal-section-label-row">
+                            <label class="modal-section-label">
+                                <span>🔢 Tentukan Kuantitas (Quantity):</span>
+                            </label>
+                            <span class="selected-unit-label" id="currentSelectedUnitDisplay">pcs</span>
+                        </div>
+                        <div class="modal-stepper-row">
+                            <button type="button" class="btn-qty-step" id="btnModalQtyMinus" aria-label="Kurangi kuantitas">−</button>
+                            <input type="number" id="inputModalQuantity" class="input-modal-qty" min="1" max="999" step="1" value="1">
+                            <button type="button" class="btn-qty-step" id="btnModalQtyPlus" aria-label="Tambah kuantitas">+</button>
+
+                            <div class="quick-qty-chips">
+                                <button type="button" class="btn-quick-qty" data-add="1">+1</button>
+                                <button type="button" class="btn-quick-qty" data-add="2">+2</button>
+                                <button type="button" class="btn-quick-qty" data-add="5">+5</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Tentukan Diskon (Bisa dipilih / ditentukan, harga menyesuaikan diskonnya) -->
+                    <div class="modal-config-section">
+                        <div class="modal-section-label-row">
+                            <label class="modal-section-label">
+                                <span>🏷️ Pilihan Diskon (Harga Menyesuaikan):</span>
+                            </label>
+                            <span class="discount-calc-preview" id="discountCalculatedPreview">-Rp 0</span>
+                        </div>
+
+                        <!-- Discount Mode Toggle: Persen (%) vs Nominal Rupiah (Rp) -->
+                        <div class="discount-mode-tabs">
+                            <button type="button" class="btn-disc-mode active" data-mode="percent" id="btnModePercent">Persen (%)</button>
+                            <button type="button" class="btn-disc-mode" data-mode="nominal" id="btnModeNominal">Nominal (Rp)</button>
+                        </div>
+
+                        <!-- Preset Discount Chips (Persentase) -->
+                        <div class="discount-presets-scroller" id="discountPresetsContainer">
+                            <button type="button" class="disc-preset-chip active" data-disc="0">0% (Normal)</button>
+                            <button type="button" class="disc-preset-chip" data-disc="5">5%</button>
+                            <button type="button" class="disc-preset-chip" data-disc="10">10%</button>
+                            <button type="button" class="disc-preset-chip" data-disc="15">15%</button>
+                            <button type="button" class="disc-preset-chip" data-disc="20">20%</button>
+                            <button type="button" class="disc-preset-chip" data-disc="25">25%</button>
+                            <button type="button" class="disc-preset-chip" data-disc="50">50%</button>
+                            <button type="button" class="disc-preset-chip" data-disc="custom">Kustom</button>
+                        </div>
+
+                        <!-- Custom Discount Input -->
+                        <div class="custom-discount-row">
+                            <div class="input-discount-wrapper">
+                                <span class="disc-prefix" id="discountPrefixSymbol">%</span>
+                                <input type="number" id="inputModalDiscount" class="setup-input input-disc-field"
+                                    placeholder="0" min="0" max="100" value="0">
+                            </div>
+                            <small class="field-hint" id="discountFieldHint">Pilih dari preset di atas atau ketik persentase diskon.</small>
+                        </div>
+                    </div>
+
+                    <!-- Calculation Summary Box -->
+                    <div class="modal-summary-box">
+                        <div class="modal-summary-row">
+                            <span>Harga Normal:</span>
+                            <span id="modalSummaryOriginalPrice">Rp 0</span>
+                        </div>
+                        <div class="modal-summary-row text-discount-row">
+                            <span>Potongan Diskon:</span>
+                            <span id="modalSummaryDiscountAmount">-Rp 0</span>
+                        </div>
+                        <div class="modal-summary-row modal-summary-final">
+                            <span>Total Pembelian:</span>
+                            <strong id="modalSummaryFinalTotal">Rp 0</strong>
+                        </div>
+                        <div class="modal-summary-row modal-summary-budget">
+                            <span>Sisa Budget Dompet:</span>
+                            <span id="modalSummaryRemainingBudget">Rp 0</span>
+                        </div>
+                        <div class="budget-warning-banner hidden" id="modalBudgetWarningBanner">
+                            ⚠️ Melebihi sisa budget saku! Kurangi kuantitas barang ini.
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="modal-action-buttons">
+                        <button type="button" class="btn-modal-cancel" id="btnCancelAddItem">Batal</button>
+                        <button type="button" class="btn-modal-confirm" id="btnConfirmAddItem">
+                            <span id="btnConfirmAddItemText">🛒 Tambahkan ke List</span>
+                        </button>
+                    </div>
 
                 </div>
             </div>
