@@ -34,133 +34,113 @@
 
 <body>
 
-  <!-- ==================== DESKTOP OUTER WRAPPER & PHONE FRAME ==================== -->
-  <div class="device-viewport-wrapper">
-    <div class="mobile-container" id="mobileAppContainer">
-      
-      <!-- ==================== TOP BAR / APP HEADER ==================== -->
-      <!-- 3 Tab di kiri (Store, List, History) & Diatas Kanan: Budget + Tombol Log Out -->
-      <header class="app-top-bar" id="appTopBar">
-        
-        <!-- Left Side: 3 Tab Menu (Store, List, History) -->
-        <nav class="top-nav-tabs" id="topNavTabs" aria-label="Navigasi Menu Utama">
-          <button type="button" class="top-tab-btn active" data-tab="store" id="topTabStore">
-            <span>Store</span>
-          </button>
-          <button type="button" class="top-tab-btn" data-tab="list" id="topTabList">
-            <span>List</span>
-            <span class="tab-counter-badge" id="listBadgeCount">0</span>
-          </button>
-          <button type="button" class="top-tab-btn" data-tab="history" id="topTabHistory">
-            <span>History</span>
-          </button>
-        </nav>
+    <!-- ==================== DESKTOP OUTER WRAPPER & PHONE FRAME (430px max, centered) ==================== -->
+    <div class="device-viewport-wrapper">
+        <div class="mobile-container" id="mobileAppContainer">
 
-        <!-- Right Side: Nominal Uang Budget & Tombol Log Out -->
-        <div class="header-right-group">
-          <!-- Live Budget Pill -->
-          <div class="live-budget-pill" id="liveBudgetPill" title="Sisa Budget Belanja Anda">
-            <span class="budget-label">Sisa:</span>
-            <strong class="budget-amount" id="headerRemainingBudget">Rp 0</strong>
-          </div>
+            <!-- ==================== TOP BAR / APP HEADER ==================== -->
+            <!-- 3 Tab di kiri (Store, List, History) & Diatas Kanan: Budget + Tombol Log Out -->
+            <header class="app-top-bar" id="appTopBar">
 
-          <!-- Log Out Button -->
-          <button type="button" class="btn-logout" id="btnLogout" title="Log Out / Ganti Supermarket & Budget" aria-label="Log Out">
-            <svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>
-            </svg>
-          </button>
-        </div>
+                <!-- Left Side: 3 Tab Menu (Store, List, History) -->
+                <nav class="top-nav-tabs" id="topNavTabs" aria-label="Navigasi Menu Utama">
+                    <button type="button" class="top-tab-btn active" data-tab="store" id="topTabStore">
+                        <span>Store</span>
+                    </button>
+                    <button type="button" class="top-tab-btn" data-tab="list" id="topTabList">
+                        <span>List</span>
+                        <span class="tab-counter-badge" id="listBadgeCount">0</span>
+                    </button>
+                    <button type="button" class="top-tab-btn" data-tab="history" id="topTabHistory">
+                        <span>History</span>
+                    </button>
+                </nav>
 
-      </header>
+                <!-- Right Side: Nominal Uang Budget & Tombol Log Out -->
+                <div class="header-right-group">
+                    <!-- Live Budget Pill -->
+                    <div class="live-budget-pill" id="liveBudgetPill" title="Sisa Budget Belanja Anda">
+                        <span class="budget-label">Sisa:</span>
+                        <strong class="budget-amount" id="headerRemainingBudget">Rp 0</strong>
+                    </div>
 
-      <!-- ==================== STORE LOCATION SUB-BAR ==================== -->
-      <div class="store-sub-bar" id="storeSubBar">
-        <div class="store-sub-info">
-          <span class="store-badge-icon">🏬</span>
-          <span class="store-name-text" id="displayStoreName">Lotte Mart Grocery - Puri Indah</span>
-          <span class="store-city-text" id="displayStoreCity">• Jakarta Barat</span>
-        </div>
-        <button type="button" class="btn-quick-manage-catalog" id="btnOpenAddProduct" title="Tambah atau ubah harga barang secara realtime">
-          <span>+ Tambah / Edit Barang</span>
-        </button>
-      </div>
+                    <!-- Log Out Button -->
+                    <button type="button" class="btn-logout" id="btnLogout"
+                        title="Log Out / Ganti Supermarket & Budget" aria-label="Log Out">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" x2="9" y1="12" y2="12" />
+                        </svg>
+                    </button>
+                </div>
 
-            <!-- ==================== HOMEPAGE TOP SEGMENT TABS (Store, List, History) ==================== -->
-            <nav class="top-segment-tabs" id="topSegmentTabs" aria-label="Navigasi Halaman Utama">
-                <button type="button" class="segment-tab-btn active" data-tab="store" id="topTabStore">
-                    <span>Store</span>
+            </header>
+
+            <!-- ==================== STORE LOCATION SUB-BAR ==================== -->
+            <div class="store-sub-bar" id="storeSubBar">
+                <div class="store-sub-info">
+                    <span class="store-badge-icon">🏬</span>
+                    <span class="store-name-text" id="displayStoreName">Lotte Mart Grocery - Puri Indah</span>
+                    <span class="store-city-text" id="displayStoreCity">• Jakarta Barat (Puri Indah)</span>
+                </div>
+                <button type="button" class="btn-quick-manage-catalog" id="btnOpenAddProduct"
+                    title="Tambah atau ubah harga barang secara realtime">
+                    <span>+ Tambah / Edit</span>
                 </button>
-                <button type="button" class="segment-tab-btn" data-tab="list" id="topTabList">
-                    <span>List</span>
-                    <span class="tab-counter-badge" id="listBadgeCount">0</span>
-                </button>
-                <button type="button" class="segment-tab-btn" data-tab="history" id="topTabHistory">
-                    <span>History</span>
-                </button>
-            </nav>
+            </div>
 
-        <!-- ==================== TAB 1: STORE (Katalog & Belanja) ==================== -->
-        <section class="tab-view active-view" id="viewStore" aria-label="Tab Store">
-          
-          <!-- Category Filter Bar -->
-          <div class="category-chip-scroller" id="categoryChipBar">
-            <button type="button" class="cat-chip active" data-category="ALL">Semua</button>
-            <button type="button" class="cat-chip" data-category="Sembako">🍚 Sembako</button>
-            <button type="button" class="cat-chip" data-category="Mie & Instan">🍜 Mie & Instan</button>
-            <button type="button" class="cat-chip" data-category="Minuman">🥛 Minuman</button>
-            <button type="button" class="cat-chip" data-category="Dapur & Masak">🍳 Dapur</button>
-            <button type="button" class="cat-chip" data-category="Kebersihan">🧼 Kebersihan</button>
-            <button type="button" class="cat-chip" data-category="Snack">🍪 Snack</button>
-          </div>
+            <!-- ==================== MAIN SCROLLABLE CONTENT AREA ==================== -->
+            <main class="mobile-content-area" id="mainContentArea">
+
+                <!-- ==================== TAB 1: STORE (Katalog & Belanja) ==================== -->
+                <section class="tab-view active-view" id="viewStore" aria-label="Tab Store">
+
+                    <!-- Category Filter Bar -->
+                    <div class="category-chip-scroller" id="categoryChipBar">
+                        <button type="button" class="cat-chip active" data-category="ALL">Semua</button>
+                        <button type="button" class="cat-chip" data-category="Sembako">🍚 Sembako</button>
+                        <button type="button" class="cat-chip" data-category="Mie & Instan">🍜 Mie & Instan</button>
+                        <button type="button" class="cat-chip" data-category="Dapur & Masak">🍳 Dapur & Masak</button>
+                        <button type="button" class="cat-chip" data-category="Minuman">🥛 Minuman</button>
+                        <button type="button" class="cat-chip" data-category="Kebersihan">🧼 Kebersihan</button>
+                    </div>
 
                     <!-- Store Info / Promo Banner -->
                     <div class="store-announcement-card" id="storePromoBanner">
                         <div class="promo-text">
                             <strong id="promoStoreTitle">Katalog Harga & Promo Terverifikasi</strong>
-                            <small id="promoStoreSubtitle">Diskon dan fluktuasi harga acuan bulan lalu otomatis
+                            <small id="promoStoreSubtitle">Diskon dan fluktuasi harga acuan bulan lalu (⬆/⬇︎/=) otomatis
                                 diperbarui.</small>
                         </div>
                         <span class="promo-badge">Live</span>
                     </div>
 
-        <!-- ==================== TAB 2: LIST (Daftar Troli Belanja Aktif) ==================== -->
-        <section class="tab-view" id="viewList" aria-label="Tab List Belanja">
-          
-          <div class="list-section-header">
-            <div>
-              <h3>Troli Belanja Anda</h3>
-              <p>Daftar barang yang siap dibawa ke kasir.</p>
-            </div>
-            <button type="button" class="btn-clear-list" id="btnClearList" title="Kosongkan List Belanja">
-              <svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-              </svg>
-              <span>Reset</span>
-            </button>
-          </div>
+                    <!-- Product Tiles Grid Container (Diisi otomatis via app.js) -->
+                    <div class="product-tiles-grid" id="productTilesContainer">
+                        <!-- Populated dynamically via app.renderStoreProducts() -->
+                    </div>
+
+                </section>
 
                 <!-- ==================== TAB 2: LIST (Daftar Troli Belanja Aktif) ==================== -->
                 <section class="tab-view" id="viewList" aria-label="Tab List Belanja">
 
-          <!-- Empty Cart State -->
-          <div class="empty-list-card hidden" id="emptyListCard">
-            <div class="empty-icon-wrap">
-              <svg class="lucide-icon" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-              </svg>
-            </div>
-            <h4>List Belanja Masih Kosong</h4>
-            <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"+ Add to list"</strong> pada barang yang ingin Anda beli.</p>
-            <button type="button" class="btn-primary-action" id="btnGoToStore">
-              <span>Ke Halaman Store</span>
-            </button>
-          </div>
-
-                    <!-- Shopping List Items Container -->
-                    <div class="active-grocery-list" id="activeGroceryListContainer">
-                        <!-- Populated dynamically via app.js -->
+                    <div class="list-section-header">
+                        <div>
+                            <h3>Troli Belanja Anda</h3>
+                            <p>Daftar barang yang siap dibawa ke kasir.</p>
+                        </div>
+                        <button type="button" class="btn-clear-list" id="btnClearList" title="Kosongkan List Belanja">
+                            <svg class="lucide-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            </svg>
+                            <span>Reset</span>
+                        </button>
                     </div>
 
                     <!-- Empty Cart State -->
@@ -175,11 +155,16 @@
                             </svg>
                         </div>
                         <h4>List Belanja Masih Kosong</h4>
-                        <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"Add to list"</strong> pada barang
+                        <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"+ Add to list"</strong> pada barang
                             yang ingin Anda beli.</p>
                         <button type="button" class="btn-primary-action" id="btnGoToStore">
                             <span>Ke Halaman Store</span>
                         </button>
+                    </div>
+
+                    <!-- Shopping List Items Container -->
+                    <div class="active-grocery-list" id="activeGroceryListContainer">
+                        <!-- Populated dynamically via app.renderCartList() -->
                     </div>
 
                 </section>
@@ -197,26 +182,24 @@
                         </button>
                     </div>
 
-                    <!-- History Grouped Tiles Container -->
-                    <div class="history-tiles-container" id="historyTilesContainer">
-                        <!-- Populated dynamically via app.js -->
+                    <!-- Empty History Card -->
+                    <div class="empty-history-card hidden" id="emptyHistoryCard">
+                        <div class="empty-icon-wrap">
+                            <svg class="lucide-icon" viewBox="0 0 24 24" width="48" height="48" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                        </div>
+                        <h4>Belum Ada Riwayat Belanja</h4>
+                        <p>Setelah Anda menyelesaikan belanja dan menekan tombol <strong>Checkout</strong>, rincian
+                            struk akan tersimpan di sini.</p>
                     </div>
 
-      <!-- ==================== LIST BOTTOM FIXED BAR (Border Hitam, Total Harga Transisi Warna & Checkout) ==================== -->
-      <footer class="list-bottom-bar hidden" id="listBottomSummaryBar">
-        <div class="list-summary-info">
-          <span class="summary-label">Total Belanja:</span>
-          <!-- Fading color dynamic text: Green -> Yellow -> Orange -> Red -->
-          <strong class="summary-total-price" id="listTotalPriceText">Rp 0</strong>
-          <small class="summary-budget-status" id="listBudgetStatusText">Aman dalam budget</small>
-        </div>
-        <button type="button" class="btn-checkout-action" id="btnCheckoutList" title="Kunci List & Selesaikan Belanja">
-          <svg class="lucide-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 6 9 17l-5-5"/>
-          </svg>
-          <span>Checkout</span>
-        </button>
-      </footer>
+                    <!-- History Grouped Tiles Container -->
+                    <div class="history-tiles-container" id="historyTilesContainer">
+                        <!-- Populated dynamically via app.renderHistory() -->
+                    </div>
 
                 </section>
 
@@ -226,7 +209,7 @@
             <footer class="list-bottom-bar hidden" id="listBottomSummaryBar">
                 <div class="list-summary-info">
                     <span class="summary-label">Total Belanja:</span>
-                    <!-- Fading color dynamic text: Green -> Yellow -> Red as budget exhausts -->
+                    <!-- Fading color dynamic text: Green -> Yellow -> Orange -> Red -->
                     <strong class="summary-total-price" id="listTotalPriceText">Rp 0</strong>
                     <small class="summary-budget-status" id="listBudgetStatusText">Aman dalam budget</small>
                 </div>
@@ -252,45 +235,36 @@
                             <path d="M16 10a4 4 0 0 1-8 0" />
                         </svg>
                     </div>
-                    <span class="nav-label">Store</span>
+                    <span class="nav-label">Belanja</span>
                 </button>
 
-          <form id="setupForm" onsubmit="return false;" class="setup-form-body">
-            
-            <!-- 1. Pemilihan Daerah -->
-            <div class="setup-field-group">
-              <label for="selectCity">
-                <svg class="lucide-icon-sm" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span>Pilih Daerah Tempat Rantau</span>
-              </label>
-              <select id="selectCity" class="setup-input select-styled" required>
-                <option value="Jakarta Barat (Puri Indah)" selected>Jakarta Barat (Puri Indah)</option>
-                <option value="Jabodetabek / Jakarta">Jabodetabek / Jakarta</option>
-                <option value="Bandung">Bandung</option>
-                <option value="Yogyakarta">Yogyakarta</option>
-                <option value="Surabaya">Surabaya</option>
-                <option value="Malang">Malang</option>
-                <option value="Semarang">Semarang</option>
-                <option value="Medan">Medan</option>
-                <option value="Bali">Bali</option>
-              </select>
-              <small class="field-hint">Pilihan supermarket di bawah disaring berdasarkan daerah yang dipilih.</small>
-            </div>
+                <!-- List Tab with live item counter badge -->
+                <button type="button" class="nav-tab-btn" data-tab="list" id="bottomNavList">
+                    <div class="nav-icon-box">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" width="22" height="22" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="21" r="1" />
+                            <circle cx="19" cy="21" r="1" />
+                            <path
+                                d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                        </svg>
+                        <span class="nav-badge hidden" id="bottomNavListBadge">0</span>
+                    </div>
+                    <span class="nav-label">List</span>
+                </button>
 
-            <!-- 2. Pemilihan Supermarket (Filtered dynamically) -->
-            <div class="setup-field-group">
-              <label for="selectSupermarket">
-                <svg class="lucide-icon-sm" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/>
-                </svg>
-                <span>Pilih Supermarket Tujuan</span>
-              </label>
-              <select id="selectSupermarket" class="setup-input select-styled" required>
-                <!-- Populated via JS based on selected city -->
-              </select>
-            </div>
+                <!-- History Tab -->
+                <button type="button" class="nav-tab-btn" data-tab="history" id="bottomNavHistory">
+                    <div class="nav-icon-box">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" width="22" height="22" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                    </div>
+                    <span class="nav-label">Riwayat</span>
+                </button>
+            </nav>
 
             <!-- ==================== ONBOARDING / SETUP MODAL (PEMILIHAN SUPERMARKET & BUDGET) ==================== -->
             <div class="setup-modal-overlay" id="setupModalOverlay">
@@ -323,8 +297,9 @@
                                 <span>Pilih Daerah Tempat Rantau</span>
                             </label>
                             <select id="selectCity" class="setup-input select-styled" required>
-                                <option value="Bandung" selected>Bandung</option>
+                                <option value="Jakarta Barat (Puri Indah)" selected>Jakarta Barat (Puri Indah)</option>
                                 <option value="Jabodetabek / Jakarta">Jabodetabek / Jakarta</option>
+                                <option value="Bandung">Bandung</option>
                                 <option value="Yogyakarta">Yogyakarta</option>
                                 <option value="Surabaya">Surabaya</option>
                                 <option value="Malang">Malang</option>
@@ -332,8 +307,7 @@
                                 <option value="Medan">Medan</option>
                                 <option value="Bali">Bali</option>
                             </select>
-                            <small class="field-hint">Pilihan supermarket di bawah akan disaring berdasarkan kota
-                                ini.</small>
+                            <small class="field-hint">Pilihan supermarket di bawah disaring berdasarkan daerah yang dipilih.</small>
                         </div>
 
                         <!-- 2. Pemilihan Supermarket (Filtered dynamically) -->
@@ -346,8 +320,6 @@
                                     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                                     <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
                                     <path d="M2 7h20" />
-                                    <path
-                                        d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7" />
                                 </svg>
                                 <span>Pilih Supermarket Tujuan</span>
                             </label>
@@ -356,90 +328,24 @@
                             </select>
                         </div>
 
-      <!-- ==================== REALTIME PRODUCT EDIT / ADD MODAL ==================== -->
-      <div class="modal-backdrop-generic hidden" id="productEditModalBackdrop">
-        <div class="modal-box-card">
-          <div class="modal-header-row">
-            <h3 id="modalProductTitle">✏️ Edit Produk & Harga</h3>
-            <button type="button" class="btn-modal-close" id="btnCloseProductModal">✕</button>
-          </div>
-
-          <form id="productEditForm" onsubmit="return false;" class="modal-form-body">
-            <input type="hidden" id="editProductId" value="">
-
-            <div class="modal-field-group">
-              <label for="editProductName">Nama Barang</label>
-              <input type="text" id="editProductName" class="modal-input" placeholder="Contoh: Beras 5kg" required>
-            </div>
-
-            <div class="modal-field-row">
-              <div class="modal-field-group">
-                <label for="editProductPrice">Harga Saat Ini (Rp) *</label>
-                <input type="number" id="editProductPrice" class="modal-input" placeholder="74000" min="0" step="500" required>
-              </div>
-
-              <div class="modal-field-group">
-                <label for="editProductLastPrice">Harga Bulan Lalu (Rp)</label>
-                <input type="number" id="editProductLastPrice" class="modal-input" placeholder="68000" min="0" step="500">
-              </div>
-            </div>
-
-            <div class="modal-field-row">
-              <div class="modal-field-group">
-                <label for="editProductDiscount">Diskon (%)</label>
-                <input type="number" id="editProductDiscount" class="modal-input" placeholder="0 (tanpa diskon)" min="0" max="99" step="1" value="0">
-              </div>
-
-              <div class="modal-field-group">
-                <label for="editProductCategory">Kategori</label>
-                <select id="editProductCategory" class="modal-input select-styled">
-                  <option value="Sembako">🍚 Sembako</option>
-                  <option value="Mie & Instan">🍜 Mie & Instan</option>
-                  <option value="Minuman">🥛 Minuman</option>
-                  <option value="Dapur & Masak">🍳 Dapur & Masak</option>
-                  <option value="Kebersihan">🧼 Kebersihan</option>
-                  <option value="Snack">🍪 Snack</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Realtime Preview Box -->
-            <div class="modal-live-preview-box" id="modalLivePreviewBox">
-              <div class="preview-title">📊 Preview Hasil Perhitungan Realtime:</div>
-              <div class="preview-row">
-                <span>Harga Efektif (Harga2):</span>
-                <strong id="previewHarga2Text">Rp 74.000</strong>
-              </div>
-              <div class="preview-row">
-                <span>Fluktuasi Pasar:</span>
-                <span id="previewFlucBadge" class="fluc-pill-preview fluc-up">⬆ Naik (+Rp 6.000)</span>
-              </div>
-            </div>
-
-            <div class="modal-actions-row">
-              <button type="submit" class="btn-modal-save" id="btnSaveProductChanges">
-                <span>💾 Simpan ke Database</span>
-              </button>
-              <button type="button" class="btn-modal-cancel" id="btnCancelProductChanges">Batal</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- ==================== RECEIPT PRINTABLE / CHECKOUT MODAL ==================== -->
-      <div class="modal-backdrop-receipt hidden" id="receiptModalBackdrop">
-        <div class="receipt-box-card">
-          <div class="receipt-paper" id="receiptPrintableSheet">
-            <div class="receipt-top-header">
-              <h2 id="receiptStoreHeader">LOTTE MART GROCERY</h2>
-              <p id="receiptCityHeader">Cabang Puri Indah</p>
-              <div class="receipt-dashed-line">--------------------------------</div>
-              <div class="receipt-date-row">
-                <span>Waktu:</span>
-                <span id="receiptTimestamp">04/11/2026 21:00</span>
-              </div>
-              <div class="receipt-dashed-line">--------------------------------</div>
-            </div>
+                        <!-- 3. Batas Budget Awal (Nominal Uang Maksimal) -->
+                        <div class="setup-field-group">
+                            <label for="inputInitialBudget">
+                                <svg class="lucide-icon-sm" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" x2="12" y1="2" y2="22" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                                <span>Batas Uang Belanja (Budget Safety Cap)</span>
+                            </label>
+                            <div class="input-currency-wrapper">
+                                <span class="currency-prefix">Rp</span>
+                                <input type="number" id="inputInitialBudget" class="setup-input currency-field"
+                                    placeholder="300000" min="10000" step="5000" value="300000" required>
+                            </div>
+                            <small class="field-hint text-warning-note">⚠️ Nominal ini TIDAK bisa diubah setelah masuk ke
+                                tab berbelanja demi disiplin keuangan anak rantau.</small>
 
                             <!-- Quick Budget Chips -->
                             <div class="quick-preset-budget">
@@ -466,17 +372,86 @@
                 </div>
             </div>
 
+            <!-- ==================== REALTIME PRODUCT EDIT / ADD MODAL ==================== -->
+            <div class="modal-backdrop-generic hidden" id="productEditModalBackdrop">
+                <div class="modal-box-card">
+                    <div class="modal-header-row">
+                        <h3 id="modalProductTitle">✏️ Edit Produk & Harga</h3>
+                        <button type="button" class="btn-modal-close" id="btnCloseProductModal">✕</button>
+                    </div>
+
+                    <form id="productEditForm" onsubmit="return false;" class="modal-form-body">
+                        <input type="hidden" id="editProductId" value="">
+
+                        <div class="modal-field-group">
+                            <label for="editProductName">Nama Barang</label>
+                            <input type="text" id="editProductName" class="modal-input" placeholder="Contoh: Beras 5kg" required>
+                        </div>
+
+                        <div class="modal-field-row">
+                            <div class="modal-field-group">
+                                <label for="editProductPrice">Harga Saat Ini (Rp) *</label>
+                                <input type="number" id="editProductPrice" class="modal-input" placeholder="74000" min="0" step="500" required>
+                            </div>
+
+                            <div class="modal-field-group">
+                                <label for="editProductLastPrice">Harga Bulan Lalu (Rp)</label>
+                                <input type="number" id="editProductLastPrice" class="modal-input" placeholder="68000" min="0" step="500">
+                            </div>
+                        </div>
+
+                        <div class="modal-field-row">
+                            <div class="modal-field-group">
+                                <label for="editProductDiscount">Diskon (%)</label>
+                                <input type="number" id="editProductDiscount" class="modal-input" placeholder="0 (tanpa diskon)" min="0" max="99" step="1" value="0">
+                            </div>
+
+                            <div class="modal-field-group">
+                                <label for="editProductCategory">Kategori</label>
+                                <select id="editProductCategory" class="modal-input select-styled">
+                                    <option value="Sembako">🍚 Sembako</option>
+                                    <option value="Mie & Instan">🍜 Mie & Instan</option>
+                                    <option value="Minuman">🥛 Minuman</option>
+                                    <option value="Dapur & Masak">🍳 Dapur & Masak</option>
+                                    <option value="Kebersihan">🧼 Kebersihan</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Realtime Preview Box -->
+                        <div class="modal-live-preview-box" id="modalLivePreviewBox">
+                            <div class="preview-title">📊 Preview Hasil Perhitungan Realtime:</div>
+                            <div class="preview-row">
+                                <span>Harga Efektif (Harga2):</span>
+                                <strong id="previewHarga2Text">Rp 74.000</strong>
+                            </div>
+                            <div class="preview-row">
+                                <span>Fluktuasi Pasar:</span>
+                                <span id="previewFlucBadge" class="fluc-pill-preview fluc-up">⬆ Naik (+Rp 6.000)</span>
+                            </div>
+                        </div>
+
+                        <div class="modal-actions-row">
+                            <button type="submit" class="btn-modal-save" id="btnSaveProductChanges">
+                                <span>💾 Simpan ke Database</span>
+                            </button>
+                            <button type="button" class="btn-modal-cancel" id="btnCancelProductChanges">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- ==================== RECEIPT PRINTABLE / CHECKOUT MODAL ==================== -->
             <div class="modal-backdrop-receipt hidden" id="receiptModalBackdrop">
                 <div class="receipt-box-card">
                     <div class="receipt-paper" id="receiptPrintableSheet">
                         <div class="receipt-top-header">
-                            <h2 id="receiptStoreHeader">ALFAMART</h2>
-                            <p id="receiptCityHeader">Cabang Bandung</p>
+                            <h2 id="receiptStoreHeader">LOTTE MART GROCERY</h2>
+                            <p id="receiptCityHeader">Cabang Puri Indah</p>
                             <div class="receipt-dashed-line">--------------------------------</div>
                             <div class="receipt-date-row">
                                 <span>Waktu:</span>
-                                <span id="receiptTimestamp">27/10/2026 21:00</span>
+                                <span id="receiptTimestamp">04/11/2026 21:00</span>
                             </div>
                             <div class="receipt-dashed-line">--------------------------------</div>
                         </div>
@@ -530,18 +505,10 @@
             <!-- Toast Notification Alert (Ramah Jempol) -->
             <div class="toast-notification hidden" id="toastNotification">
                 <span class="toast-icon" id="toastIcon">⚠️</span>
-                <span class="toast-message" id="toastMessage">Budget tidak mencukupi!</span>
+                <span class="toast-message" id="toastMessage">Pemberitahuan</span>
             </div>
 
         </div>
-      </div>
-
-      <!-- Toast Notification Alert (Ramah Jempol) -->
-      <div class="toast-notification hidden" id="toastNotification">
-        <span class="toast-icon" id="toastIcon">⚠️</span>
-        <span class="toast-message" id="toastMessage">Pemberitahuan</span>
-      </div>
-
     </div>
 
     <!-- Main JavaScript Logic Engine -->
