@@ -33,16 +33,28 @@ Aplikasi web mobile PWA bergaya *native app* dengan tema **Velvet Obsidian & Rub
 
 ---
 
-### 4. 🚦 Tiga Tingkat Status Indikator Budget
+### 4. 🚦 Sistem Pemotongan Budget Riil & Tiga Tingkat Status Warna
+- **Pemotongan Otomatis Saat Checkout**: Nominal saldo budget kini berkurang secara riil begitu transaksi checkout selesai. Siswa rantau dapat memantau sisa uang sakunya secara berkesinambungan.
 - **🟢 HIJAU (Masih Aman)**:
-  - Muncul saat pengeluaran belanja masih jauh di bawah batas budget (sisa budget dompet $> 25\%$).
-  - Status teks: `✅ Masih Aman (XX% terpakai)`.
-- **🟡 KUNING (Warning / Mau Habis)**:
-  - Muncul sebagai peringatan dini saat total belanjaan sudah mendekati limit (sisa budget dompet $\le 25\%$, pengeluaran $\ge 75\%$).
-  - Status teks: `⚠️ Warning: Budget hampir habis! (XX% terpakai)`.
-- **🔴 MERAH (Habis & Kelewatan)**:
-  - Muncul saat total belanjaan sudah mencapai atau melampaui sisa budget (sisa budget $\le 0$, pengeluaran $\ge 100\%$).
-  - Status teks: `🚨 Budget Habis & Kelewatan (+Rp XXX)!`.
+  - Muncul saat saldo budget masih dalam batas aman (sisa $> 25\%$).
+  - Status: `✅ Masih Aman (Sisa Rp XXX)`.
+- **🟡 KUNING (Krisis / Mau Habis)**:
+  - Muncul sebagai peringatan dini saat budget belanja sudah memasuki zona krisis (sisa $\le 25\%$).
+  - Status: `⚠️ Krisis: Budget hampir habis! (Sisa Rp XXX)`.
+- **🔴 MERAH (Habis / Kelewatan)**:
+  - Muncul saat budget telah habis total (Rp 0) atau pengeluaran melebihi saldo.
+  - Status: `🚨 Budget Habis (Rp 0 tersisa)!` atau `🚨 Budget Habis & Kelewatan (+Rp XXX)!`.
+
+---
+
+### 5. 🔤 Tipografi Modern & Bersih (Inter & Plus Jakarta Sans)
+- Mengganti font sebelumnya dengan font **Inter** dan **Plus Jakarta Sans** untuk kenyamanan membaca angka rupiah, label harga, dan nama komoditas yang jauh lebih tajam dan estetis.
+
+---
+
+### 6. 🚫 Bebas Seluruh Dialog Pop-up Browser Native
+- Tombol **Log out**, **Kosongkan troli**, dan **Hapus riwayat** kini bekerja seketika menggunakan notifikasi *toast* non-intrusif tanpa memunculkan dialog pop-up `confirm()` atau `alert()` bawaan browser.
+- Area sub-bar supermarket dihilangkan dari instruksi "+ Tambah / Edit" agar tata letak lokasi belanja bersih dan rapi.
 
 ---
 

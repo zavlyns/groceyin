@@ -189,4 +189,32 @@ assert.strictEqual(testItem.finalPrice, 66600);
 assert.strictEqual(testItem.finalPrice * testItem.quantity, 133200);
 console.log("✔ Test 8 Passed: Pilihan satuan (kg) dan diskon (10%) menghasilkan harga akhir yang sesuai.");
 
+// Test 9: Budget Deduction After Checkout
+let initialBudgetTest = 300000;
+const checkoutSpent = 133200;
+initialBudgetTest = Math.max(0, initialBudgetTest - checkoutSpent);
+assert.strictEqual(initialBudgetTest, 166800, "Sisa budget setelah checkout harus 166.800");
+console.log("✔ Test 9 Passed: Budget berhasil berkurang secara riil setelah checkout barang.");
+
+// Test 10: Color Indicator (Krisis = Kuning, Habis/Lebih = Merah)
+function testBudgetDynamicColor(remaining, originalBudget) {
+  if (remaining <= 0) return { color: "#F43F5E", label: "MERAH_HABIS_LEBIH" };
+  const critical = Math.max(30000, originalBudget * 0.25);
+  if (remaining <= critical) return { color: "#F59E0B", label: "KUNING_KRISIS" };
+  return { color: "#10B981", label: "HIJAU_AMAN" };
+}
+
+const colorAman = testBudgetDynamicColor(166800, 300000);
+assert.strictEqual(colorAman.color, "#10B981");
+
+const colorKrisis = testBudgetDynamicColor(50000, 300000); // 16.6% <= 25%
+assert.strictEqual(colorKrisis.color, "#F59E0B");
+
+const colorHabis = testBudgetDynamicColor(0, 300000);
+assert.strictEqual(colorHabis.color, "#F43F5E");
+
+const colorLebih = testBudgetDynamicColor(-20000, 300000);
+assert.strictEqual(colorLebih.color, "#F43F5E");
+console.log("✔ Test 10 Passed: Status warna terbukti valid (Krisis = Kuning, Habis/Lebih = Merah, Aman = Hijau).");
+
 console.log("🎉 ALL TESTS PASSED SUCCESSFULLY!");

@@ -85,7 +85,7 @@ const DEFAULT_COMMODITIES = [
     price: 74000,
     lastMonthPrice: 68000, // ⬆ Merah (Naik dari 68rb jadi 74rb)
     discount: 0,
-    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-telur-1kg",
@@ -95,7 +95,7 @@ const DEFAULT_COMMODITIES = [
     price: 28000,
     lastMonthPrice: 32000, // ⬇︎ Hijau (Turun dari 32rb jadi 28rb)
     discount: 0,
-    image: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-garam-500g",
@@ -105,7 +105,7 @@ const DEFAULT_COMMODITIES = [
     price: 5000,
     lastMonthPrice: 5000, // = Abu-abu (Setara / Sama dengan bulan lalu)
     discount: 0,
-    image: "https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-beras-5kg-745",
@@ -115,7 +115,7 @@ const DEFAULT_COMMODITIES = [
     price: 74500,
     lastMonthPrice: 74500, // = Abu-abu
     discount: 0,
-    image: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-minyak-2l",
@@ -125,7 +125,7 @@ const DEFAULT_COMMODITIES = [
     price: 42000,
     lastMonthPrice: 42000, // = Abu-abu
     discount: 0,
-    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-indomie-goreng-5",
@@ -135,7 +135,7 @@ const DEFAULT_COMMODITIES = [
     price: 16500,
     lastMonthPrice: 15500, // ⬆ Merah
     discount: 0,
-    image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-indomie-kuah-5",
@@ -145,7 +145,7 @@ const DEFAULT_COMMODITIES = [
     price: 16000,
     lastMonthPrice: 15000, // ⬆ Merah
     discount: 0,
-    image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-terigu-1kg",
@@ -155,7 +155,7 @@ const DEFAULT_COMMODITIES = [
     price: 15500,
     lastMonthPrice: 15500, // = Abu-abu
     discount: 0,
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-gula-1kg",
@@ -165,7 +165,7 @@ const DEFAULT_COMMODITIES = [
     price: 19500,
     lastMonthPrice: 18000, // ⬆ Merah
     discount: 0,
-    image: "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-ultra-milk-1l",
@@ -175,7 +175,7 @@ const DEFAULT_COMMODITIES = [
     price: 22500,
     lastMonthPrice: 22000, // ⬆ Merah
     discount: 0,
-    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-aqua-6",
@@ -185,7 +185,7 @@ const DEFAULT_COMMODITIES = [
     price: 24000,
     lastMonthPrice: 24000, // = Abu-abu
     discount: 0,
-    image: "https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-daging-300g",
@@ -195,7 +195,7 @@ const DEFAULT_COMMODITIES = [
     price: 55000,
     lastMonthPrice: 52000, // ⬆ Merah
     discount: 0,
-    image: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-sabun-cuci",
@@ -205,7 +205,7 @@ const DEFAULT_COMMODITIES = [
     price: 20000,
     lastMonthPrice: 21000, // ⬇︎ Hijau
     discount: 0,
-    image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-sabun-mandi",
@@ -215,7 +215,7 @@ const DEFAULT_COMMODITIES = [
     price: 29500,
     lastMonthPrice: 32000, // ⬇︎ Hijau
     discount: 0,
-    image: "https://images.unsplash.com/photo-1607006314644-77a834b6b669?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=500&q=80"
   }
 ];
 
@@ -244,6 +244,7 @@ class SmartGroceryApp {
     this.city = "Jakarta Barat (Puri Indah)";
     this.supermarket = "Lotte Mart Grocery - Puri Indah";
     this.initialBudget = 300000;
+    this.originalBudget = 300000;
     this.isSessionLocked = false;
 
     this.catalog = {};
@@ -298,9 +299,12 @@ class SmartGroceryApp {
             savedItems.forEach(savedItem => {
               const defIdx = this.catalog[storeName].findIndex(it => it.id === savedItem.id);
               if (defIdx !== -1) {
+                const freshDefault = this.catalog[storeName][defIdx];
                 this.catalog[storeName][defIdx] = {
-                  ...this.catalog[storeName][defIdx],
-                  ...savedItem
+                  ...freshDefault,
+                  ...savedItem,
+                  // Pastikan gambar default terbaru diterapkan
+                  image: freshDefault.image || savedItem.image
                 };
               } else {
                 this.catalog[storeName].push(savedItem);
@@ -502,17 +506,15 @@ class SmartGroceryApp {
       });
     });
 
-    // 7. Clear List
+    // 7. Clear List (Langsung kosongkan troli tanpa dialog popup browser)
     this.btnClearList.addEventListener("click", () => {
       if (this.cart.length === 0) return;
-      if (confirm("Kosongkan troli belanja saat ini? Seluruh saldo akan dikembalikan ke budget.")) {
-        this.cart = [];
-        this.saveCart();
-        this.updateBudgetAndCartUI();
-        this.renderCartList();
-        this.renderStoreProducts();
-        this.showToast("🛒", "Troli belanja berhasil dikosongkan.");
-      }
+      this.cart = [];
+      this.saveCart();
+      this.updateBudgetAndCartUI();
+      this.renderCartList();
+      this.renderStoreProducts();
+      this.showToast("🛒", "Troli belanja berhasil dikosongkan.");
     });
 
     // 8. Checkout Action Button (Transaksi Langsung Tanpa Popup)
@@ -532,15 +534,13 @@ class SmartGroceryApp {
       });
     }
 
-    // 10. History Actions
+    // 10. History Actions (Bersihkan riwayat langsung tanpa dialog popup browser)
     this.btnClearHistory.addEventListener("click", () => {
       if (this.history.length === 0) return;
-      if (confirm("Hapus seluruh catatan riwayat belanja?")) {
-        this.history = [];
-        localStorage.removeItem(this.STORAGE_HISTORY);
-        this.renderHistory();
-        this.showToast("🗑️", "Riwayat belanja telah dibersihkan.");
-      }
+      this.history = [];
+      localStorage.removeItem(this.STORAGE_HISTORY);
+      this.renderHistory();
+      this.showToast("🗑️", "Riwayat belanja telah dibersihkan.");
     });
 
     // 11. Receipt Modal Actions (Hanya dibuka saat user klik "Lihat Struk" di riwayat)
@@ -550,7 +550,9 @@ class SmartGroceryApp {
     });
 
     // 12. Realtime Product Edit Modal Listeners (Katalog Editor)
-    this.btnOpenAddProduct.addEventListener("click", () => this.openAddProductModal());
+    if (this.btnOpenAddProduct) {
+      this.btnOpenAddProduct.addEventListener("click", () => this.openAddProductModal());
+    }
     this.btnCloseProductModal.addEventListener("click", () => this.closeProductModal());
     this.btnCancelProductChanges.addEventListener("click", () => this.closeProductModal());
 
@@ -706,6 +708,7 @@ class SmartGroceryApp {
         this.city = session.city || "Jakarta Barat (Puri Indah)";
         this.supermarket = session.supermarket || "Lotte Mart Grocery - Puri Indah";
         this.initialBudget = parseFloat(session.initialBudget) || 300000;
+        this.originalBudget = parseFloat(session.originalBudget) || this.initialBudget;
         this.isSessionLocked = true;
         this.setupModalOverlay.classList.add("hidden");
       } catch (e) {
@@ -776,7 +779,7 @@ class SmartGroceryApp {
     const budgetVal = parseFloat(this.inputInitialBudget.value);
 
     if (!budgetVal || budgetVal <= 0) {
-      alert("Silakan masukkan nominal budget yang valid (minimal Rp 10.000)!");
+      this.showToast("⚠️", "Silakan masukkan nominal budget yang valid (minimal Rp 10.000)!");
       this.inputInitialBudget.focus();
       return;
     }
@@ -788,6 +791,7 @@ class SmartGroceryApp {
       this.city = city;
       this.supermarket = supermarket;
       this.initialBudget = budgetVal;
+      this.originalBudget = budgetVal;
       this.isSessionLocked = true;
 
       if (!this.catalog[this.supermarket]) {
@@ -799,6 +803,7 @@ class SmartGroceryApp {
         city: this.city,
         supermarket: this.supermarket,
         initialBudget: this.initialBudget,
+        originalBudget: this.originalBudget,
         lockedAt: new Date().toISOString()
       };
       localStorage.setItem(this.STORAGE_SESSION, JSON.stringify(session));
@@ -821,13 +826,13 @@ class SmartGroceryApp {
   }
 
   handleLogout() {
-    if (confirm("Keluar dari sesi belanja ini? Anda dapat memilih supermarket lain atau mengatur ulang batas budget.")) {
-      localStorage.removeItem(this.STORAGE_SESSION);
-      this.isSessionLocked = false;
-      this.cart = [];
-      this.saveCart();
-      this.openSetupModal();
-    }
+    // Keluar langsung tanpa pop up browser native confirm
+    localStorage.removeItem(this.STORAGE_SESSION);
+    this.isSessionLocked = false;
+    this.cart = [];
+    this.saveCart();
+    this.openSetupModal();
+    this.showToast("👋", "Keluar dari sesi belanja. Silakan pilih supermarket atau atur budget.");
   }
 
   // ==================== TAB SWITCHING ====================
@@ -895,20 +900,21 @@ class SmartGroceryApp {
 
   /**
    * Status Warna Budget:
-   * - HIJAU: Masih aman (pengeluaran < 75%)
-   * - KUNING: Warning yang artinya sudah mau habis (pengeluaran 75% - 99%)
-   * - MERAH: Sudah habis dan kelewatan (pengeluaran >= 100%, over-budget)
+   * - HIJAU: Masih aman (sisa > 25% batas krisis)
+   * - KUNING: Krisis / Warning (sisa <= 25% dari budget acuan)
+   * - MERAH: Habis atau lebih (sisa <= 0 atau over-budget)
    */
   getDynamicBudgetColor(totalSpent, budget) {
-    if (budget <= 0) return "#F43F5E";
-    const ratio = totalSpent / budget;
-    if (ratio >= 1.0) {
-      return "#F43F5E"; // Merah Ruby: Habis dan kelewatan
-    } else if (ratio >= 0.75) {
-      return "#F59E0B"; // Kuning Golden: Warning mau habis
-    } else {
-      return "#10B981"; // Hijau Emerald: Masih aman
+    if (budget <= 0) return "#F43F5E"; // Merah Ruby: Habis / 0
+    const remaining = budget - totalSpent;
+    if (remaining <= 0) {
+      return "#F43F5E"; // Merah: Habis atau lebih
     }
+    const criticalThreshold = Math.max(30000, (this.originalBudget || budget) * 0.25);
+    if (remaining <= criticalThreshold) {
+      return "#F59E0B"; // Kuning: Krisis / hampir habis
+    }
+    return "#10B981"; // Hijau: Masih aman
   }
 
   updateBudgetAndCartUI() {
@@ -919,20 +925,22 @@ class SmartGroceryApp {
     // 1. Live Remaining Budget in Top Header
     this.headerRemainingBudget.textContent = this.formatRupiah(remaining);
 
+    const criticalThreshold = Math.max(30000, (this.originalBudget || this.initialBudget) * 0.25);
+
     if (remaining <= 0) {
-      // MERAH: Sudah habis dan kelewatan
-      this.liveBudgetPill.style.background = "rgba(244, 63, 94, 0.16)";
-      this.liveBudgetPill.style.borderColor = "rgba(244, 63, 94, 0.5)";
+      // MERAH: Habis atau lebih (over-budget)
+      this.liveBudgetPill.style.background = "rgba(244, 63, 94, 0.22)";
+      this.liveBudgetPill.style.borderColor = "rgba(244, 63, 94, 0.65)";
       this.headerRemainingBudget.style.color = "#FDA4AF";
-    } else if (remaining <= this.initialBudget * 0.25) {
-      // KUNING: Warning, artinya sudah mau habis
-      this.liveBudgetPill.style.background = "rgba(245, 158, 11, 0.15)";
-      this.liveBudgetPill.style.borderColor = "rgba(245, 158, 11, 0.5)";
+    } else if (remaining <= criticalThreshold) {
+      // KUNING: Krisis / warning (budget hampir habis)
+      this.liveBudgetPill.style.background = "rgba(245, 158, 11, 0.20)";
+      this.liveBudgetPill.style.borderColor = "rgba(245, 158, 11, 0.65)";
       this.headerRemainingBudget.style.color = "#FBBF24";
     } else {
       // HIJAU: Masih aman
-      this.liveBudgetPill.style.background = "rgba(16, 185, 129, 0.12)";
-      this.liveBudgetPill.style.borderColor = "rgba(16, 185, 129, 0.4)";
+      this.liveBudgetPill.style.background = "rgba(16, 185, 129, 0.16)";
+      this.liveBudgetPill.style.borderColor = "rgba(16, 185, 129, 0.5)";
       this.headerRemainingBudget.style.color = "#34D399";
     }
 
@@ -958,17 +966,20 @@ class SmartGroceryApp {
       this.btnCheckoutLabelText.textContent = `Bayar via ${currentMethod}`;
     }
 
-    if (totalSpent >= this.initialBudget) {
+    if (this.initialBudget <= 0) {
+      this.listBudgetStatusText.textContent = `🚨 Budget Habis (Rp 0 tersisa)!`;
+      this.listBudgetStatusText.style.color = "#F43F5E";
+    } else if (totalSpent >= this.initialBudget) {
       const overAmount = totalSpent - this.initialBudget;
       this.listBudgetStatusText.textContent = overAmount > 0
         ? `🚨 Budget Habis & Kelewatan (+${this.formatRupiah(overAmount)})!`
         : `🚨 Budget Habis (100% terpakai)!`;
       this.listBudgetStatusText.style.color = "#F43F5E";
-    } else if (totalSpent >= this.initialBudget * 0.75) {
-      this.listBudgetStatusText.textContent = `⚠️ Warning: Budget hampir habis! (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
+    } else if (remaining <= criticalThreshold) {
+      this.listBudgetStatusText.textContent = `⚠️ Krisis: Budget hampir habis! (Sisa ${this.formatRupiah(remaining)})`;
       this.listBudgetStatusText.style.color = "#F59E0B";
     } else {
-      this.listBudgetStatusText.textContent = `✅ Masih Aman (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
+      this.listBudgetStatusText.textContent = `✅ Masih Aman (Sisa ${this.formatRupiah(remaining)})`;
       this.listBudgetStatusText.style.color = "#10B981";
     }
 
@@ -1009,7 +1020,6 @@ class SmartGroceryApp {
         <div style="grid-column: 1 / -1; text-align: center; padding: 36px 16px; color: var(--text-muted);">
           <p style="font-size: 2rem; margin-bottom: 8px;">🛒</p>
           <p style="font-weight: 600;">Tidak ada barang di kategori ini.</p>
-          <small>Gunakan tombol "+ Tambah / Edit" untuk menambahkan produk baru.</small>
         </div>
       `;
       return;
@@ -1364,7 +1374,7 @@ class SmartGroceryApp {
     const category = this.editProductCategory.value;
 
     if (!name || isNaN(price) || price < 0) {
-      alert("Harap isi nama dan harga yang valid!");
+      this.showToast("⚠️", "Harap isi nama dan harga yang valid!");
       return;
     }
 
@@ -1568,17 +1578,29 @@ class SmartGroceryApp {
     this.history.unshift(record);
     localStorage.setItem(this.STORAGE_HISTORY, JSON.stringify(this.history));
 
-    // 2. Kosongkan keranjang
+    // 2. Potong/kurangi saldo budget setelah checkout barang
+    this.initialBudget = Math.max(0, this.initialBudget - totalSpent);
+    const savedSession = localStorage.getItem(this.STORAGE_SESSION);
+    if (savedSession) {
+      try {
+        const sess = JSON.parse(savedSession);
+        sess.initialBudget = this.initialBudget;
+        localStorage.setItem(this.STORAGE_SESSION, JSON.stringify(sess));
+      } catch (e) {}
+    }
+
+    // 3. Kosongkan keranjang
     this.cart = [];
     this.saveCart();
 
-    // 3. Perbarui seluruh UI state
+    // 4. Perbarui seluruh UI state
     this.updateBudgetAndCartUI();
     this.renderCartList();
     this.renderHistory();
+    this.renderStoreProducts();
 
-    // 4. Feedback instan tanpa popup (langsung switch ke tab History)
-    this.showToast("🎉", `Transaksi ${this.formatRupiah(totalSpent)} via ${paymentMethod} Berhasil!`);
+    // 5. Feedback instan tanpa popup (langsung switch ke tab History)
+    this.showToast("🎉", `Transaksi ${this.formatRupiah(totalSpent)} via ${paymentMethod} Berhasil! Sisa budget dompet: ${this.formatRupiah(this.initialBudget)}`);
     this.switchTab("history");
   }
 

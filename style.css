@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    GROCERYIN - SMART GROCERY & BUDGET SAFETY TRACKER
    Color Theme: Sleek Black Background & Vibrant Crimson Red Lists / Accents
    Format: 9:16 Smartphone Layout (Centered on Desktop)
@@ -65,9 +65,9 @@
   --radius-xl: 22px;
   --radius-full: 9999px;
 
-  /* Font Families */
-  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Font Families - Modern Crisp UI (Inter & Plus Jakarta Sans) */
+  --font-heading: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 * {
@@ -309,6 +309,54 @@ html, body {
   background: rgba(220, 38, 38, 0.25);
   color: var(--primary-light);
   border-color: var(--primary-red);
+}
+
+/* ==================== STORE LOCATION SUB-BAR ==================== */
+.store-sub-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 14px 4px;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.store-sub-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  max-width: 100%;
+}
+
+.store-sub-info .store-badge-icon {
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: none;
+  font-size: 0.82rem;
+  color: inherit;
+}
+
+.store-name-text {
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.store-city-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ==================== TOP SEGMENT TABS (Store, List, History) ==================== */
