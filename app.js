@@ -165,7 +165,7 @@ const DEFAULT_COMMODITIES = [
     price: 19500,
     lastMonthPrice: 18000, // ⬆ Merah
     discount: 0,
-    image: "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=500&q=80"
+    image: "https://images.unsplash.com/photo-1587735243615-c03f25aaff15?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-ultra-milk-1l",
@@ -185,7 +185,7 @@ const DEFAULT_COMMODITIES = [
     price: 24000,
     lastMonthPrice: 24000, // = Abu-abu
     discount: 0,
-    image: "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=500&q=80"
+    image: "assets/aqua.jpg"
   },
   {
     id: "prod-daging-300g",
@@ -195,7 +195,7 @@ const DEFAULT_COMMODITIES = [
     price: 55000,
     lastMonthPrice: 52000, // ⬆ Merah
     discount: 0,
-    image: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80"
+    image: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-sabun-cuci",
@@ -238,7 +238,7 @@ class SmartGroceryApp {
     this.STORAGE_SESSION = "groceryin_rantau_session";
     this.STORAGE_CART = "groceryin_rantau_cart";
     this.STORAGE_HISTORY = "groceryin_rantau_history";
-    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v2";
+    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v3";
 
     // State
     this.city = "Jakarta Barat (Puri Indah)";
@@ -303,8 +303,10 @@ class SmartGroceryApp {
                 this.catalog[storeName][defIdx] = {
                   ...freshDefault,
                   ...savedItem,
-                  // Pastikan gambar default terbaru diterapkan
-                  image: freshDefault.image || savedItem.image
+                  // Pastikan gambar default terbaru diterapkan dan link lama/rusak ditimpa
+                  image: (savedItem.id === "prod-aqua-6" || !savedItem.image || savedItem.image.includes("1548839140"))
+                    ? freshDefault.image
+                    : (freshDefault.image || savedItem.image)
                 };
               } else {
                 this.catalog[storeName].push(savedItem);
@@ -1049,15 +1051,11 @@ class SmartGroceryApp {
       html += `
         <div class="product-tile" data-id="${item.id}">
           <div class="product-image-wrap">
-            <img src="${item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80'}" 
+            <img src="${item.image || 'assets/aqua.jpg'}" 
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560023907-5f339617ea30?auto=format&fit=crop&w=500&q=80';"
                  alt="${this.escapeHtml(item.name)}" class="product-tile-img" loading="lazy">
             
             ${hasDiscount ? `<span class="product-discount-pill">-${discountPercent}%</span>` : ''}
-
-            <!-- Tombol Edit Cepat (✏️) pada kartu -->
-            <button type="button" class="btn-tile-edit-quick" onclick="app.openEditProductModal('${item.id}')" title="Ubah harga atau detail barang ini">
-              ✏️
-            </button>
           </div>
 
           <div class="product-tile-name" title="${this.escapeHtml(item.name)}">
