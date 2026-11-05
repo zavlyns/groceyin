@@ -1,19 +1,39 @@
 # GroceryIn - Smart Grocery & Budget Safety Tracker (PWA)
 
-Aplikasi web mobile PWA bergaya *native app* dengan tema **Sleek Black & Vibrant Crimson Red**, dirancang khusus untuk seorang **siswa rantau** yang belanja bulanan sambil mendorong troli supermarket.
+Aplikasi web mobile PWA bergaya *native app* dengan tema **Velvet Obsidian & Ruby Crimson**, dirancang khusus untuk seorang **siswa rantau** yang belanja bulanan sambil mendorong troli supermarket.
 
 ---
 
-## 🌟 Fitur Utama & Pembaruan
+## 🌟 Fitur Utama & Pembaruan Terkini
 
-### 1. 🎨 Tema Hitam & Merah (Black & Crimson Red Edition)
-- **Background Hitam Pekat**: `#000000` dan `#0C0C0E` dengan permukaan kartu `#141418`.
-- **Aksen Merah Crimson**: Tombol aksi, badge, outline kartu troli belanja, dan icon navigasi beraksen merah tajam (`#DC2626` / `#EF4444`).
-- **Desain Mobile UI 430px Centered**: Tampilan smartphone optimal di rasio 9:16 yang berada di tengah layar jika dibuka via browser laptop/PC desktop.
+### 1. ⚡ Checkout Instan Tanpa Pop-up ("Langsung Selesai")
+- **Tanpa Dialog Blocking**: Menghapus seluruh konfirmasi native browser `confirm()` dan modal overlay struk kasir yang menghalangi layar saat transaksi.
+- **Transisi Mulus**: Saat tombol **Checkout** ditekan, data belanja langsung tersimpan ke riwayat (History) dengan metode pembayaran yang dipilih, keranjang dikosongkan, toast konfirmasi halus muncul, dan tab langsung beralih ke **Riwayat (History)** secara instan.
 
 ---
 
-### 2. 🚦 Tiga Tingkat Status Indikator Budget
+### 2. 💳 Pilihan Metode Pembayaran Kasir Fleksibel
+- Pilihan metode pembayaran interaktif langsung di tab Belanja sebelum checkout:
+  - 📱 **QRIS** *(Instan / GoPay / OVO / ShopeePay / Livin)*
+  - 💵 **Tunai / Cash** *(Uang pas / kasir)*
+  - 💳 **BCA** *(BCA Mobile / myBCA / Sakuku)*
+  - 🏦 **Mandiri** *(Livin' by Mandiri)*
+  - 🏧 **BRI** *(BRImo / Kartu BRI)*
+  - 💳 **Kartu Debit / EDC** *(Debit Chip / Flazz / Tap)*
+- Metode pembayaran yang dipilih otomatis tercatat di setiap kartu riwayat belanja (History badge) dan struk kasir.
+
+---
+
+### 3. 🎨 Tema Estetik Velvet Obsidian & Ruby Crimson (Nyaman di Mata)
+- Palet warna gelap modern berkelas (Dark Slate & Luxury Ruby):
+  - **Latar Belakang**: `#0A0D14` (Desktop) & `#10141D` (Mobile Phone) untuk mengurangi silau saat di bawah lampu supermarket.
+  - **Permukaan Kartu**: `#171C26` dengan tepi aksen Ruby `#F43F5E` dan kontras teks lembut `#F1F5F9`.
+  - **Aksen Tombol & Navigasi**: Gradien Ruby Rose `#E11D48` & `#F43F5E` yang elegan dan ramah jempol.
+- **Desain Mobile UI 430px Centered**: Rasio smartphone 9:16 tetap di tengah layar desktop dengan layout sentuhan satu tangan.
+
+---
+
+### 4. 🚦 Tiga Tingkat Status Indikator Budget
 - **🟢 HIJAU (Masih Aman)**:
   - Muncul saat pengeluaran belanja masih jauh di bawah batas budget (sisa budget dompet $> 25\%$).
   - Status teks: `✅ Masih Aman (XX% terpakai)`.

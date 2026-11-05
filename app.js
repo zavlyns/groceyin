@@ -1,6 +1,6 @@
 /**
  * GROCERYIN - SMART GROCERY & BUDGET SAFETY TRACKER
- * Native Mobile PWA Edition - Sleek Black Background & Vibrant Crimson Red Accents
+ * Native Mobile PWA Edition - Velvet Obsidian & Ruby Crimson Theme
  * 
  * Features:
  * - Dynamic Supermarket Filtering by City (Lotte Mart Grocery - Puri Indah, Indomaret, Alfamart, Alfamidi, Family Mart)
@@ -11,8 +11,10 @@
  *   * MERAH: Sudah habis dan kelewatan (pengeluaran >= 100%, over-budget)
  * - Modal Penentuan Satuan (kg, pcs, liter, pack, botol, gram, ml, ikat, custom)
  * - Modal Pemilihan Diskon Fleksibel (Preset %, Custom %, atau Nominal Rp) dengan kalkulasi harga otomatis
+ * - Pilihan Metode Pembayaran Kasir (Cash, QRIS, BCA, Mandiri, BRI, Kartu Debit)
+ * - Checkout Instan Langsung Tanpa Popup: tidak ada confirm() atau pop-up struk yang menutupi layar
  * - Interactive Quantity Stepper (-[]+) & X delete with budget refund
- * - Checkout locking list & archiving to History with printable receipt
+ * - Riwayat Transaksi Lengkap dengan Badge Metode Pembayaran
  * - Realtime Product & Price Editor with Permanent Database Persistence
  * - Fluctuation Emotes: ⬆ (Merah Naik), ⬇︎ (Hijau Turun), = (Abu-abu Setara)
  */
@@ -259,6 +261,9 @@ class SmartGroceryApp {
     this.modalDiscountMode = "percent"; // "percent" atau "nominal"
     this.modalDiscountValue = 0;
 
+    // State Metode Pembayaran Kasir (QRIS, Cash, BCA, Mandiri, BRI, Kartu Debit)
+    this.selectedPaymentMethod = "QRIS";
+
     this.initDOM();
     this.initPWA();
     this.loadCatalogDatabase();
@@ -349,6 +354,13 @@ class SmartGroceryApp {
     this.listTotalPriceText = document.getElementById("listTotalPriceText");
     this.listBudgetStatusText = document.getElementById("listBudgetStatusText");
     this.btnCheckoutList = document.getElementById("btnCheckoutList");
+    this.summaryPaymentMethodLabel = document.getElementById("summaryPaymentMethodLabel");
+    this.btnCheckoutLabelText = document.getElementById("btnCheckoutLabelText");
+
+    // Payment Section Elements in List View
+    this.checkoutPaymentBox = document.getElementById("checkoutPaymentBox");
+    this.activePaymentBadge = document.getElementById("activePaymentBadge");
+    this.paymentChipsGrid = document.getElementById("paymentChipsGrid");
 
     // History View Elements
     this.historyTilesContainer = document.getElementById("historyTilesContainer");
@@ -417,11 +429,12 @@ class SmartGroceryApp {
     this.btnConfirmAddItem = document.getElementById("btnConfirmAddItem");
     this.btnConfirmAddItemText = document.getElementById("btnConfirmAddItemText");
 
-    // Receipt Modal
+    // Receipt Modal (diakses opsional via tab History)
     this.receiptModalBackdrop = document.getElementById("receiptModalBackdrop");
     this.receiptStoreHeader = document.getElementById("receiptStoreHeader");
     this.receiptCityHeader = document.getElementById("receiptCityHeader");
     this.receiptTimestamp = document.getElementById("receiptTimestamp");
+    this.receiptPaymentMethod = document.getElementById("receiptPaymentMethod");
     this.receiptItemsListBody = document.getElementById("receiptItemsListBody");
     this.receiptInitialBudget = document.getElementById("receiptInitialBudget");
     this.receiptTotalDiscount = document.getElementById("receiptTotalDiscount");
@@ -489,7 +502,7 @@ class SmartGroceryApp {
       });
     });
 
-    // 7. Clear List & Checkout
+    // 7. Clear List
     this.btnClearList.addEventListener("click", () => {
       if (this.cart.length === 0) return;
       if (confirm("Kosongkan troli belanja saat ini? Seluruh saldo akan dikembalikan ke budget.")) {
@@ -502,9 +515,24 @@ class SmartGroceryApp {
       }
     });
 
+    // 8. Checkout Action Button (Transaksi Langsung Tanpa Popup)
     this.btnCheckoutList.addEventListener("click", () => this.handleCheckout());
 
-    // 8. History Actions
+    // 9. Payment Method Selection Chips (Cash, QRIS, BCA, Mandiri, BRI, Kartu Debit)
+    if (this.paymentChipsGrid) {
+      this.paymentChipsGrid.querySelectorAll(".payment-chip-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          this.paymentChipsGrid.querySelectorAll(".payment-chip-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          this.selectedPaymentMethod = btn.getAttribute("data-method") || "QRIS";
+          if (this.activePaymentBadge) this.activePaymentBadge.textContent = this.selectedPaymentMethod;
+          if (this.summaryPaymentMethodLabel) this.summaryPaymentMethodLabel.textContent = `Bayar via ${this.selectedPaymentMethod}:`;
+          if (this.btnCheckoutLabelText) this.btnCheckoutLabelText.textContent = `Bayar via ${this.selectedPaymentMethod}`;
+        });
+      });
+    }
+
+    // 10. History Actions
     this.btnClearHistory.addEventListener("click", () => {
       if (this.history.length === 0) return;
       if (confirm("Hapus seluruh catatan riwayat belanja?")) {
@@ -515,14 +543,13 @@ class SmartGroceryApp {
       }
     });
 
-    // 9. Receipt Modal
+    // 11. Receipt Modal Actions (Hanya dibuka saat user klik "Lihat Struk" di riwayat)
     this.btnReceiptPrint.addEventListener("click", () => window.print());
     this.btnReceiptClose.addEventListener("click", () => {
       this.receiptModalBackdrop.classList.add("hidden");
-      this.switchTab("history");
     });
 
-    // 10. Realtime Product Edit Modal Listeners (Katalog Editor)
+    // 12. Realtime Product Edit Modal Listeners (Katalog Editor)
     this.btnOpenAddProduct.addEventListener("click", () => this.openAddProductModal());
     this.btnCloseProductModal.addEventListener("click", () => this.closeProductModal());
     this.btnCancelProductChanges.addEventListener("click", () => this.closeProductModal());
@@ -536,7 +563,7 @@ class SmartGroceryApp {
       this.saveProductChanges();
     });
 
-    // 11. Modal Add / Edit to List Events (Satuan, Quantity, Diskon)
+    // 13. Modal Add / Edit to List Events (Satuan, Quantity, Diskon)
     this.initAddItemModalEvents();
   }
 
@@ -873,14 +900,14 @@ class SmartGroceryApp {
    * - MERAH: Sudah habis dan kelewatan (pengeluaran >= 100%, over-budget)
    */
   getDynamicBudgetColor(totalSpent, budget) {
-    if (budget <= 0) return "#EF4444";
+    if (budget <= 0) return "#F43F5E";
     const ratio = totalSpent / budget;
     if (ratio >= 1.0) {
-      return "#EF4444"; // Merah: Habis dan kelewatan
+      return "#F43F5E"; // Merah Ruby: Habis dan kelewatan
     } else if (ratio >= 0.75) {
-      return "#EAB308"; // Kuning: Warning mau habis
+      return "#F59E0B"; // Kuning Golden: Warning mau habis
     } else {
-      return "#22C55E"; // Hijau: Masih aman
+      return "#10B981"; // Hijau Emerald: Masih aman
     }
   }
 
@@ -894,19 +921,19 @@ class SmartGroceryApp {
 
     if (remaining <= 0) {
       // MERAH: Sudah habis dan kelewatan
-      this.liveBudgetPill.style.background = "rgba(239, 68, 68, 0.2)";
-      this.liveBudgetPill.style.borderColor = "#EF4444";
-      this.headerRemainingBudget.style.color = "#EF4444";
+      this.liveBudgetPill.style.background = "rgba(244, 63, 94, 0.16)";
+      this.liveBudgetPill.style.borderColor = "rgba(244, 63, 94, 0.5)";
+      this.headerRemainingBudget.style.color = "#FDA4AF";
     } else if (remaining <= this.initialBudget * 0.25) {
       // KUNING: Warning, artinya sudah mau habis
-      this.liveBudgetPill.style.background = "rgba(234, 179, 8, 0.2)";
-      this.liveBudgetPill.style.borderColor = "#EAB308";
-      this.headerRemainingBudget.style.color = "#EAB308";
+      this.liveBudgetPill.style.background = "rgba(245, 158, 11, 0.15)";
+      this.liveBudgetPill.style.borderColor = "rgba(245, 158, 11, 0.5)";
+      this.headerRemainingBudget.style.color = "#FBBF24";
     } else {
       // HIJAU: Masih aman
-      this.liveBudgetPill.style.background = "rgba(34, 197, 94, 0.15)";
-      this.liveBudgetPill.style.borderColor = "#22C55E";
-      this.headerRemainingBudget.style.color = "#22C55E";
+      this.liveBudgetPill.style.background = "rgba(16, 185, 129, 0.12)";
+      this.liveBudgetPill.style.borderColor = "rgba(16, 185, 129, 0.4)";
+      this.headerRemainingBudget.style.color = "#34D399";
     }
 
     // 2. Tab Badges
@@ -918,23 +945,31 @@ class SmartGroceryApp {
       this.bottomNavListBadge.classList.add("hidden");
     }
 
-    // 3. List Bottom Summary Bar Styling
+    // 3. List Bottom Summary Bar Styling & Payment Label
     this.listTotalPriceText.textContent = this.formatRupiah(totalSpent);
     const dynamicColor = this.getDynamicBudgetColor(totalSpent, this.initialBudget);
     this.listTotalPriceText.style.color = dynamicColor;
+
+    const currentMethod = this.selectedPaymentMethod || "QRIS";
+    if (this.summaryPaymentMethodLabel) {
+      this.summaryPaymentMethodLabel.textContent = `Bayar via ${currentMethod}:`;
+    }
+    if (this.btnCheckoutLabelText) {
+      this.btnCheckoutLabelText.textContent = `Bayar via ${currentMethod}`;
+    }
 
     if (totalSpent >= this.initialBudget) {
       const overAmount = totalSpent - this.initialBudget;
       this.listBudgetStatusText.textContent = overAmount > 0
         ? `🚨 Budget Habis & Kelewatan (+${this.formatRupiah(overAmount)})!`
         : `🚨 Budget Habis (100% terpakai)!`;
-      this.listBudgetStatusText.style.color = "#EF4444";
+      this.listBudgetStatusText.style.color = "#F43F5E";
     } else if (totalSpent >= this.initialBudget * 0.75) {
       this.listBudgetStatusText.textContent = `⚠️ Warning: Budget hampir habis! (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
-      this.listBudgetStatusText.style.color = "#EAB308";
+      this.listBudgetStatusText.style.color = "#F59E0B";
     } else {
       this.listBudgetStatusText.textContent = `✅ Masih Aman (${Math.round((totalSpent / this.initialBudget) * 100)}% terpakai)`;
-      this.listBudgetStatusText.style.color = "#22C55E";
+      this.listBudgetStatusText.style.color = "#10B981";
     }
 
     this.btnCheckoutList.disabled = (this.cart.length === 0);
@@ -1000,8 +1035,6 @@ class SmartGroceryApp {
         emoteSymbol = "=";
         emoteClass = "emote-equal";
       }
-
-      const defaultUnit = item.defaultUnit || "pcs";
 
       html += `
         <div class="product-tile" data-id="${item.id}">
@@ -1371,7 +1404,7 @@ class SmartGroceryApp {
     this.renderStoreProducts();
   }
 
-  // ==================== TAB 2: CART / LIST (RED THEMED CARDS) ====================
+  // ==================== TAB 2: CART / LIST (RUBY ACCENT CARDS) ====================
   updateItemQuantity(cartItemId, newQty) {
     const itemIndex = this.cart.findIndex(i => (i.cartItemId || i.id) === cartItemId);
     if (itemIndex === -1) return;
@@ -1421,10 +1454,12 @@ class SmartGroceryApp {
     if (this.cart.length === 0) {
       this.activeGroceryListContainer.innerHTML = "";
       this.emptyListCard.classList.remove("hidden");
+      if (this.checkoutPaymentBox) this.checkoutPaymentBox.classList.add("hidden");
       return;
     }
 
     this.emptyListCard.classList.add("hidden");
+    if (this.checkoutPaymentBox) this.checkoutPaymentBox.classList.remove("hidden");
 
     let html = "";
     this.cart.forEach((item, index) => {
@@ -1505,19 +1540,16 @@ class SmartGroceryApp {
     this.activeGroceryListContainer.innerHTML = html;
   }
 
-  // ==================== CHECKOUT & RECEIPT ====================
+  // ==================== CHECKOUT (TRANSAKSI LANGSUNG TANPA POPUP) ====================
   handleCheckout() {
     if (this.cart.length === 0) {
-      alert("Troli belanja masih kosong!");
+      this.showToast("🛒", "Troli belanja masih kosong!");
       return;
     }
 
     const totalSpent = this.getTotalCartPrice();
     const remainingBudget = this.getRemainingBudget();
-
-    if (!confirm(`Kunci list belanja dan selesaikan belanjaan senilai ${this.formatRupiah(totalSpent)}? Data akan diarsipkan ke tab History.`)) {
-      return;
-    }
+    const paymentMethod = this.selectedPaymentMethod || "QRIS";
 
     const record = {
       id: `rcpt-${Date.now()}`,
@@ -1528,23 +1560,30 @@ class SmartGroceryApp {
       totalSpent: totalSpent,
       totalDiscountSaved: this.getTotalDiscountSaved(),
       remainingBudget: remainingBudget,
+      paymentMethod: paymentMethod,
       items: JSON.parse(JSON.stringify(this.cart))
     };
 
+    // 1. Simpan transaksi ke riwayat
     this.history.unshift(record);
     localStorage.setItem(this.STORAGE_HISTORY, JSON.stringify(this.history));
 
+    // 2. Kosongkan keranjang
     this.cart = [];
     this.saveCart();
 
+    // 3. Perbarui seluruh UI state
     this.updateBudgetAndCartUI();
     this.renderCartList();
     this.renderHistory();
 
-    this.showReceiptModal(record);
+    // 4. Feedback instan tanpa popup (langsung switch ke tab History)
+    this.showToast("🎉", `Transaksi ${this.formatRupiah(totalSpent)} via ${paymentMethod} Berhasil!`);
+    this.switchTab("history");
   }
 
   showReceiptModal(record) {
+    if (!record) return;
     this.receiptStoreHeader.textContent = record.supermarket.toUpperCase();
     this.receiptCityHeader.textContent = `Cabang ${record.city}`;
     
@@ -1554,6 +1593,10 @@ class SmartGroceryApp {
       month: "2-digit",
       year: "numeric"
     }) + " " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+    if (this.receiptPaymentMethod) {
+      this.receiptPaymentMethod.textContent = record.paymentMethod || "QRIS";
+    }
 
     let itemsHtml = "";
     record.items.forEach(it => {
@@ -1594,6 +1637,12 @@ class SmartGroceryApp {
     this.history.forEach(record => {
       const recordDate = new Date(record.date);
       const relativeDate = this.formatRelativeDate(recordDate);
+      const payment = record.paymentMethod || "QRIS";
+
+      let paymentIcon = "📱";
+      if (payment === "Cash") paymentIcon = "💵";
+      else if (payment === "BCA" || payment === "Kartu Debit") paymentIcon = "💳";
+      else if (payment === "Mandiri" || payment === "BRI") paymentIcon = "🏦";
 
       let itemsSummaryHtml = "";
       record.items.forEach(it => {
@@ -1614,6 +1663,7 @@ class SmartGroceryApp {
           <div class="history-record-header">
             <div class="history-meta">
               <span class="history-date-badge">${relativeDate}</span>
+              <span class="history-payment-badge">${paymentIcon} ${payment}</span>
               <small class="history-store-tag">🏬 ${this.escapeHtml(record.supermarket)}</small>
             </div>
             <strong class="history-total-price">${this.formatRupiah(record.totalSpent)}</strong>
@@ -1625,7 +1675,7 @@ class SmartGroceryApp {
 
           <div class="history-card-footer">
             <button type="button" class="btn-history-view-receipt" onclick="app.showReceiptModal(app.history.find(h => h.id === '${record.id}'))">
-              📄 Lihat Struk Pembelian
+              📄 Lihat Rincian Struk
             </button>
           </div>
         </div>
@@ -1680,7 +1730,7 @@ class SmartGroceryApp {
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.toastNotification.classList.add("hidden");
-    }, 2500);
+    }, 2800);
   }
 }
 
