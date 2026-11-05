@@ -3,7 +3,7 @@
  * Provides offline capabilities & caching for aesthetic mobile experience.
  */
 
-const CACHE_NAME = 'groceryin-rantau-v2';
+const CACHE_NAME = 'groceryin-aesthetic-v4';
 
 const STATIC_ASSETS = [
   './',
@@ -21,7 +21,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching GroceryIn aesthetic app shell');
+      console.log('[SW] Pre-caching GroceryIn aesthetic app shell v4');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
         console.warn('[SW] Pre-cache partial warning:', err);
       });
@@ -29,7 +29,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. Activate Event: Clean up outdated caches
+// 2. Activate Event: Clean up all outdated caches immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -45,7 +45,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch Event: Stale-While-Revalidate for local assets and images
+// 3. Fetch Event: Network-First (agar update selalu langsung tampil) with Cache Fallback
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
@@ -54,8 +54,8 @@ self.addEventListener('fetch', (event) => {
   if (url.protocol.startsWith('chrome-extension')) return;
 
   event.respondWith(
-    caches.match(req).then((cachedResponse) => {
-      const fetchPromise = fetch(req).then((networkResponse) => {
+    fetch(req)
+      .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -63,9 +63,7 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => cachedResponse);
-
-      return cachedResponse || fetchPromise;
-    })
+      })
+      .catch(() => caches.match(req))
   );
 });
