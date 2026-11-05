@@ -1,12 +1,32 @@
 # GroceryIn - Smart Grocery & Budget Safety Tracker (PWA)
 
-Aplikasi web mobile PWA bergaya *native app* dengan tema **Velvet Obsidian & Ruby Crimson**, dirancang khusus untuk seorang **siswa rantau** yang belanja bulanan sambil mendorong troli supermarket.
+Aplikasi web mobile PWA bergaya *native app* dengan tema **Aesthetic Slate Grey & Sky Blue Neon**, dirancang khusus untuk seorang **siswa rantau** yang belanja bulanan sambil mendorong troli supermarket.
 
 ---
 
 ## 🌟 Fitur Utama & Pembaruan Terkini
 
-### 1. ⚡ Checkout Instan Tanpa Pop-up ("Langsung Selesai")
+### 1. 📱 Format Layar Presisi Rasio 9:16 (430px : 764px)
+- **Rasio Smartphone 9:16**: Tampilan UI seluruh aplikasi dikunci dan dioptimalkan presisi di rasio 9:16 (`430px : 764px`), berada tepat di tengah layar (*centered*) saat dibuka di desktop/browser PC dan pas di genggaman tangan smartphone.
+- **Ergonomi Satu Tangan**: Seluruh navigasi utama bertumpu pada **Floating Bottom Navigation Bar** yang melayang di bagian bawah layar agar mudah dijangkau jempol.
+
+---
+
+### 2. 🎨 Palet Warna Abu-Abu Estetik & Biru Muda Aesthetic (Sky Blue Glow)
+- Mengganti tema hitam-merah sebelumnya menjadi kombinasi **Slate Charcoal & Aesthetic Sky Blue**:
+  - **Latar Belakang**: `#0B0F19` (Desktop) & `#0F172A` (Mobile Slate).
+  - **Permukaan Kartu**: `#182234` dengan border halus `#24344D` dan border-left biru muda `#38BDF8`.
+  - **Aksen & Nominal Utama**: Warna **Biru Muda Aesthetic / Cyan Glow (`#38BDF8`)** yang menyala indah untuk Total Belanja (`TOTAL BELANJA Rp 200.000`), harga barang, dan tombol aksi.
+  - **Ikon Minimalis**: Ikon pensil edit (`✎`) dan tempat sampah hapus (`🗑`) abu-abu slate bersih di kartu troli.
+
+---
+
+### 3. 🧹 Pembersihan Tab Atas yang Kaku
+- Menghapus tab kotak jadul `[Store] [List 0] [History]` dari header atas dan menggantinya dengan branding logo *GroceryIn* yang minimalis dan elegan. Seluruh pergantian tab dipusatkan di Floating Bottom Nav.
+
+---
+
+### 4. ⚡ Checkout Instan Tanpa Pop-up ("Langsung Selesai")
 - **Tanpa Dialog Blocking**: Menghapus seluruh konfirmasi native browser `confirm()` dan modal overlay struk kasir yang menghalangi layar saat transaksi.
 - **Transisi Mulus**: Saat tombol **Checkout** ditekan, data belanja langsung tersimpan ke riwayat (History) dengan metode pembayaran yang dipilih, keranjang dikosongkan, toast konfirmasi halus muncul, dan tab langsung beralih ke **Riwayat (History)** secara instan.
 

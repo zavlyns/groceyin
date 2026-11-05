@@ -10,7 +10,7 @@
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#E11D48">
+    <meta name="theme-color" content="#38BDF8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -42,19 +42,18 @@
             <!-- 3 Tab di kiri (Store, List, History) & Diatas Kanan: Budget + Tombol Log Out -->
             <header class="app-top-bar" id="appTopBar">
 
-                <!-- Left Side: 3 Tab Menu (Store, List, History) -->
-                <nav class="top-nav-tabs" id="topNavTabs" aria-label="Navigasi Menu Utama">
-                    <button type="button" class="top-tab-btn active" data-tab="store" id="topTabStore">
-                        <span>Store</span>
-                    </button>
-                    <button type="button" class="top-tab-btn" data-tab="list" id="topTabList">
-                        <span>List</span>
-                        <span class="tab-counter-badge" id="listBadgeCount">0</span>
-                    </button>
-                    <button type="button" class="top-tab-btn" data-tab="history" id="topTabHistory">
-                        <span>History</span>
-                    </button>
-                </nav>
+                <!-- Left Side: Clean App Brand Badge (Tanpa tab kotak kaku) -->
+                <div class="app-brand-badge" id="appBrandBadge">
+                    <div class="app-brand-icon-box">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                            <path d="M3 6h18" />
+                            <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
+                    </div>
+                    <span class="app-brand-name">GroceryIn</span>
+                </div>
 
                 <!-- Right Side: Nominal Uang Budget & Tombol Log Out -->
                 <div class="header-right-group">
@@ -154,6 +153,12 @@
                         <button type="button" class="btn-primary-action" id="btnGoToStore">
                             <span>Ke Halaman Store</span>
                         </button>
+                    </div>
+
+                    <!-- Total Belanja Header Card (Sesuai Gambar Referensi 2) -->
+                    <div class="cart-total-header-card" id="cartTotalHeaderCard">
+                        <span class="total-label-text">TOTAL BELANJA</span>
+                        <strong class="total-amount-display" id="cartTotalHeaderAmount">Rp 0</strong>
                     </div>
 
                     <!-- Shopping List Items Container -->

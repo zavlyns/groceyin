@@ -484,9 +484,9 @@ class SmartGroceryApp {
     this.btnLogout.addEventListener("click", () => this.handleLogout());
 
     // 5. Tab Navigation
-    this.topTabStore.addEventListener("click", () => this.switchTab("store"));
-    this.topTabList.addEventListener("click", () => this.switchTab("list"));
-    this.topTabHistory.addEventListener("click", () => this.switchTab("history"));
+    if (this.topTabStore) this.topTabStore.addEventListener("click", () => this.switchTab("store"));
+    if (this.topTabList) this.topTabList.addEventListener("click", () => this.switchTab("list"));
+    if (this.topTabHistory) this.topTabHistory.addEventListener("click", () => this.switchTab("history"));
 
     this.bottomNavStore.addEventListener("click", () => this.switchTab("store"));
     this.bottomNavList.addEventListener("click", () => this.switchTab("list"));
@@ -945,7 +945,7 @@ class SmartGroceryApp {
     }
 
     // 2. Tab Badges
-    this.listBadgeCount.textContent = totalItems;
+    if (this.listBadgeCount) this.listBadgeCount.textContent = totalItems;
     if (totalItems > 0) {
       this.bottomNavListBadge.classList.remove("hidden");
       this.bottomNavListBadge.textContent = totalItems;
@@ -1461,14 +1461,23 @@ class SmartGroceryApp {
   }
 
   renderCartList() {
+    const totalSpent = this.getTotalCartPrice();
+    const cartHeaderCard = document.getElementById("cartTotalHeaderCard");
+    const cartHeaderAmount = document.getElementById("cartTotalHeaderAmount");
+    if (cartHeaderAmount) {
+      cartHeaderAmount.textContent = this.formatRupiah(totalSpent);
+    }
+
     if (this.cart.length === 0) {
       this.activeGroceryListContainer.innerHTML = "";
       this.emptyListCard.classList.remove("hidden");
+      if (cartHeaderCard) cartHeaderCard.classList.add("hidden");
       if (this.checkoutPaymentBox) this.checkoutPaymentBox.classList.add("hidden");
       return;
     }
 
     this.emptyListCard.classList.add("hidden");
+    if (cartHeaderCard) cartHeaderCard.classList.remove("hidden");
     if (this.checkoutPaymentBox) this.checkoutPaymentBox.classList.remove("hidden");
 
     let html = "";
@@ -1487,20 +1496,26 @@ class SmartGroceryApp {
       html += `
         <div class="list-item-card" data-id="${itemIdKey}">
           
-          <!-- Top Header: Item Index + Edit Button + Delete Button -->
+          <!-- Top Header: Item Index + Minimalist Slate Icons (Edit & Delete seperti Gambar 2) -->
           <div class="list-item-top-header">
             <span class="item-index-label">Item #${index + 1}</span>
 
             <div class="list-item-actions-top">
-              <button type="button" class="btn-edit-item-config" 
+              <button type="button" class="btn-icon-action btn-edit-item" 
                       onclick="app.openAddItemModal('${item.id}', app.cart[${index}])" 
-                      title="Ubah Satuan, Qty atau Diskon">
-                <span>✏️ Atur</span>
+                      title="Ubah Satuan, Qty atau Diskon" aria-label="Edit item">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                </svg>
               </button>
-              <button type="button" class="btn-remove-item" 
+              <button type="button" class="btn-icon-action btn-delete-item" 
                       onclick="app.removeItemFromCart('${itemIdKey}')" 
-                      title="Hapus dari troli">
-                ✕
+                      title="Hapus dari troli" aria-label="Hapus item">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
               </button>
             </div>
           </div>

@@ -1,14 +1,14 @@
 {
   "name": "GroceryIn - Smart Grocery & Budget Safety Tracker",
   "short_name": "GroceryIn",
-  "description": "Aplikasi PWA asisten belanja bulanan siswa rantau dengan tema Velvet Obsidian & Ruby, checkout instan tanpa popup, pilihan metode pembayaran (QRIS, Tunai, BCA, Mandiri, BRI, Debit), pengendali budget tiga tingkat, dan kalkulasi diskon otomatis.",
+  "description": "Aplikasi PWA asisten belanja bulanan siswa rantau dengan tema Slate Grey & Aesthetic Sky Blue, checkout instan tanpa popup, pilihan metode pembayaran kasir, pengendali budget, dan kalkulasi diskon otomatis.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay"],
   "orientation": "portrait",
-  "background_color": "#10141D",
-  "theme_color": "#E11D48",
+  "background_color": "#0F172A",
+  "theme_color": "#38BDF8",
   "categories": ["shopping", "finance", "lifestyle"],
   "icons": [
     {
