@@ -1448,12 +1448,16 @@ class SmartGroceryApp {
       this.btnConfirmAddItemText.textContent = "🛒 Masukkan ke List";
     }
 
+    if (this.floatingBottomNav) this.floatingBottomNav.style.display = "none";
     this.recalculateModalPricing();
     this.addItemModalOverlay.classList.remove("hidden");
   }
 
   closeAddItemModal() {
     this.addItemModalOverlay.classList.add("hidden");
+    if (this.floatingBottomNav && (this.currentTab !== "list" || this.cart.length === 0)) {
+      this.floatingBottomNav.style.display = "flex";
+    }
   }
 
   recalculateModalPricing() {
@@ -1652,6 +1656,7 @@ class SmartGroceryApp {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
+    if (this.floatingBottomNav) this.floatingBottomNav.style.display = "none";
     this.modalProductTitle.textContent = "✏️ Ubah Harga & Detail Produk";
     this.editProductId.value = product.id;
     this.editProductName.value = product.name;
@@ -1665,6 +1670,7 @@ class SmartGroceryApp {
   }
 
   openAddProductModal(prefilledName = "") {
+    if (this.floatingBottomNav) this.floatingBottomNav.style.display = "none";
     this.modalProductTitle.textContent = "➕ Tambah Barang Baru ke Toko";
     this.editProductId.value = "";
     this.editProductName.value = (typeof prefilledName === "string") ? prefilledName : "";
@@ -1686,6 +1692,9 @@ class SmartGroceryApp {
 
   closeProductModal() {
     this.productEditModalBackdrop.classList.add("hidden");
+    if (this.floatingBottomNav && (this.currentTab !== "list" || this.cart.length === 0)) {
+      this.floatingBottomNav.style.display = "flex";
+    }
   }
 
   updateModalLivePreview() {

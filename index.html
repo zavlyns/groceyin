@@ -29,7 +29,7 @@
         rel="stylesheet">
 
     <!-- External Stylesheet (Slate Aesthetic & Sky Cyan Glow) -->
-    <link rel="stylesheet" href="style.css?v=20261111a">
+    <link rel="stylesheet" href="style.css?v=20261111b">
 </head>
 
 <body>
@@ -693,9 +693,11 @@
             <!-- ==================== REALTIME PRODUCT EDIT / ADD MODAL ==================== -->
             <div class="modal-backdrop-generic hidden" id="productEditModalBackdrop">
                 <div class="modal-box-card">
+                    <div class="sheet-drag-handle"></div>
+
                     <div class="modal-header-row">
                         <h3 id="modalProductTitle">✏️ Edit Produk & Harga</h3>
-                        <button type="button" class="btn-modal-close" id="btnCloseProductModal">✕</button>
+                        <button type="button" class="btn-modal-close" id="btnCloseProductModal" aria-label="Tutup">✕</button>
                     </div>
 
                     <form id="productEditForm" onsubmit="return false;" class="modal-form-body">
@@ -834,7 +836,7 @@
     </div>
 
     <!-- Main JavaScript Logic Engine -->
-    <script src="app.js?v=20261111a"></script>
+    <script src="app.js?v=20261111b"></script>
 </body>
 
 </html>
