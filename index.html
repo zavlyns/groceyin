@@ -29,7 +29,7 @@
         rel="stylesheet">
 
     <!-- External Stylesheet (Slate Aesthetic & Sky Cyan Glow) -->
-    <link rel="stylesheet" href="style.css?v=20261105e">
+    <link rel="stylesheet" href="style.css?v=20261111a">
 </head>
 
 <body>
@@ -91,6 +91,33 @@
 
                 <!-- ==================== TAB 1: STORE (Katalog & Belanja) ==================== -->
                 <section class="tab-view active-view" id="viewStore" aria-label="Tab Store">
+
+                    <!-- Store Search & Add Product Action Bar -->
+                    <div class="store-search-bar-wrap" id="storeSearchBarWrap">
+                        <div class="store-search-box">
+                            <svg class="search-glass-icon" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="storeSearchInput" class="store-search-input"
+                                placeholder="Cari barang belanjaan (misal: Beras, Aqua, Sabun)..." autocomplete="off">
+                            <button type="button" id="btnClearSearch" class="btn-clear-search hidden" title="Hapus pencarian" aria-label="Hapus pencarian">✕</button>
+                        </div>
+                        <button type="button" class="btn-quick-add-product" id="btnOpenAddProduct" title="Tambah / Buat Barang Baru ke Toko">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>+ Barang</span>
+                        </button>
+                    </div>
+
+                    <!-- Search Filter Feedback / Status Bar -->
+                    <div class="search-feedback-bar hidden" id="searchFeedbackBar">
+                        <span class="search-feedback-text" id="searchFeedbackText">Ditemukan 0 barang</span>
+                        <button type="button" id="btnResetSearchQuery" class="btn-reset-search-link">Reset Cari</button>
+                    </div>
 
                     <!-- Category Filter Bar -->
                     <div class="category-chip-scroller" id="categoryChipBar">
@@ -510,41 +537,122 @@
                         </div>
                     </div>
 
-                    <!-- 3. Tentukan Diskon (Bisa dipilih / ditentukan, harga menyesuaikan diskonnya) -->
-                    <div class="modal-config-section">
+                    <!-- 3. Tentukan Diskon (Kalkulator Diskon Otomatis & Bertingkat: 50% + 20%) -->
+                    <div class="modal-config-section discount-calculator-section">
                         <div class="modal-section-label-row">
                             <label class="modal-section-label">
-                                <span>🏷️ Pilihan Diskon (Harga Menyesuaikan):</span>
+                                <span>🧮 Kalkulator Diskon (Otomatis & Bertingkat):</span>
                             </label>
                             <span class="discount-calc-preview" id="discountCalculatedPreview">-Rp 0</span>
                         </div>
 
-                        <!-- Discount Mode Toggle: Persen (%) vs Nominal Rupiah (Rp) -->
+                        <!-- Mode Toggle: Kalkulator Diskon (%) vs Nominal Rupiah (Rp) -->
                         <div class="discount-mode-tabs">
-                            <button type="button" class="btn-disc-mode active" data-mode="percent" id="btnModePercent">Persen (%)</button>
-                            <button type="button" class="btn-disc-mode" data-mode="nominal" id="btnModeNominal">Nominal (Rp)</button>
+                            <button type="button" class="btn-disc-mode active" data-mode="calculator" id="btnModePercent">Kalkulator Diskon (%)</button>
+                            <button type="button" class="btn-disc-mode" data-mode="nominal" id="btnModeNominal">Potongan Rupiah (Rp)</button>
                         </div>
 
-                        <!-- Preset Discount Chips (Persentase) -->
-                        <div class="discount-presets-scroller" id="discountPresetsContainer">
-                            <button type="button" class="disc-preset-chip active" data-disc="0">0% (Normal)</button>
-                            <button type="button" class="disc-preset-chip" data-disc="5">5%</button>
-                            <button type="button" class="disc-preset-chip" data-disc="10">10%</button>
-                            <button type="button" class="disc-preset-chip" data-disc="15">15%</button>
-                            <button type="button" class="disc-preset-chip" data-disc="20">20%</button>
-                            <button type="button" class="disc-preset-chip" data-disc="25">25%</button>
-                            <button type="button" class="disc-preset-chip" data-disc="50">50%</button>
-                            <button type="button" class="disc-preset-chip" data-disc="custom">Kustom</button>
-                        </div>
-
-                        <!-- Custom Discount Input -->
-                        <div class="custom-discount-row">
-                            <div class="input-discount-wrapper">
-                                <span class="disc-prefix" id="discountPrefixSymbol">%</span>
-                                <input type="number" id="inputModalDiscount" class="setup-input input-disc-field"
-                                    placeholder="0" min="0" max="100" value="0">
+                        <!-- ==================== CALCULATOR MODE CONTAINER ==================== -->
+                        <div class="calc-mode-container" id="calcModePercentContainer">
+                            
+                            <!-- Digital Calculator Screen -->
+                            <div class="calc-digital-screen" id="calcDigitalScreen">
+                                <div class="calc-screen-top">
+                                    <span class="calc-screen-label">Rumus Diskon:</span>
+                                    <span class="calc-effective-badge" id="calcEffectiveBadge">Diskon Efektif: 0%</span>
+                                </div>
+                                <div class="calc-formula-display" id="calcFormulaDisplay">0% (Normal)</div>
+                                
+                                <!-- Step-by-Step Breakdown Display (misal: 50% + 20%) -->
+                                <div class="calc-breakdown-box" id="calcBreakdownBox">
+                                    <div class="calc-breakdown-empty">Belum ada diskon diterapkan. Pilih preset atau tambah diskon di bawah.</div>
+                                </div>
                             </div>
-                            <small class="field-hint" id="discountFieldHint">Pilih dari preset di atas atau ketik persentase diskon.</small>
+
+                            <!-- Otomatis Diskon Promo Toko -->
+                            <div class="auto-discount-banner hidden" id="autoDiscountBanner">
+                                <div class="auto-disc-info">
+                                    <span class="auto-disc-tag">🏷️ Promo Toko Terdeteksi:</span>
+                                    <strong id="autoDiscountText">Diskon 10%</strong>
+                                </div>
+                                <button type="button" class="btn-apply-auto-disc" id="btnApplyAutoDiscount">Pakai Diskon</button>
+                            </div>
+
+                            <!-- Preset Diskon Bertingkat (Dept Store / Retail Promo) -->
+                            <div class="calc-group-label">
+                                <span>⚡ Preset Diskon Bertingkat:</span>
+                            </div>
+                            <div class="stacked-presets-scroller" id="stackedPresetsScroller">
+                                <button type="button" class="btn-stacked-chip" data-formula="50+20">50% + 20%</button>
+                                <button type="button" class="btn-stacked-chip" data-formula="70+20">70% + 20%</button>
+                                <button type="button" class="btn-stacked-chip" data-formula="30+10">30% + 10%</button>
+                                <button type="button" class="btn-stacked-chip" data-formula="20+10">20% + 10%</button>
+                                <button type="button" class="btn-stacked-chip" data-formula="50+10">50% + 10%</button>
+                            </div>
+
+                            <!-- Tombol Tambah Diskon Bertingkat (+ Diskon Tambahan) -->
+                            <div class="calc-group-label">
+                                <span>➕ Tambah Diskon (Stacking):</span>
+                                <small class="calc-hint-small">Klik untuk menambah lapisan diskon</small>
+                            </div>
+                            <div class="stack-add-scroller" id="stackAddScroller">
+                                <button type="button" class="btn-stack-add" data-add-disc="5">+5%</button>
+                                <button type="button" class="btn-stack-add" data-add-disc="10">+10%</button>
+                                <button type="button" class="btn-stack-add" data-add-disc="15">+15%</button>
+                                <button type="button" class="btn-stack-add" data-add-disc="20">+20%</button>
+                                <button type="button" class="btn-stack-add" data-add-disc="25">+25%</button>
+                                <button type="button" class="btn-stack-add" data-add-disc="50">+50%</button>
+                            </div>
+
+                            <!-- Preset Diskon Tunggal Utama -->
+                            <div class="calc-group-label">
+                                <span>🏷️ Diskon Dasar / Standar:</span>
+                            </div>
+                            <div class="discount-presets-scroller" id="discountPresetsContainer">
+                                <button type="button" class="disc-preset-chip active" data-disc="0">0% (Normal)</button>
+                                <button type="button" class="disc-preset-chip" data-disc="5">5%</button>
+                                <button type="button" class="disc-preset-chip" data-disc="10">10%</button>
+                                <button type="button" class="disc-preset-chip" data-disc="15">15%</button>
+                                <button type="button" class="disc-preset-chip" data-disc="20">20%</button>
+                                <button type="button" class="disc-preset-chip" data-disc="25">25%</button>
+                                <button type="button" class="disc-preset-chip" data-disc="30">30%</button>
+                                <button type="button" class="disc-preset-chip" data-disc="50">50%</button>
+                                <button type="button" class="disc-preset-chip" data-disc="70">70%</button>
+                            </div>
+
+                            <!-- Interactive Formula Input & Calculator Buttons -->
+                            <div class="custom-discount-row">
+                                <div class="calc-input-actions-bar">
+                                    <div class="input-discount-wrapper">
+                                        <span class="disc-prefix" id="discountPrefixSymbol">%</span>
+                                        <input type="text" id="inputModalDiscount" class="setup-input input-disc-field"
+                                            placeholder="Contoh: 50+20 atau 50% + 20%" value="0">
+                                    </div>
+                                    <button type="button" class="btn-calc-op btn-op-plus" id="btnCalcOpPlus" title="Tambah operator (+)">+ Tambah</button>
+                                    <button type="button" class="btn-calc-op btn-op-back" id="btnCalcOpBack" title="Hapus lapisan terakhir">⌫</button>
+                                    <button type="button" class="btn-calc-op btn-op-clear" id="btnCalcOpClear" title="Reset diskon ke 0%">C</button>
+                                </div>
+                                <small class="field-hint" id="discountFieldHint">Ketik diskon bertingkat (misal: <strong>50 + 20</strong>) atau gunakan tombol di atas.</small>
+                            </div>
+                        </div>
+
+                        <!-- ==================== NOMINAL MODE (POTONGAN RUPIAH) ==================== -->
+                        <div class="calc-mode-container hidden" id="calcModeNominalContainer">
+                            <div class="nominal-presets-scroller" id="nominalPresetsScroller">
+                                <button type="button" class="nominal-preset-chip" data-nominal="1000">Rp 1.000</button>
+                                <button type="button" class="nominal-preset-chip" data-nominal="2000">Rp 2.000</button>
+                                <button type="button" class="nominal-preset-chip" data-nominal="5000">Rp 5.000</button>
+                                <button type="button" class="nominal-preset-chip" data-nominal="10000">Rp 10.000</button>
+                                <button type="button" class="nominal-preset-chip" data-nominal="20000">Rp 20.000</button>
+                            </div>
+                            <div class="custom-discount-row">
+                                <div class="input-discount-wrapper">
+                                    <span class="disc-prefix">Rp</span>
+                                    <input type="number" id="inputModalNominalDiscount" class="setup-input input-disc-field"
+                                        placeholder="0" min="0" step="500" value="0">
+                                </div>
+                                <small class="field-hint">Ketik nominal potongan rupiah per satuan (contoh: 5000 untuk hemat Rp 5.000).</small>
+                            </div>
                         </div>
                     </div>
 
@@ -612,8 +720,8 @@
 
                         <div class="modal-field-row">
                             <div class="modal-field-group">
-                                <label for="editProductDiscount">Diskon (%)</label>
-                                <input type="number" id="editProductDiscount" class="modal-input" placeholder="0 (tanpa diskon)" min="0" max="99" step="1" value="0">
+                                <label for="editProductDiscount">Diskon (% atau Bertingkat misal: 50+20)</label>
+                                <input type="text" id="editProductDiscount" class="modal-input" placeholder="0 atau 50+20" value="0">
                             </div>
 
                             <div class="modal-field-group">
@@ -726,7 +834,7 @@
     </div>
 
     <!-- Main JavaScript Logic Engine -->
-    <script src="app.js?v=20261105e"></script>
+    <script src="app.js?v=20261111a"></script>
 </body>
 
 </html>

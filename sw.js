@@ -3,7 +3,7 @@
  * Provides offline capabilities & caching for aesthetic mobile experience.
  */
 
-const CACHE_NAME = 'groceryin-aesthetic-v5';
+const CACHE_NAME = 'groceryin-aesthetic-v6';
 
 const STATIC_ASSETS = [
   './',
@@ -22,7 +22,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching GroceryIn aesthetic app shell v5');
+      console.log('[SW] Pre-caching GroceryIn aesthetic app shell v6');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
         console.warn('[SW] Pre-cache partial warning:', err);
       });

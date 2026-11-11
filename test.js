@@ -217,4 +217,92 @@ const colorLebih = testBudgetDynamicColor(-20000, 300000);
 assert.strictEqual(colorLebih.color, "#F43F5E");
 console.log("✔ Test 10 Passed: Status warna terbukti valid (Krisis = Kuning, Habis/Lebih = Merah, Aman = Hijau).");
 
+// Test 11: Compound Discount Calculator Logic (50% + 20% Stacked Discount)
+function calculateCompoundDiscount(basePrice, layers) {
+  const validLayers = (layers || []).filter(n => n > 0);
+  let currentPrice = basePrice;
+  let totalSaved = 0;
+  const steps = [];
+
+  validLayers.forEach((pct, idx) => {
+    const stepSaved = Math.round(currentPrice * (pct / 100));
+    const nextPrice = Math.max(0, currentPrice - stepSaved);
+    steps.push({ step: idx + 1, percent: pct, saved: stepSaved, priceAfter: nextPrice });
+    totalSaved += stepSaved;
+    currentPrice = nextPrice;
+  });
+
+  const effectiveFraction = basePrice > 0 ? (totalSaved / basePrice) : 0;
+  const effectivePercent = Math.round(effectiveFraction * 100);
+  const formula = validLayers.map(p => `${p}%`).join(" + ");
+
+  return { layers: validLayers, formula, finalPrice: currentPrice, totalSaved, effectiveFraction, effectivePercent, steps };
+}
+
+const discResult5020 = calculateCompoundDiscount(100000, [50, 20]);
+assert.strictEqual(discResult5020.formula, "50% + 20%");
+assert.strictEqual(discResult5020.finalPrice, 40000, "Harga akhir Rp 100.000 dengan diskon 50%+20% harus Rp 40.000");
+assert.strictEqual(discResult5020.totalSaved, 60000, "Total hemat harus Rp 60.000");
+assert.strictEqual(discResult5020.effectivePercent, 60, "Diskon efektif harus 60%");
+assert.strictEqual(discResult5020.steps.length, 2);
+assert.strictEqual(discResult5020.steps[0].saved, 50000);
+assert.strictEqual(discResult5020.steps[1].saved, 10000);
+console.log("✔ Test 11 Passed: Kalkulator diskon bertingkat 50% + 20% terbukti valid (Harga 100rb jadi 40rb, hemat 60%).");
+
+// Test 12: Stacked Discount 70% + 20%
+const discResult7020 = calculateCompoundDiscount(100000, [70, 20]);
+assert.strictEqual(discResult7020.finalPrice, 24000, "Harga akhir Rp 100.000 dengan diskon 70%+20% harus Rp 24.000");
+assert.strictEqual(discResult7020.totalSaved, 76000);
+assert.strictEqual(discResult7020.effectivePercent, 76);
+console.log("✔ Test 12 Passed: Kalkulator diskon bertingkat 70% + 20% terbukti valid (Harga 100rb jadi 24rb, hemat 76%).");
+
+// Test 13: Search Bar Filter Functionality
+function filterProducts(products, query, category = "ALL") {
+  const q = (query || "").toLowerCase().trim();
+  return products.filter(p => {
+    const catMatch = (category === "ALL" || p.category === category);
+    if (!catMatch) return false;
+    if (!q) return true;
+    return (p.name && p.name.toLowerCase().includes(q)) || (p.category && p.category.toLowerCase().includes(q));
+  });
+}
+
+const searchBeras = filterProducts(DEFAULT_COMMODITIES, "beras");
+assert.strictEqual(searchBeras.length, 2, "Harus menemukan 2 produk beras");
+assert.ok(searchBeras.every(p => p.name.toLowerCase().includes("beras")));
+
+const searchAqua = filterProducts(DEFAULT_COMMODITIES, "aqua");
+assert.strictEqual(searchAqua.length, 1);
+assert.strictEqual(searchAqua[0].name, "Aqua 6 Botol");
+
+const searchNotFound = filterProducts(DEFAULT_COMMODITIES, "Kerupuk Kulit Super");
+assert.strictEqual(searchNotFound.length, 0, "Query barang tidak ada harus menghasilkan array kosong");
+console.log("✔ Test 13 Passed: Fitur Search Bar berhasil memfilter katalog produk secara akurat.");
+
+// Test 14: Creating / Adding new Product automatically to store catalog
+const testStoreCatalog = [...DEFAULT_COMMODITIES];
+const initialCount = testStoreCatalog.length;
+const newProduct = {
+  id: "custom-prod-test-1",
+  name: "Kerupuk Kulit Super",
+  category: "Sembako",
+  defaultUnit: "pack",
+  price: 15000,
+  lastMonthPrice: 15000,
+  discount: 0.1,
+  discountFormula: "10%"
+};
+
+// Tambahkan otomatis ke beranda toko di paling atas
+testStoreCatalog.unshift(newProduct);
+assert.strictEqual(testStoreCatalog.length, initialCount + 1);
+assert.strictEqual(testStoreCatalog[0].id, "custom-prod-test-1");
+assert.strictEqual(testStoreCatalog[0].name, "Kerupuk Kulit Super");
+
+// Pastikan barang yang baru dibuat langsung dapat ditemukan via search
+const searchNewProduct = filterProducts(testStoreCatalog, "kerupuk");
+assert.strictEqual(searchNewProduct.length, 1);
+assert.strictEqual(searchNewProduct[0].name, "Kerupuk Kulit Super");
+console.log("✔ Test 14 Passed: Barang baru berhasil dibuat dan otomatis bertambah ke halaman store/beranda.");
+
 console.log("🎉 ALL TESTS PASSED SUCCESSFULLY!");

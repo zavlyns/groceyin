@@ -254,13 +254,19 @@ class SmartGroceryApp {
     this.currentTab = "store";
     this.currentCategory = "ALL";
 
-    // State untuk Add/Edit Item to List Modal (Satuan, Qty, Diskon)
+    // State untuk Store Search Bar
+    this.searchQuery = "";
+
+    // State untuk Add/Edit Item to List Modal (Satuan, Qty, Diskon Bertingkat)
     this.modalProductId = null;
     this.editingCartItemId = null;
     this.modalUnit = "pcs";
     this.modalQuantity = 1;
-    this.modalDiscountMode = "percent"; // "percent" atau "nominal"
-    this.modalDiscountValue = 0;
+    this.modalDiscountMode = "calculator"; // "calculator" (persen bertingkat) atau "nominal" (Rp)
+    this.modalDiscountLayers = [0]; // e.g. [50, 20] -> 50% + 20%
+    this.modalDiscountFormula = "0%";
+    this.modalNominalDiscount = 0;
+    this.autoStoreDiscount = 0;
 
     // State Metode Pembayaran Kasir (QRIS, Cash, BCA, Mandiri, BRI, Kartu Debit)
     this.selectedPaymentMethod = "QRIS";
@@ -347,9 +353,14 @@ class SmartGroceryApp {
     this.viewList = document.getElementById("viewList");
     this.viewHistory = document.getElementById("viewHistory");
 
-    // Store View Elements
+    // Store View & Search Elements
     this.productTilesContainer = document.getElementById("productTilesContainer");
     this.categoryChipBar = document.getElementById("categoryChipBar");
+    this.storeSearchInput = document.getElementById("storeSearchInput");
+    this.btnClearSearch = document.getElementById("btnClearSearch");
+    this.searchFeedbackBar = document.getElementById("searchFeedbackBar");
+    this.searchFeedbackText = document.getElementById("searchFeedbackText");
+    this.btnResetSearchQuery = document.getElementById("btnResetSearchQuery");
 
     // List View Elements
     this.activeGroceryListContainer = document.getElementById("activeGroceryListContainer");
@@ -422,10 +433,26 @@ class SmartGroceryApp {
     this.discountCalculatedPreview = document.getElementById("discountCalculatedPreview");
     this.btnModePercent = document.getElementById("btnModePercent");
     this.btnModeNominal = document.getElementById("btnModeNominal");
+    this.calcModePercentContainer = document.getElementById("calcModePercentContainer");
+    this.calcModeNominalContainer = document.getElementById("calcModeNominalContainer");
+    this.calcDigitalScreen = document.getElementById("calcDigitalScreen");
+    this.calcEffectiveBadge = document.getElementById("calcEffectiveBadge");
+    this.calcFormulaDisplay = document.getElementById("calcFormulaDisplay");
+    this.calcBreakdownBox = document.getElementById("calcBreakdownBox");
+    this.autoDiscountBanner = document.getElementById("autoDiscountBanner");
+    this.autoDiscountText = document.getElementById("autoDiscountText");
+    this.btnApplyAutoDiscount = document.getElementById("btnApplyAutoDiscount");
+    this.stackedPresetsScroller = document.getElementById("stackedPresetsScroller");
+    this.stackAddScroller = document.getElementById("stackAddScroller");
     this.discountPresetsContainer = document.getElementById("discountPresetsContainer");
     this.discountPrefixSymbol = document.getElementById("discountPrefixSymbol");
     this.inputModalDiscount = document.getElementById("inputModalDiscount");
     this.discountFieldHint = document.getElementById("discountFieldHint");
+    this.btnCalcOpPlus = document.getElementById("btnCalcOpPlus");
+    this.btnCalcOpBack = document.getElementById("btnCalcOpBack");
+    this.btnCalcOpClear = document.getElementById("btnCalcOpClear");
+    this.inputModalNominalDiscount = document.getElementById("inputModalNominalDiscount");
+    this.nominalPresetsScroller = document.getElementById("nominalPresetsScroller");
     this.modalSummaryOriginalPrice = document.getElementById("modalSummaryOriginalPrice");
     this.modalSummaryDiscountAmount = document.getElementById("modalSummaryDiscountAmount");
     this.modalSummaryFinalTotal = document.getElementById("modalSummaryFinalTotal");
@@ -553,7 +580,7 @@ class SmartGroceryApp {
 
     // 12. Realtime Product Edit Modal Listeners (Katalog Editor)
     if (this.btnOpenAddProduct) {
-      this.btnOpenAddProduct.addEventListener("click", () => this.openAddProductModal());
+      this.btnOpenAddProduct.addEventListener("click", () => this.openAddProductModal(this.searchQuery || ""));
     }
     this.btnCloseProductModal.addEventListener("click", () => this.closeProductModal());
     this.btnCancelProductChanges.addEventListener("click", () => this.closeProductModal());
@@ -567,8 +594,126 @@ class SmartGroceryApp {
       this.saveProductChanges();
     });
 
-    // 13. Modal Add / Edit to List Events (Satuan, Quantity, Diskon)
+    // 13. Search Bar Events (Live filter toko & beranda)
+    if (this.storeSearchInput) {
+      this.storeSearchInput.addEventListener("input", (e) => {
+        this.searchQuery = e.target.value.trim().toLowerCase();
+        if (this.btnClearSearch) {
+          this.btnClearSearch.classList.toggle("hidden", this.searchQuery.length === 0);
+        }
+        this.renderStoreProducts();
+      });
+    }
+
+    if (this.btnClearSearch) {
+      this.btnClearSearch.addEventListener("click", () => this.clearSearch());
+    }
+
+    if (this.btnResetSearchQuery) {
+      this.btnResetSearchQuery.addEventListener("click", () => this.clearSearch());
+    }
+
+    // 14. Modal Add / Edit to List Events (Satuan, Quantity, Kalkulator Diskon)
     this.initAddItemModalEvents();
+  }
+
+  clearSearch() {
+    this.searchQuery = "";
+    if (this.storeSearchInput) this.storeSearchInput.value = "";
+    if (this.btnClearSearch) this.btnClearSearch.classList.add("hidden");
+    if (this.searchFeedbackBar) this.searchFeedbackBar.classList.add("hidden");
+    this.renderStoreProducts();
+  }
+
+  // ==================== DISCOUNT CALCULATOR HELPER METHODS ====================
+  /**
+   * Mengurai formula teks diskon (misal: "50 + 20", "50% + 20%", "30")
+   * Menghasilkan array bilangan persen, e.g. [50, 20]
+   */
+  parseFormulaLayers(formulaStr) {
+    if (!formulaStr || typeof formulaStr !== "string") {
+      const num = parseFloat(formulaStr);
+      return (!isNaN(num) && num > 0) ? [Math.min(100, num)] : [0];
+    }
+
+    const parts = formulaStr.split("+");
+    const layers = [];
+
+    parts.forEach(part => {
+      const clean = part.replace(/[^0-9.]/g, "").trim();
+      const val = parseFloat(clean);
+      if (!isNaN(val) && val > 0) {
+        layers.push(Math.min(100, val));
+      }
+    });
+
+    return layers.length > 0 ? layers : [0];
+  }
+
+  /**
+   * Menghitung diskon bertingkat (Compound Discount Calculator: misal 50% + 20%)
+   * Menghasilkan rincian bertahap, diskon nominal per satuan, diskon efektif, dan harga akhir.
+   */
+  calculateCompoundDiscount(basePrice, layers) {
+    if (!basePrice || basePrice <= 0) {
+      return {
+        layers: [0],
+        formula: "0% (Normal)",
+        finalPrice: 0,
+        totalSaved: 0,
+        effectiveFraction: 0,
+        effectivePercent: 0,
+        steps: []
+      };
+    }
+
+    const validLayers = (layers || [])
+      .map(n => Math.min(100, Math.max(0, parseFloat(n) || 0)))
+      .filter(n => n > 0);
+
+    if (validLayers.length === 0) {
+      return {
+        layers: [0],
+        formula: "0% (Normal)",
+        finalPrice: basePrice,
+        totalSaved: 0,
+        effectiveFraction: 0,
+        effectivePercent: 0,
+        steps: []
+      };
+    }
+
+    let currentPrice = basePrice;
+    let totalSaved = 0;
+    const steps = [];
+
+    validLayers.forEach((pct, idx) => {
+      const stepSaved = Math.round(currentPrice * (pct / 100));
+      const nextPrice = Math.max(0, currentPrice - stepSaved);
+      steps.push({
+        step: idx + 1,
+        percent: pct,
+        saved: stepSaved,
+        priceBefore: currentPrice,
+        priceAfter: nextPrice
+      });
+      totalSaved += stepSaved;
+      currentPrice = nextPrice;
+    });
+
+    const effectiveFraction = basePrice > 0 ? (totalSaved / basePrice) : 0;
+    const effectivePercent = Math.round(effectiveFraction * 100);
+    const formula = validLayers.map(p => `${p}%`).join(" + ");
+
+    return {
+      layers: validLayers,
+      formula: formula,
+      finalPrice: currentPrice,
+      totalSaved: totalSaved,
+      effectiveFraction: effectiveFraction,
+      effectivePercent: effectivePercent,
+      steps: steps
+    };
   }
 
   // ==================== MODAL ADD / EDIT ITEM TO LIST EVENTS ====================
@@ -635,16 +780,14 @@ class SmartGroceryApp {
       });
     });
 
-    // Discount Mode Toggle: Persen (%) vs Nominal (Rp)
+    // ==================== DISCOUNT CALCULATOR EVENTS ====================
+    // Toggle Mode: Kalkulator Diskon (%) vs Potongan Rupiah (Rp)
     this.btnModePercent.addEventListener("click", () => {
-      this.modalDiscountMode = "percent";
+      this.modalDiscountMode = "calculator";
       this.btnModePercent.classList.add("active");
       this.btnModeNominal.classList.remove("active");
-      this.discountPrefixSymbol.textContent = "%";
-      this.discountPresetsContainer.style.display = "flex";
-      this.discountFieldHint.textContent = "Pilih preset diskon di atas atau ketik persentase diskon (0-100%).";
-      this.inputModalDiscount.placeholder = "0";
-      this.inputModalDiscount.value = this.modalDiscountValue;
+      if (this.calcModePercentContainer) this.calcModePercentContainer.classList.remove("hidden");
+      if (this.calcModeNominalContainer) this.calcModeNominalContainer.classList.add("hidden");
       this.recalculateModalPricing();
     });
 
@@ -652,50 +795,120 @@ class SmartGroceryApp {
       this.modalDiscountMode = "nominal";
       this.btnModeNominal.classList.add("active");
       this.btnModePercent.classList.remove("active");
-      this.discountPrefixSymbol.textContent = "Rp";
-      this.discountPresetsContainer.style.display = "none";
-      this.discountFieldHint.textContent = "Ketik potongan rupiah langsung per satuan (misal: 5000).";
-      this.inputModalDiscount.placeholder = "0";
-      this.inputModalDiscount.value = this.modalDiscountValue;
+      if (this.calcModePercentContainer) this.calcModePercentContainer.classList.add("hidden");
+      if (this.calcModeNominalContainer) this.calcModeNominalContainer.classList.remove("hidden");
       this.recalculateModalPricing();
     });
 
-    // Discount Presets Chips
+    // Preset Diskon Bertingkat (50+20, 70+20, 30+10, 20+10, 50+10)
+    if (this.stackedPresetsScroller) {
+      this.stackedPresetsScroller.querySelectorAll(".btn-stacked-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const formulaStr = btn.getAttribute("data-formula") || "50+20";
+          this.modalDiscountLayers = this.parseFormulaLayers(formulaStr);
+          this.inputModalDiscount.value = this.modalDiscountLayers.map(p => `${p}%`).join(" + ");
+          this.recalculateModalPricing();
+        });
+      });
+    }
+
+    // Tombol Tambah Diskon (Stacking): +5%, +10%, +15%, +20%, +25%, +50%
+    if (this.stackAddScroller) {
+      this.stackAddScroller.querySelectorAll(".btn-stack-add").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const addDisc = parseFloat(btn.getAttribute("data-add-disc")) || 10;
+          if (this.modalDiscountLayers.length === 1 && this.modalDiscountLayers[0] === 0) {
+            this.modalDiscountLayers = [addDisc];
+          } else {
+            this.modalDiscountLayers.push(addDisc);
+          }
+          this.inputModalDiscount.value = this.modalDiscountLayers.map(p => `${p}%`).join(" + ");
+          this.recalculateModalPricing();
+        });
+      });
+    }
+
+    // Preset Diskon Tunggal Standar: 0%, 5%, 10%, 15%, 20%, 25%, 30%, 50%, 70%
     this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(chip => {
       chip.addEventListener("click", () => {
-        this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(c => c.classList.remove("active"));
-        chip.classList.add("active");
-        const val = chip.getAttribute("data-disc");
-
-        if (val === "custom") {
-          this.inputModalDiscount.focus();
-        } else {
-          this.modalDiscountValue = parseFloat(val) || 0;
-          this.inputModalDiscount.value = this.modalDiscountValue;
-          this.recalculateModalPricing();
-        }
+        const val = parseFloat(chip.getAttribute("data-disc")) || 0;
+        this.modalDiscountLayers = val > 0 ? [val] : [0];
+        this.inputModalDiscount.value = val > 0 ? `${val}%` : "0";
+        this.recalculateModalPricing();
       });
     });
 
+    // Operator Kalkulator: + Tambah, ⌫ Backspace, C Clear
+    if (this.btnCalcOpPlus) {
+      this.btnCalcOpPlus.addEventListener("click", () => {
+        let cur = this.inputModalDiscount.value.trim();
+        if (cur && !cur.endsWith("+")) {
+          this.inputModalDiscount.value = cur + " + ";
+        }
+        this.inputModalDiscount.focus();
+      });
+    }
+
+    if (this.btnCalcOpBack) {
+      this.btnCalcOpBack.addEventListener("click", () => {
+        if (this.modalDiscountLayers.length > 1) {
+          this.modalDiscountLayers.pop();
+          this.inputModalDiscount.value = this.modalDiscountLayers.map(p => `${p}%`).join(" + ");
+        } else {
+          this.modalDiscountLayers = [0];
+          this.inputModalDiscount.value = "0";
+        }
+        this.recalculateModalPricing();
+      });
+    }
+
+    if (this.btnCalcOpClear) {
+      this.btnCalcOpClear.addEventListener("click", () => {
+        this.modalDiscountLayers = [0];
+        this.inputModalDiscount.value = "0";
+        this.recalculateModalPricing();
+      });
+    }
+
+    // Input Manual Formula Diskon
     this.inputModalDiscount.addEventListener("input", () => {
-      const val = parseFloat(this.inputModalDiscount.value) || 0;
-      this.modalDiscountValue = val;
-
-      if (this.modalDiscountMode === "percent") {
-        this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(chip => {
-          const chipVal = chip.getAttribute("data-disc");
-          if (chipVal !== "custom") {
-            chip.classList.toggle("active", parseFloat(chipVal) === val);
-          } else {
-            const hasMatch = Array.from(this.discountPresetsContainer.querySelectorAll(".disc-preset-chip"))
-              .some(c => c.getAttribute("data-disc") !== "custom" && parseFloat(c.getAttribute("data-disc")) === val);
-            chip.classList.toggle("active", !hasMatch && val > 0);
-          }
-        });
-      }
-
+      const val = this.inputModalDiscount.value;
+      this.modalDiscountLayers = this.parseFormulaLayers(val);
       this.recalculateModalPricing();
     });
+
+    // Otomatis Diskon Promo Toko
+    if (this.btnApplyAutoDiscount) {
+      this.btnApplyAutoDiscount.addEventListener("click", () => {
+        if (this.autoStoreDiscount > 0) {
+          this.modalDiscountLayers = [this.autoStoreDiscount];
+          this.inputModalDiscount.value = `${this.autoStoreDiscount}%`;
+          this.recalculateModalPricing();
+        }
+      });
+    }
+
+    // Nominal Presets Chips
+    if (this.nominalPresetsScroller) {
+      this.nominalPresetsScroller.querySelectorAll(".nominal-preset-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          this.nominalPresetsScroller.querySelectorAll(".nominal-preset-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          const nom = parseFloat(chip.getAttribute("data-nominal")) || 0;
+          this.modalNominalDiscount = nom;
+          if (this.inputModalNominalDiscount) this.inputModalNominalDiscount.value = nom;
+          this.recalculateModalPricing();
+        });
+      });
+    }
+
+    if (this.inputModalNominalDiscount) {
+      this.inputModalNominalDiscount.addEventListener("input", () => {
+        const nom = parseFloat(this.inputModalNominalDiscount.value) || 0;
+        this.modalNominalDiscount = nom;
+        this.recalculateModalPricing();
+      });
+    }
 
     // Confirm button inside modal
     this.btnConfirmAddItem.addEventListener("click", () => this.handleConfirmAddItem());
@@ -1014,16 +1227,47 @@ class SmartGroceryApp {
     }
 
     const products = this.getCurrentStoreProducts();
-    const filtered = products.filter(p => this.currentCategory === "ALL" || p.category === this.currentCategory);
-    const remainingBudget = this.getRemainingBudget();
+    let filtered = products.filter(p => this.currentCategory === "ALL" || p.category === this.currentCategory);
 
+    // Filter berdasarkan input search bar
+    if (this.searchQuery && this.searchQuery.length > 0) {
+      filtered = filtered.filter(p => {
+        const nameMatch = p.name && p.name.toLowerCase().includes(this.searchQuery);
+        const catMatch = p.category && p.category.toLowerCase().includes(this.searchQuery);
+        return nameMatch || catMatch;
+      });
+
+      if (this.searchFeedbackBar && this.searchFeedbackText) {
+        this.searchFeedbackBar.classList.remove("hidden");
+        this.searchFeedbackText.textContent = `Ditemukan ${filtered.length} barang untuk "${this.searchQuery}"`;
+      }
+    } else {
+      if (this.searchFeedbackBar) {
+        this.searchFeedbackBar.classList.add("hidden");
+      }
+    }
+
+    // Jika pencarian tidak menemukan barang apapun
     if (filtered.length === 0) {
-      this.productTilesContainer.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 36px 16px; color: var(--text-muted);">
-          <p style="font-size: 2rem; margin-bottom: 8px;">🛒</p>
-          <p style="font-weight: 600;">Tidak ada barang di kategori ini.</p>
-        </div>
-      `;
+      if (this.searchQuery && this.searchQuery.length > 0) {
+        this.productTilesContainer.innerHTML = `
+          <div class="empty-search-card">
+            <div class="empty-search-icon">🔍</div>
+            <h4>Barang "${this.escapeHtml(this.searchQuery)}" tidak ditemukan</h4>
+            <p>Barang ini belum tersedia di katalog <strong>${this.escapeHtml(this.supermarket)}</strong>.<br>Anda bisa membuatnya langsung dan otomatis menambahkannya ke beranda toko!</p>
+            <button type="button" class="btn-create-from-search" onclick="app.openAddProductModal('${this.escapeHtml(this.searchQuery)}')">
+              <span>+ Buat & Tambahkan "${this.escapeHtml(this.searchQuery)}" ke Toko</span>
+            </button>
+          </div>
+        `;
+      } else {
+        this.productTilesContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 36px 16px; color: var(--text-muted);">
+            <p style="font-size: 2rem; margin-bottom: 8px;">🛒</p>
+            <p style="font-weight: 600;">Tidak ada barang di kategori ini.</p>
+          </div>
+        `;
+      }
       return;
     }
 
@@ -1032,6 +1276,7 @@ class SmartGroceryApp {
       const hasDiscount = item.discount > 0;
       const discountPercent = Math.round(item.discount * 100);
       const harga2 = hasDiscount ? Math.round(item.price * (1 - item.discount)) : item.price;
+      const discountBadgeText = item.discountFormula ? `-${item.discountFormula}` : `-${discountPercent}%`;
 
       let emoteSymbol = "=";
       let emoteClass = "emote-equal";
@@ -1049,13 +1294,13 @@ class SmartGroceryApp {
       }
 
       html += `
-        <div class="product-tile" data-id="${item.id}">
+        <div class="product-tile ${item.isNew ? 'product-tile-new' : ''}" data-id="${item.id}">
           <div class="product-image-wrap">
             <img src="${item.image || 'assets/aqua.jpg'}" 
                  onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560023907-5f339617ea30?auto=format&fit=crop&w=500&q=80';"
                  alt="${this.escapeHtml(item.name)}" class="product-tile-img" loading="lazy">
             
-            ${hasDiscount ? `<span class="product-discount-pill">-${discountPercent}%</span>` : ''}
+            ${hasDiscount ? `<span class="product-discount-pill" title="Diskon ${item.discountFormula || discountPercent + '%'}">${discountBadgeText}</span>` : ''}
           </div>
 
           <div class="product-tile-name" title="${this.escapeHtml(item.name)}">
@@ -1073,7 +1318,7 @@ class SmartGroceryApp {
             </div>
           </div>
 
-          <!-- Tombol Add to list: membuka modal pemilihan satuan (kg/pcs/liter) & diskon -->
+          <!-- Tombol Add to list: membuka modal pemilihan satuan (kg/pcs/liter) & kalkulator diskon -->
           <button type="button" class="btn-add-to-list" 
                   onclick="app.openAddItemModal('${item.id}')" 
                   title="Pilih satuan dan diskon sebelum dimasukkan ke list">
@@ -1132,38 +1377,66 @@ class SmartGroceryApp {
     this.modalQuantity = editCartItem ? editCartItem.quantity : 1;
     this.inputModalQuantity.value = this.modalQuantity;
 
-    // 3. Initial Discount
-    if (editCartItem) {
-      this.modalDiscountMode = editCartItem.discountMode || "percent";
-      this.modalDiscountValue = editCartItem.discountValue !== undefined ? editCartItem.discountValue : (editCartItem.discount ? Math.round(editCartItem.discount * 100) : 0);
-    } else {
-      this.modalDiscountMode = "percent";
-      this.modalDiscountValue = targetItem.discount ? Math.round(targetItem.discount * 100) : 0;
+    // 3. Otomatis Deteksi Diskon Promo Toko
+    this.autoStoreDiscount = (targetItem.discount && targetItem.discount > 0) ? Math.round(targetItem.discount * 100) : 0;
+    if (this.autoDiscountBanner) {
+      if (this.autoStoreDiscount > 0) {
+        this.autoDiscountBanner.classList.remove("hidden");
+        if (this.autoDiscountText) {
+          const autoFormulaText = targetItem.discountFormula || `Diskon ${this.autoStoreDiscount}%`;
+          this.autoDiscountText.textContent = autoFormulaText;
+        }
+      } else {
+        this.autoDiscountBanner.classList.add("hidden");
+      }
     }
 
+    // 4. Initial Discount State (Kalkulator vs Nominal)
+    if (editCartItem) {
+      this.modalDiscountMode = editCartItem.discountMode === "nominal" ? "nominal" : "calculator";
+      if (this.modalDiscountMode === "nominal") {
+        this.modalNominalDiscount = editCartItem.discountValue || (editCartItem.price - editCartItem.finalPrice) || 0;
+        if (this.inputModalNominalDiscount) this.inputModalNominalDiscount.value = this.modalNominalDiscount;
+      } else {
+        if (editCartItem.discountLayers && editCartItem.discountLayers.length > 0) {
+          this.modalDiscountLayers = [...editCartItem.discountLayers];
+        } else if (editCartItem.discountFormula) {
+          this.modalDiscountLayers = this.parseFormulaLayers(editCartItem.discountFormula);
+        } else if (editCartItem.discount) {
+          this.modalDiscountLayers = [Math.round(editCartItem.discount * 100)];
+        } else {
+          this.modalDiscountLayers = [0];
+        }
+        this.inputModalDiscount.value = editCartItem.discountFormula || this.modalDiscountLayers.map(p => `${p}%`).join(" + ");
+      }
+    } else {
+      // Item baru ditambah dari Store: cek apakah ada diskon bawaan toko
+      this.modalDiscountMode = "calculator";
+      if (targetItem.discountFormula) {
+        this.modalDiscountLayers = this.parseFormulaLayers(targetItem.discountFormula);
+        this.inputModalDiscount.value = targetItem.discountFormula;
+      } else if (this.autoStoreDiscount > 0) {
+        this.modalDiscountLayers = [this.autoStoreDiscount];
+        this.inputModalDiscount.value = `${this.autoStoreDiscount}%`;
+      } else {
+        this.modalDiscountLayers = [0];
+        this.inputModalDiscount.value = "0";
+      }
+      this.modalNominalDiscount = 0;
+      if (this.inputModalNominalDiscount) this.inputModalNominalDiscount.value = 0;
+    }
+
+    // Toggle container view
     if (this.modalDiscountMode === "nominal") {
       this.btnModeNominal.classList.add("active");
       this.btnModePercent.classList.remove("active");
-      this.discountPrefixSymbol.textContent = "Rp";
-      this.discountPresetsContainer.style.display = "none";
-      this.discountFieldHint.textContent = "Ketik potongan rupiah langsung per satuan.";
+      if (this.calcModePercentContainer) this.calcModePercentContainer.classList.add("hidden");
+      if (this.calcModeNominalContainer) this.calcModeNominalContainer.classList.remove("hidden");
     } else {
       this.btnModePercent.classList.add("active");
       this.btnModeNominal.classList.remove("active");
-      this.discountPrefixSymbol.textContent = "%";
-      this.discountPresetsContainer.style.display = "flex";
-      this.discountFieldHint.textContent = "Pilih preset diskon di atas atau ketik persentase diskon (0-100%).";
-    }
-
-    this.inputModalDiscount.value = this.modalDiscountValue;
-
-    if (this.modalDiscountMode === "percent") {
-      this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(chip => {
-        const val = chip.getAttribute("data-disc");
-        if (val !== "custom") {
-          chip.classList.toggle("active", parseFloat(val) === this.modalDiscountValue);
-        }
-      });
+      if (this.calcModePercentContainer) this.calcModePercentContainer.classList.remove("hidden");
+      if (this.calcModeNominalContainer) this.calcModeNominalContainer.classList.add("hidden");
     }
 
     // Modal title
@@ -1195,18 +1468,74 @@ class SmartGroceryApp {
     const qty = Math.max(1, this.modalQuantity);
 
     let discountPerUnit = 0;
-    let discountFraction = 0;
+    let netPricePerUnit = basePrice;
+    let effectiveFraction = 0;
+    let effectivePercent = 0;
+    let formulaDisplayStr = "0% (Normal)";
+    let stepsList = [];
 
-    if (this.modalDiscountMode === "percent") {
-      const pct = Math.min(100, Math.max(0, this.modalDiscountValue));
-      discountFraction = pct / 100;
-      discountPerUnit = Math.round(basePrice * discountFraction);
+    if (this.modalDiscountMode === "calculator") {
+      const calcResult = this.calculateCompoundDiscount(basePrice, this.modalDiscountLayers);
+      discountPerUnit = calcResult.totalSaved;
+      netPricePerUnit = calcResult.finalPrice;
+      effectiveFraction = calcResult.effectiveFraction;
+      effectivePercent = calcResult.effectivePercent;
+      formulaDisplayStr = calcResult.formula;
+      stepsList = calcResult.steps;
+
+      // Update Digital Screen
+      if (this.calcFormulaDisplay) this.calcFormulaDisplay.textContent = formulaDisplayStr;
+      if (this.calcEffectiveBadge) {
+        this.calcEffectiveBadge.textContent = effectivePercent > 0
+          ? `Diskon Efektif: ${effectivePercent}% (-${this.formatRupiah(discountPerUnit)})`
+          : `Diskon Efektif: 0%`;
+      }
+
+      // Update breakdown
+      if (this.calcBreakdownBox) {
+        if (stepsList.length > 0) {
+          this.calcBreakdownBox.innerHTML = `
+            <div class="calc-steps-list">
+              ${stepsList.map(s => `
+                <div class="calc-step-item">
+                  <span class="calc-step-badge">Tahap ${s.step} (-${s.percent}%)</span>
+                  <span class="calc-step-detail">Potongan ${this.formatRupiah(s.saved)} &rarr; Sisa ${this.formatRupiah(s.priceAfter)}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          this.calcBreakdownBox.innerHTML = `<div class="calc-breakdown-empty">Harga normal (tanpa diskon diterapkan).</div>`;
+        }
+      }
+
+      // Update preset chips active state
+      if (this.discountPresetsContainer) {
+        this.discountPresetsContainer.querySelectorAll(".disc-preset-chip").forEach(chip => {
+          const val = parseFloat(chip.getAttribute("data-disc")) || 0;
+          const isSingleMatch = (this.modalDiscountLayers.length === 1 && this.modalDiscountLayers[0] === val);
+          chip.classList.toggle("active", isSingleMatch);
+        });
+      }
+
+      if (this.stackedPresetsScroller) {
+        this.stackedPresetsScroller.querySelectorAll(".btn-stacked-chip").forEach(chip => {
+          const fStr = chip.getAttribute("data-formula") || "";
+          const chipLayers = this.parseFormulaLayers(fStr);
+          const isMatch = (chipLayers.length === this.modalDiscountLayers.length &&
+            chipLayers.every((val, index) => val === this.modalDiscountLayers[index]));
+          chip.classList.toggle("active", isMatch);
+        });
+      }
     } else {
-      discountPerUnit = Math.min(basePrice, Math.max(0, this.modalDiscountValue));
-      discountFraction = basePrice > 0 ? (discountPerUnit / basePrice) : 0;
+      // Mode Nominal (Rp)
+      discountPerUnit = Math.min(basePrice, Math.max(0, this.modalNominalDiscount));
+      netPricePerUnit = Math.max(0, basePrice - discountPerUnit);
+      effectiveFraction = basePrice > 0 ? (discountPerUnit / basePrice) : 0;
+      effectivePercent = Math.round(effectiveFraction * 100);
+      formulaDisplayStr = `Potongan ${this.formatRupiah(discountPerUnit)}`;
     }
 
-    const netPricePerUnit = Math.max(0, basePrice - discountPerUnit);
     const subtotal = netPricePerUnit * qty;
     const totalOriginal = basePrice * qty;
     const totalDiscountSaved = discountPerUnit * qty;
@@ -1254,17 +1583,25 @@ class SmartGroceryApp {
     const qty = Math.max(1, this.modalQuantity);
 
     let discountPerUnit = 0;
-    let discountFraction = 0;
-    if (this.modalDiscountMode === "percent") {
-      const pct = Math.min(100, Math.max(0, this.modalDiscountValue));
-      discountFraction = pct / 100;
-      discountPerUnit = Math.round(basePrice * discountFraction);
+    let netPrice = basePrice;
+    let effectiveFraction = 0;
+    let formula = null;
+    let layers = [];
+
+    if (this.modalDiscountMode === "calculator") {
+      const calcResult = this.calculateCompoundDiscount(basePrice, this.modalDiscountLayers);
+      discountPerUnit = calcResult.totalSaved;
+      netPrice = calcResult.finalPrice;
+      effectiveFraction = calcResult.effectiveFraction;
+      formula = calcResult.formula !== "0% (Normal)" ? calcResult.formula : null;
+      layers = calcResult.layers;
     } else {
-      discountPerUnit = Math.min(basePrice, Math.max(0, this.modalDiscountValue));
-      discountFraction = basePrice > 0 ? (discountPerUnit / basePrice) : 0;
+      discountPerUnit = Math.min(basePrice, Math.max(0, this.modalNominalDiscount));
+      netPrice = Math.max(0, basePrice - discountPerUnit);
+      effectiveFraction = basePrice > 0 ? (discountPerUnit / basePrice) : 0;
+      formula = `Hemat ${this.formatRupiah(discountPerUnit)}`;
     }
 
-    const netPrice = Math.max(0, basePrice - discountPerUnit);
     const subtotal = netPrice * qty;
 
     if (this.editingCartItemId) {
@@ -1273,8 +1610,10 @@ class SmartGroceryApp {
         this.cart[itemIndex].unit = this.modalUnit;
         this.cart[itemIndex].quantity = qty;
         this.cart[itemIndex].discountMode = this.modalDiscountMode;
-        this.cart[itemIndex].discountValue = this.modalDiscountValue;
-        this.cart[itemIndex].discount = discountFraction;
+        this.cart[itemIndex].discountValue = this.modalDiscountMode === "nominal" ? this.modalNominalDiscount : Math.round(effectiveFraction * 100);
+        this.cart[itemIndex].discountFormula = formula;
+        this.cart[itemIndex].discountLayers = layers;
+        this.cart[itemIndex].discount = effectiveFraction;
         this.cart[itemIndex].finalPrice = netPrice;
         this.cart[itemIndex].totalPrice = subtotal;
       }
@@ -1289,8 +1628,10 @@ class SmartGroceryApp {
         unit: this.modalUnit,
         quantity: qty,
         discountMode: this.modalDiscountMode,
-        discountValue: this.modalDiscountValue,
-        discount: discountFraction,
+        discountValue: this.modalDiscountMode === "nominal" ? this.modalNominalDiscount : Math.round(effectiveFraction * 100),
+        discountFormula: formula,
+        discountLayers: layers,
+        discount: effectiveFraction,
         finalPrice: netPrice,
         totalPrice: subtotal,
         image: product.image
@@ -1316,17 +1657,17 @@ class SmartGroceryApp {
     this.editProductName.value = product.name;
     this.editProductPrice.value = product.price;
     this.editProductLastPrice.value = product.lastMonthPrice !== undefined ? product.lastMonthPrice : product.price;
-    this.editProductDiscount.value = Math.round((product.discount || 0) * 100);
+    this.editProductDiscount.value = product.discountFormula || Math.round((product.discount || 0) * 100);
     this.editProductCategory.value = product.category || "Sembako";
 
     this.updateModalLivePreview();
     this.productEditModalBackdrop.classList.remove("hidden");
   }
 
-  openAddProductModal() {
-    this.modalProductTitle.textContent = "➕ Tambah Barang Baru ke Katalog";
+  openAddProductModal(prefilledName = "") {
+    this.modalProductTitle.textContent = "➕ Tambah Barang Baru ke Toko";
     this.editProductId.value = "";
-    this.editProductName.value = "";
+    this.editProductName.value = (typeof prefilledName === "string") ? prefilledName : "";
     this.editProductPrice.value = "";
     this.editProductLastPrice.value = "";
     this.editProductDiscount.value = "0";
@@ -1334,6 +1675,13 @@ class SmartGroceryApp {
 
     this.updateModalLivePreview();
     this.productEditModalBackdrop.classList.remove("hidden");
+    setTimeout(() => {
+      if (this.editProductName.value) {
+        this.editProductPrice.focus();
+      } else {
+        this.editProductName.focus();
+      }
+    }, 120);
   }
 
   closeProductModal() {
@@ -1343,12 +1691,18 @@ class SmartGroceryApp {
   updateModalLivePreview() {
     const price = parseFloat(this.editProductPrice.value) || 0;
     const lastPrice = parseFloat(this.editProductLastPrice.value) || price;
-    const discountPct = parseFloat(this.editProductDiscount.value) || 0;
+    const discountStr = (this.editProductDiscount.value || "0").trim();
 
-    const discountDec = discountPct / 100;
-    const harga2 = Math.round(price * (1 - discountDec));
+    // Parse discount text (bisa bertingkat misal: 50+20 atau 10%)
+    const layers = this.parseFormulaLayers(discountStr);
+    const calcResult = this.calculateCompoundDiscount(price, layers);
+    const harga2 = calcResult.finalPrice;
 
-    this.previewHarga2Text.textContent = this.formatRupiah(harga2);
+    if (calcResult.effectivePercent > 0) {
+      this.previewHarga2Text.textContent = `${this.formatRupiah(harga2)} (${calcResult.formula} = Efektif ${calcResult.effectivePercent}%)`;
+    } else {
+      this.previewHarga2Text.textContent = this.formatRupiah(harga2);
+    }
 
     const diff = price - lastPrice;
     if (diff > 0) {
@@ -1368,7 +1722,7 @@ class SmartGroceryApp {
     const name = this.editProductName.value.trim();
     const price = parseFloat(this.editProductPrice.value);
     const lastPrice = parseFloat(this.editProductLastPrice.value) || price;
-    const discountPct = parseFloat(this.editProductDiscount.value) || 0;
+    const discountStr = (this.editProductDiscount.value || "0").trim();
     const category = this.editProductCategory.value;
 
     if (!name || isNaN(price) || price < 0) {
@@ -1376,7 +1730,12 @@ class SmartGroceryApp {
       return;
     }
 
-    const discountDec = Math.max(0, Math.min(0.99, discountPct / 100));
+    // Hitung diskon (mendukung diskon bertingkat 50+20)
+    const layers = this.parseFormulaLayers(discountStr);
+    const calcResult = this.calculateCompoundDiscount(price, layers);
+    const discountDec = calcResult.effectiveFraction;
+    const discountFormula = calcResult.formula !== "0% (Normal)" ? calcResult.formula : "";
+
     const storeProducts = this.getCurrentStoreProducts();
 
     if (id) {
@@ -1388,6 +1747,7 @@ class SmartGroceryApp {
           price: price,
           lastMonthPrice: lastPrice,
           discount: discountDec,
+          discountFormula: discountFormula,
           category: category
         };
         this.showToast("💾", `Data "${name}" berhasil diperbarui.`);
@@ -1402,14 +1762,23 @@ class SmartGroceryApp {
         price: price,
         lastMonthPrice: lastPrice,
         discount: discountDec,
-        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"
+        discountFormula: discountFormula,
+        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80",
+        isNew: true
       });
-      this.showToast("🎉", `Barang baru "${name}" berhasil ditambahkan.`);
+      this.showToast("🎉", `"${name}" berhasil dibuat & otomatis muncul di beranda toko!`);
     }
 
     this.saveCatalogDatabase();
     this.closeProductModal();
+
+    // Otomatis reset pencarian & render ke beranda toko
+    this.clearSearch();
     this.renderStoreProducts();
+
+    // Scroll ke atas agar pengguna melihat langsung produk yang baru ditambahkan
+    const mainArea = document.getElementById("mainContentArea");
+    if (mainArea) mainArea.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // ==================== TAB 2: CART / LIST (RUBY ACCENT CARDS) ====================
