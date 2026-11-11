@@ -29,7 +29,7 @@
         rel="stylesheet">
 
     <!-- External Stylesheet (Slate Aesthetic & Sky Cyan Glow) -->
-    <link rel="stylesheet" href="style.css?v=20261111c">
+    <link rel="stylesheet" href="style.css?v=20261111d">
 </head>
 
 <body>
@@ -119,14 +119,15 @@
                         <button type="button" id="btnResetSearchQuery" class="btn-reset-search-link">Reset Cari</button>
                     </div>
 
-                    <!-- Category Filter Bar -->
+                    <!-- Category Filter Bar (Semua Barang, Bahan Pokok, Kebersihan & Mandi, Sayur & Buah, Kebutuhan lainnya, Snack, ATK) -->
                     <div class="category-chip-scroller" id="categoryChipBar">
-                        <button type="button" class="cat-chip active" data-category="ALL">Semua</button>
-                        <button type="button" class="cat-chip" data-category="Sembako">🍚 Sembako</button>
-                        <button type="button" class="cat-chip" data-category="Mie & Instan">🍜 Mie & Instan</button>
-                        <button type="button" class="cat-chip" data-category="Dapur & Masak">🍳 Dapur & Masak</button>
-                        <button type="button" class="cat-chip" data-category="Minuman">🥛 Minuman</button>
-                        <button type="button" class="cat-chip" data-category="Kebersihan">🧼 Kebersihan</button>
+                        <button type="button" class="cat-chip active" data-category="ALL">Barang (Semua)</button>
+                        <button type="button" class="cat-chip" data-category="Bahan Pokok">🍚 Bahan Pokok</button>
+                        <button type="button" class="cat-chip" data-category="Kebersihan & Mandi">🧼 Kebersihan & Mandi</button>
+                        <button type="button" class="cat-chip" data-category="Sayur & Buah">🥬 Sayur & Buah</button>
+                        <button type="button" class="cat-chip" data-category="Kebutuhan lainnya">📦 Kebutuhan lainnya</button>
+                        <button type="button" class="cat-chip" data-category="Snack">🍿 Snack</button>
+                        <button type="button" class="cat-chip" data-category="ATK">✏️ ATK</button>
                     </div>
 
                     <!-- Store Info / Promo Banner -->
@@ -454,7 +455,33 @@
                             </div>
                         </div>
 
-                        <!-- 4. Tombol Confirm -->
+                        <!-- 4. Fitur Penginstallan PWA Langsung ke HP Masing-Masing -->
+                        <div class="setup-install-box" id="setupInstallBox">
+                            <div class="setup-install-content">
+                                <div class="setup-install-icon">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
+                                        <path d="M12 18h.01"/>
+                                        <path d="M12 7v5"/>
+                                        <path d="m9 10 3 3 3-3"/>
+                                    </svg>
+                                </div>
+                                <div class="setup-install-info">
+                                    <strong>Install GroceryIn ke HP</strong>
+                                    <small id="setupInstallStatusText">Pasang sebagai aplikasi di layar utama HP agar cepat dibuka tanpa browser.</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-setup-install" id="btnInstallApp">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" x2="12" y1="15" y2="3"/>
+                                </svg>
+                                <span id="btnInstallAppText">📲 Install Aplikasi ke HP</span>
+                            </button>
+                        </div>
+
+                        <!-- 5. Tombol Confirm -->
                         <button type="submit" id="btnConfirmSetup" class="btn-confirm-setup">
                             <span id="btnConfirmText">Confirm & Unduh Katalog</span>
                             <svg class="lucide-icon-sm" viewBox="0 0 24 24" width="18" height="18" fill="none"
@@ -466,6 +493,23 @@
 
                     </form>
 
+                </div>
+            </div>
+
+            <!-- ==================== MODAL PANDUAN INSTALL APLIKASI (IOS / ANDROID / DESKTOP) ==================== -->
+            <div class="modal-backdrop-custom hidden" id="installGuideModalOverlay" style="z-index: 1300;">
+                <div class="setup-card install-guide-card">
+                    <div class="setup-header" style="margin-bottom: 12px;">
+                        <div class="setup-brand-icon" style="background: rgba(56, 189, 248, 0.2);">📲</div>
+                        <h3 id="installGuideTitle" style="color: #F8FAFC; margin-bottom: 4px;">Cara Pasang ke Layar HP</h3>
+                        <p id="installGuideDesc" style="font-size: 0.76rem; color: #94A3B8;">Ikuti langkah cepat berikut untuk memasang ikon GroceryIn di layar utama HP Anda:</p>
+                    </div>
+                    <div class="install-steps-list" id="installStepsList">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                    <button type="button" class="btn-confirm-setup" id="btnCloseInstallGuide" style="margin-top: 16px;">
+                        <span>Mengerti & Kembali</span>
+                    </button>
                 </div>
             </div>
 
@@ -729,11 +773,12 @@
                             <div class="modal-field-group">
                                 <label for="editProductCategory">Kategori</label>
                                 <select id="editProductCategory" class="modal-input select-styled">
-                                    <option value="Sembako">🍚 Sembako</option>
-                                    <option value="Mie & Instan">🍜 Mie & Instan</option>
-                                    <option value="Minuman">🥛 Minuman</option>
-                                    <option value="Dapur & Masak">🍳 Dapur & Masak</option>
-                                    <option value="Kebersihan">🧼 Kebersihan</option>
+                                    <option value="Bahan Pokok">🍚 Bahan Pokok</option>
+                                    <option value="Kebersihan & Mandi">🧼 Kebersihan & Mandi</option>
+                                    <option value="Sayur & Buah">🥬 Sayur & Buah</option>
+                                    <option value="Kebutuhan lainnya">📦 Kebutuhan lainnya</option>
+                                    <option value="Snack">🍿 Snack</option>
+                                    <option value="ATK">✏️ ATK</option>
                                 </select>
                             </div>
                         </div>
@@ -836,7 +881,7 @@
     </div>
 
     <!-- Main JavaScript Logic Engine -->
-    <script src="app.js?v=20261111c"></script>
+    <script src="app.js?v=20261111d"></script>
 </body>
 
 </html>

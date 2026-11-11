@@ -1777,66 +1777,131 @@ html::-webkit-scrollbar-thumb {
   color: var(--text-muted);
 }
 
-/* ==================== LOBBY: INSTAL APLIKASI KE HANDPHONE BANNER ==================== */
-.lobby-install-card {
-  background: linear-gradient(135deg, #162238 0%, #0F172A 100%);
-  border: 1.5px solid rgba(56, 189, 248, 0.4);
+/* ==================== PWA INSTALLATION SECTION DI SETUP MODAL ==================== */
+.setup-install-box {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1.5px dashed rgba(56, 189, 248, 0.4);
   border-radius: var(--radius-lg);
-  padding: 10px 12px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-image: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 60%);
+}
+
+.setup-install-content {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.2);
 }
 
-.lobby-install-icon {
+.setup-install-icon {
   width: 38px;
   height: 38px;
   border-radius: var(--radius-md);
-  background: var(--primary-gradient);
-  color: #0F172A;
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38BDF8;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.lobby-install-text {
-  flex: 1;
+.setup-install-info {
   display: flex;
   flex-direction: column;
 }
 
-.lobby-install-text strong {
-  font-size: 0.82rem;
-  color: #FFFFFF;
+.setup-install-info strong {
+  font-size: 0.84rem;
+  color: #F8FAFC;
+  font-weight: 700;
 }
 
-.lobby-install-text small {
-  font-size: 0.68rem;
-  color: #E4E4E7;
+.setup-install-info small {
+  font-size: 0.7rem;
+  color: #94A3B8;
+  line-height: 1.35;
 }
 
-.btn-lobby-install-action {
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-  background: #FFFFFF;
-  color: #DC2626;
+.btn-setup-install {
+  width: 100%;
+  min-height: 40px;
+  background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
+  color: #0F172A;
   border: none;
+  border-radius: var(--radius-md);
   font-family: var(--font-heading);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 800;
   cursor: pointer;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
   transition: all 0.15s ease;
 }
 
-.btn-lobby-install-action:hover,
-.btn-lobby-install-action:active {
-  background: #EF4444;
-  color: #FFFFFF;
-  transform: scale(0.95);
+.btn-setup-install:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-setup-install:active {
+  transform: scale(0.97);
+}
+
+.btn-setup-install.installed {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34D399;
+  box-shadow: none;
+}
+
+/* Modal Panduan Install */
+.install-guide-card {
+  max-width: 360px;
+}
+
+.install-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.guide-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #0F172A;
+  border: 1px solid #24344D;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: #38BDF8;
+  color: #0F172A;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-desc {
+  font-size: 0.78rem;
+  color: #E2E8F0;
+  line-height: 1.4;
 }
 
 /* ==================== LOBBY: SEBELUM PILIH LOKASI (SIGN IN BOX) ==================== */

@@ -75,12 +75,14 @@ const CITY_SUPERMARKETS = {
   ]
 };
 
-// ==================== 2. DEFAULT COMMODITY PRODUCTS (14 ITEMS) ====================
+// ==================== 2. DEFAULT COMMODITY PRODUCTS (KATEGORI RESMI) ====================
+// Kategori: Bahan Pokok, Kebersihan & Mandi, Sayur & Buah, Kebutuhan lainnya, Snack, ATK
 const DEFAULT_COMMODITIES = [
+  // --- BAHAN POKOK ---
   {
     id: "prod-beras-5kg-74",
     name: "Beras 5kg",
-    category: "Sembako",
+    category: "Bahan Pokok",
     defaultUnit: "kg",
     price: 74000,
     lastMonthPrice: 68000, // ⬆ Merah (Naik dari 68rb jadi 74rb, selisih +Rp 6.000)
@@ -88,9 +90,19 @@ const DEFAULT_COMMODITIES = [
     image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80"
   },
   {
+    id: "prod-minyak-2l",
+    name: "Minyak Goreng 2L",
+    category: "Bahan Pokok",
+    defaultUnit: "liter",
+    price: 43000,
+    lastMonthPrice: 42000, // ⬆ Merah (Bulan lalu 42rb -> Sekarang 43rb, naik +Rp 1.000)
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80"
+  },
+  {
     id: "prod-telur-1kg",
     name: "Telur 1kg",
-    category: "Sembako",
+    category: "Bahan Pokok",
     defaultUnit: "kg",
     price: 28000,
     lastMonthPrice: 32000, // ⬇︎ Hijau (Turun dari 32rb jadi 28rb, hemat -Rp 4.000)
@@ -100,7 +112,7 @@ const DEFAULT_COMMODITIES = [
   {
     id: "prod-garam-500g",
     name: "Garam 500g",
-    category: "Dapur & Masak",
+    category: "Bahan Pokok",
     defaultUnit: "pack",
     price: 5000,
     lastMonthPrice: 5000, // = Abu-abu (Setara / Sama Rp 5.000 dengan bulan lalu)
@@ -110,27 +122,17 @@ const DEFAULT_COMMODITIES = [
   {
     id: "prod-beras-5kg-745",
     name: "Beras 5kg (Premium)",
-    category: "Sembako",
+    category: "Bahan Pokok",
     defaultUnit: "pack",
-    price: 74500,
-    lastMonthPrice: 74500, // = Abu-abu
+    price: 74000,
+    lastMonthPrice: 74000, // = Abu-abu (Harga Rp 74.000 stabil)
     discount: 0,
     image: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=500&q=80"
   },
   {
-    id: "prod-minyak-2l",
-    name: "Minyak Goreng 2L",
-    category: "Sembako",
-    defaultUnit: "liter",
-    price: 42000,
-    lastMonthPrice: 42000, // = Abu-abu
-    discount: 0,
-    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80"
-  },
-  {
     id: "prod-indomie-goreng-5",
     name: "Indomie Goreng 5 pcs",
-    category: "Mie & Instan",
+    category: "Bahan Pokok",
     defaultUnit: "pack",
     price: 16500,
     lastMonthPrice: 15500, // ⬆ Merah
@@ -140,7 +142,7 @@ const DEFAULT_COMMODITIES = [
   {
     id: "prod-indomie-kuah-5",
     name: "Indomie Kuah 5 pcs",
-    category: "Mie & Instan",
+    category: "Bahan Pokok",
     defaultUnit: "pack",
     price: 16000,
     lastMonthPrice: 15000, // ⬆ Merah
@@ -150,7 +152,7 @@ const DEFAULT_COMMODITIES = [
   {
     id: "prod-terigu-1kg",
     name: "Tepung Terigu 1kg",
-    category: "Dapur & Masak",
+    category: "Bahan Pokok",
     defaultUnit: "kg",
     price: 15500,
     lastMonthPrice: 15500, // = Abu-abu
@@ -160,7 +162,7 @@ const DEFAULT_COMMODITIES = [
   {
     id: "prod-gula-1kg",
     name: "Gula Pasir 1kg",
-    category: "Sembako",
+    category: "Bahan Pokok",
     defaultUnit: "kg",
     price: 19500,
     lastMonthPrice: 18000, // ⬆ Merah
@@ -168,39 +170,21 @@ const DEFAULT_COMMODITIES = [
     image: "https://images.unsplash.com/photo-1587735243615-c03f25aaff15?auto=format&fit=crop&w=500&q=80"
   },
   {
-    id: "prod-ultra-milk-1l",
-    name: "Susu Ultra Milk 1L",
-    category: "Minuman",
-    defaultUnit: "liter",
-    price: 22500,
-    lastMonthPrice: 22000, // ⬆ Merah
-    discount: 0,
-    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=80"
-  },
-  {
-    id: "prod-aqua-6",
-    name: "Aqua 6 Botol",
-    category: "Minuman",
-    defaultUnit: "botol",
-    price: 24000,
-    lastMonthPrice: 24000, // = Abu-abu
-    discount: 0,
-    image: "assets/aqua.jpg"
-  },
-  {
     id: "prod-daging-300g",
     name: "Daging Sapi 300g",
-    category: "Sembako",
+    category: "Bahan Pokok",
     defaultUnit: "pack",
     price: 55000,
     lastMonthPrice: 52000, // ⬆ Merah
     discount: 0,
     image: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
   },
+
+  // --- KEBERSIHAN & MANDI ---
   {
     id: "prod-sabun-cuci",
     name: "Sabun Cuci",
-    category: "Kebersihan",
+    category: "Kebersihan & Mandi",
     defaultUnit: "pack",
     price: 20000,
     lastMonthPrice: 21000, // ⬇︎ Hijau
@@ -210,12 +194,180 @@ const DEFAULT_COMMODITIES = [
   {
     id: "prod-sabun-mandi",
     name: "Sabun Mandi",
-    category: "Kebersihan",
+    category: "Kebersihan & Mandi",
     defaultUnit: "pcs",
     price: 29500,
     lastMonthPrice: 32000, // ⬇︎ Hijau
     discount: 0,
     image: "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-sampo-170ml",
+    name: "Sampo Rambut 170ml",
+    category: "Kebersihan & Mandi",
+    defaultUnit: "botol",
+    price: 24000,
+    lastMonthPrice: 24000, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-odol-190g",
+    name: "Pasta Gigi 190g",
+    category: "Kebersihan & Mandi",
+    defaultUnit: "pcs",
+    price: 16500,
+    lastMonthPrice: 18000, // ⬇︎ Hijau
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1559591937-e1032b4b248e?auto=format&fit=crop&w=500&q=80"
+  },
+
+  // --- SAYUR & BUAH ---
+  {
+    id: "prod-bawang-merah-250g",
+    name: "Bawang Merah 250g",
+    category: "Sayur & Buah",
+    defaultUnit: "pack",
+    price: 12000,
+    lastMonthPrice: 14000, // ⬇︎ Hijau
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-cabai-rawit-100g",
+    name: "Cabai Rawit Merah 100g",
+    category: "Sayur & Buah",
+    defaultUnit: "pack",
+    price: 8500,
+    lastMonthPrice: 7500, // ⬆ Merah
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-apel-fuji-500g",
+    name: "Apel Fuji 500g",
+    category: "Sayur & Buah",
+    defaultUnit: "pack",
+    price: 22000,
+    lastMonthPrice: 22000, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-pisang-sunpride",
+    name: "Pisang Sunpride 1 Sisir",
+    category: "Sayur & Buah",
+    defaultUnit: "ikat",
+    price: 18500,
+    lastMonthPrice: 18500, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=500&q=80"
+  },
+
+  // --- KEBUTUHAN LAINNYA ---
+  {
+    id: "prod-aqua-6",
+    name: "Aqua 6 Botol",
+    category: "Kebutuhan lainnya",
+    defaultUnit: "botol",
+    price: 24000,
+    lastMonthPrice: 24000, // = Abu-abu
+    discount: 0,
+    image: "assets/aqua.jpg"
+  },
+  {
+    id: "prod-ultra-milk-1l",
+    name: "Susu Ultra Milk 1L",
+    category: "Kebutuhan lainnya",
+    defaultUnit: "liter",
+    price: 22500,
+    lastMonthPrice: 22000, // ⬆ Merah
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-tisu-wajah-250",
+    name: "Tisu Wajah 250 sheets",
+    category: "Kebutuhan lainnya",
+    defaultUnit: "pack",
+    price: 14500,
+    lastMonthPrice: 15000, // ⬇︎ Hijau
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1584556812952-905ffd0c611a?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-baterai-aa-4",
+    name: "Baterai AA 4 pcs",
+    category: "Kebutuhan lainnya",
+    defaultUnit: "pack",
+    price: 16000,
+    lastMonthPrice: 16000, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1619725002198-6a689b72f41d?auto=format&fit=crop&w=500&q=80"
+  },
+
+  // --- SNACK ---
+  {
+    id: "prod-chitato-68g",
+    name: "Chitato Sapi Panggang 68g",
+    category: "Snack",
+    defaultUnit: "pack",
+    price: 11500,
+    lastMonthPrice: 11500, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-roma-kelapa-300g",
+    name: "Biskuit Roma Kelapa 300g",
+    category: "Snack",
+    defaultUnit: "pack",
+    price: 10000,
+    lastMonthPrice: 10000, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-silverqueen-58g",
+    name: "SilverQueen Cashew 58g",
+    category: "Snack",
+    defaultUnit: "pcs",
+    price: 16500,
+    lastMonthPrice: 18000, // ⬇︎ Hijau
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=500&q=80"
+  },
+
+  // --- ATK ---
+  {
+    id: "prod-buku-spiral-a5",
+    name: "Buku Tulis Spiral A5",
+    category: "ATK",
+    defaultUnit: "pcs",
+    price: 12500,
+    lastMonthPrice: 12500, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-pulpen-gel-3",
+    name: "Pulpen Gel Hitam 3 pcs",
+    category: "ATK",
+    defaultUnit: "pack",
+    price: 10000,
+    lastMonthPrice: 10000, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=500&q=80"
+  },
+  {
+    id: "prod-sticky-notes",
+    name: "Sticky Notes Warna",
+    category: "ATK",
+    defaultUnit: "pack",
+    price: 8500,
+    lastMonthPrice: 8500, // = Abu-abu
+    discount: 0,
+    image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=500&q=80"
   }
 ];
 
@@ -238,7 +390,7 @@ class SmartGroceryApp {
     this.STORAGE_SESSION = "groceryin_rantau_session";
     this.STORAGE_CART = "groceryin_rantau_cart";
     this.STORAGE_HISTORY = "groceryin_rantau_history";
-    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v4";
+    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v5";
 
     // State
     this.city = "Jakarta Barat (Puri Indah)";
@@ -253,6 +405,10 @@ class SmartGroceryApp {
 
     this.currentTab = "store";
     this.currentCategory = "ALL";
+
+    // PWA Install State
+    this.deferredInstallPrompt = null;
+    this.isAppInstalled = false;
 
     // State untuk Store Search Bar
     this.searchQuery = "";
@@ -278,14 +434,134 @@ class SmartGroceryApp {
     this.loadState();
   }
 
-  // ==================== PWA SERVICE WORKER ====================
+  // ==================== PWA SERVICE WORKER & INSTALLATION ENGINE ====================
   initPWA() {
+    this.isAppInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
           .then(reg => console.log('📱 GroceryIn PWA SW Registered:', reg.scope))
           .catch(err => console.warn('PWA SW error:', err));
       });
+    }
+
+    // Tangkap event beforeinstallprompt (Chrome Android, Edge, Samsung Internet, dll)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredInstallPrompt = e;
+      this.updateInstallButtonUI();
+      console.log('📲 PWA beforeinstallprompt captured and ready');
+    });
+
+    // Deteksi ketika aplikasi berhasil di-install
+    window.addEventListener('appinstalled', () => {
+      this.deferredInstallPrompt = null;
+      this.isAppInstalled = true;
+      this.updateInstallButtonUI();
+      this.showToast('🎉', 'Aplikasi GroceryIn berhasil dipasang di HP Anda!');
+    });
+  }
+
+  // ==================== PWA INSTALLATION ENGINE ====================
+  updateInstallButtonUI() {
+    if (!this.btnInstallApp) return;
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    if (isStandalone || this.isAppInstalled) {
+      this.btnInstallApp.classList.add("installed");
+      if (this.btnInstallAppText) this.btnInstallAppText.textContent = "✓ Aplikasi Terpasang di HP";
+      if (this.setupInstallStatusText) this.setupInstallStatusText.textContent = "GroceryIn sudah aktif terpasang di HP Anda sebagai Web App.";
+    } else if (this.deferredInstallPrompt) {
+      this.btnInstallApp.classList.remove("installed");
+      if (this.btnInstallAppText) this.btnInstallAppText.textContent = "📲 Pasang Langsung ke Layar HP";
+      if (this.setupInstallStatusText) this.setupInstallStatusText.textContent = "Ketuk untuk langsung menginstall ikon aplikasi ke layar utama HP Anda.";
+    } else {
+      this.btnInstallApp.classList.remove("installed");
+      if (this.btnInstallAppText) this.btnInstallAppText.textContent = "📲 Install Aplikasi ke HP";
+      if (this.setupInstallStatusText) this.setupInstallStatusText.textContent = "Pasang sebagai aplikasi di layar utama HP agar cepat dibuka tanpa browser.";
+    }
+  }
+
+  handleInstallApp() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    if (isStandalone || this.isAppInstalled) {
+      this.showToast('✅', 'GroceryIn sudah terpasang di layar HP Anda!');
+      return;
+    }
+
+    // 1. Jika browser mendukung prompt langsung (Android Chrome, Edge, dll)
+    if (this.deferredInstallPrompt) {
+      this.deferredInstallPrompt.prompt();
+      this.deferredInstallPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          this.showToast('📲', 'Sedang memasang GroceryIn ke HP Anda...');
+          this.isAppInstalled = true;
+          this.updateInstallButtonUI();
+        } else {
+          this.showToast('ℹ️', 'Pemasangan aplikasi dibatalkan.');
+        }
+        this.deferredInstallPrompt = null;
+      }).catch(err => {
+        console.warn('Error during install prompt:', err);
+        this.openInstallGuide();
+      });
+      return;
+    }
+
+    // 2. Buka panduan langkah demi langkah jika prompt browser otomatis belum siap / iOS Safari
+    this.openInstallGuide();
+  }
+
+  openInstallGuide() {
+    if (!this.installGuideModalOverlay) return;
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    if (isIOS) {
+      this.installGuideTitle.textContent = "Cara Pasang di iPhone / iPad (iOS)";
+      this.installGuideDesc.textContent = "Gunakan Safari untuk memasang GroceryIn ke layar utama:";
+      this.installStepsList.innerHTML = `
+        <div class="guide-step-item">
+          <div class="step-num">1</div>
+          <div class="step-desc">Tekan tombol <strong>Bagikan (Share)</strong> ikon <span style="font-size:1.15rem; vertical-align:middle;">⎋</span> di bilah navigasi bawah Safari.</div>
+        </div>
+        <div class="guide-step-item">
+          <div class="step-num">2</div>
+          <div class="step-desc">Gulir ke bawah dan ketuk opsi <strong>"Tambahkan ke Layar Utama" (Add to Home Screen ⊞)</strong>.</div>
+        </div>
+        <div class="guide-step-item">
+          <div class="step-num">3</div>
+          <div class="step-desc">Ketuk <strong>Tambah (Add)</strong> di pojok kanan atas. Aplikasi GroceryIn siap dibuka dari layar utama HP!</div>
+        </div>
+      `;
+    } else {
+      this.installGuideTitle.textContent = "Cara Pasang di HP Android / Komputer";
+      this.installGuideDesc.textContent = "Pasang GroceryIn langsung ke layar utama perangkat Anda:";
+      this.installStepsList.innerHTML = `
+        <div class="guide-step-item">
+          <div class="step-num">1</div>
+          <div class="step-desc">Ketuk menu <strong>titik tiga (⋮)</strong> di pojok kanan atas browser Google Chrome.</div>
+        </div>
+        <div class="guide-step-item">
+          <div class="step-num">2</div>
+          <div class="step-desc">Pilih menu <strong>"Install aplikasi"</strong> atau <strong>"Tambahkan ke Layar Utama"</strong>.</div>
+        </div>
+        <div class="guide-step-item">
+          <div class="step-num">3</div>
+          <div class="step-desc">Ketuk <strong>Install</strong>. Ikon GroceryIn akan langsung muncul di menu aplikasi HP Anda!</div>
+        </div>
+      `;
+    }
+
+    this.installGuideModalOverlay.classList.remove("hidden");
+  }
+
+  closeInstallGuide() {
+    if (this.installGuideModalOverlay) {
+      this.installGuideModalOverlay.classList.add("hidden");
     }
   }
 
@@ -310,6 +586,7 @@ class SmartGroceryApp {
                   ...freshDefault,
                   ...savedItem,
                   name: freshDefault.name,
+                  category: freshDefault.category,
                   price: freshDefault.price,
                   lastMonthPrice: freshDefault.lastMonthPrice !== undefined ? freshDefault.lastMonthPrice : freshDefault.price,
                   // Pastikan gambar default terbaru diterapkan dan link lama/rusak ditimpa
@@ -394,13 +671,23 @@ class SmartGroceryApp {
     this.bottomNavHistory = document.getElementById("bottomNavHistory");
     this.bottomNavListBadge = document.getElementById("bottomNavListBadge");
 
-    // Setup Modal
+    // Setup Modal & PWA Installation
     this.setupModalOverlay = document.getElementById("setupModalOverlay");
     this.selectCity = document.getElementById("selectCity");
     this.selectSupermarket = document.getElementById("selectSupermarket");
     this.inputInitialBudget = document.getElementById("inputInitialBudget");
     this.btnConfirmSetup = document.getElementById("btnConfirmSetup");
     this.btnConfirmText = document.getElementById("btnConfirmText");
+    this.btnInstallApp = document.getElementById("btnInstallApp");
+    this.btnInstallAppText = document.getElementById("btnInstallAppText");
+    this.setupInstallStatusText = document.getElementById("setupInstallStatusText");
+
+    // Modal Panduan Install
+    this.installGuideModalOverlay = document.getElementById("installGuideModalOverlay");
+    this.installGuideTitle = document.getElementById("installGuideTitle");
+    this.installGuideDesc = document.getElementById("installGuideDesc");
+    this.installStepsList = document.getElementById("installStepsList");
+    this.btnCloseInstallGuide = document.getElementById("btnCloseInstallGuide");
 
     // Realtime Product Edit Modal Elements (Katalog Editor)
     this.productEditModalBackdrop = document.getElementById("productEditModalBackdrop");
@@ -511,6 +798,14 @@ class SmartGroceryApp {
 
     // 3. Confirm Setup Button
     this.btnConfirmSetup.addEventListener("click", () => this.handleConfirmSetup());
+
+    // 3b. PWA Install Action in Setup Modal
+    if (this.btnInstallApp) {
+      this.btnInstallApp.addEventListener("click", () => this.handleInstallApp());
+    }
+    if (this.btnCloseInstallGuide) {
+      this.btnCloseInstallGuide.addEventListener("click", () => this.closeInstallGuide());
+    }
 
     // 4. Logout / Ganti Toko & Budget
     this.btnLogout.addEventListener("click", () => this.handleLogout());
@@ -970,6 +1265,7 @@ class SmartGroceryApp {
   openSetupModal() {
     this.setupModalOverlay.classList.remove("hidden");
     this.populateSupermarketsForCity(this.selectCity.value);
+    this.updateInstallButtonUI();
   }
 
   populateSupermarketsForCity(city) {
