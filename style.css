@@ -139,8 +139,9 @@ html::-webkit-scrollbar-thumb {
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(56, 189, 248, 0.2);
   border-left: 1px solid rgba(56, 189, 248, 0.25);
   border-right: 1px solid rgba(56, 189, 248, 0.25);
-  overflow: visible !important;
+  overflow-x: hidden;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Responsif di Layar Smartphone HP */
@@ -162,29 +163,34 @@ html::-webkit-scrollbar-thumb {
 .app-top-bar {
   position: sticky;
   top: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: rgba(15, 23, 42, 0.96);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  padding: 12px 14px 10px;
+  padding: 10px 10px 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
   z-index: 60;
   flex-shrink: 0;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* App Brand Logo Badge (Gantinya tab menu kotak di atas) */
 .app-brand-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .app-brand-icon-box {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-sm);
   background: rgba(56, 189, 248, 0.14);
   border: 1px solid rgba(56, 189, 248, 0.4);
@@ -198,7 +204,7 @@ html::-webkit-scrollbar-thumb {
 
 .app-brand-name {
   font-family: var(--font-heading);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: -0.3px;
@@ -291,8 +297,9 @@ html::-webkit-scrollbar-thumb {
 .header-right-group {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  gap: 5px;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 /* Install Button in Header */
@@ -300,15 +307,16 @@ html::-webkit-scrollbar-thumb {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 8px;
+  padding: 4px 7px;
   border-radius: var(--radius-full);
   background: rgba(220, 38, 38, 0.18);
   border: 1px solid rgba(220, 38, 38, 0.45);
   color: #F87171;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .btn-header-install:hover,
@@ -323,31 +331,37 @@ html::-webkit-scrollbar-thumb {
 .live-budget-pill {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   background: #1A1A1E;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-full);
-  padding: 4px 10px;
+  padding: 3px 8px;
   transition: all 0.25s ease;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .budget-label {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .budget-amount {
   font-family: var(--font-heading);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: #FFFFFF;
   transition: color 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-logout {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-strong);
   background: #1A1A1E;
@@ -357,6 +371,8 @@ html::-webkit-scrollbar-thumb {
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
+  padding: 0;
 }
 
 .btn-logout:hover,
@@ -3926,21 +3942,23 @@ html::-webkit-scrollbar-thumb {
   }
 
   .app-top-bar {
-    padding: 10px 12px;
-    gap: 6px;
+    padding: 8px 10px;
+    gap: 4px;
+    box-sizing: border-box;
+    max-width: 100%;
   }
 
   .app-brand-name {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .live-budget-pill {
-    padding: 4px 8px;
-    gap: 4px;
+    padding: 3px 6px;
+    gap: 3px;
   }
 
   .budget-amount {
-    font-size: 0.82rem;
+    font-size: 0.74rem;
   }
 
   .store-sub-bar {
@@ -4176,17 +4194,19 @@ html::-webkit-scrollbar-thumb {
 .btn-sync-session {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.4);
   color: #34D399;
-  padding: 4px 8px;
+  padding: 3px 7px;
   border-radius: var(--radius-full);
   font-family: var(--font-heading);
   font-size: 0.68rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .btn-sync-session:hover {

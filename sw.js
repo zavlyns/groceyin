@@ -3,7 +3,7 @@
  * Provides offline capabilities & caching for aesthetic mobile experience.
  */
 
-const CACHE_NAME = 'groceryin-aesthetic-v11';
+const CACHE_NAME = 'groceryin-aesthetic-v12';
 
 const STATIC_ASSETS = [
   './',

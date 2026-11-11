@@ -2903,7 +2903,7 @@ class SmartGroceryApp {
 
     // Update UI status text
     if (this.syncStatusText) {
-      this.syncStatusText.textContent = `Sesi: ${this.sessionRoomId}`;
+      this.syncStatusText.textContent = "Sesi";
     }
 
     // 1. Local Server Polling (Bila dijalankan via node server.js di Lab / IP Lokal / localhost)
@@ -3153,7 +3153,7 @@ class SmartGroceryApp {
     this.sessionRoomId = newRoom;
     localStorage.setItem("groceryin_session_room", this.sessionRoomId);
     if (this.syncStatusText) {
-      this.syncStatusText.textContent = `Sesi: ${this.sessionRoomId}`;
+      this.syncStatusText.textContent = "Sesi";
     }
 
     const newUrl = this.getSessionShareUrl();
