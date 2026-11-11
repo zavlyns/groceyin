@@ -95,7 +95,7 @@ const DEFAULT_COMMODITIES = [
     category: "Bahan Pokok",
     defaultUnit: "liter",
     price: 43000,
-    lastMonthPrice: 42000, // ⬆ Merah (Bulan lalu 42rb -> Sekarang 43rb, naik +Rp 1.000)
+    lastMonthPrice: 43000, // = Abu-abu (Harga stabil Rp 43.000 ga kurang ga tambah)
     discount: 0,
     image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80"
   },
@@ -390,7 +390,7 @@ class SmartGroceryApp {
     this.STORAGE_SESSION = "groceryin_rantau_session";
     this.STORAGE_CART = "groceryin_rantau_cart";
     this.STORAGE_HISTORY = "groceryin_rantau_history";
-    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v5";
+    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v6";
 
     // State
     this.city = "Jakarta Barat (Puri Indah)";
@@ -595,6 +595,12 @@ class SmartGroceryApp {
                     : (freshDefault.image || savedItem.image)
                 };
               } else {
+                // Custom product created by user:
+                // Jika fotonya masih default rak sayuran yang lama atau berisi kata kunci tumbler/botol/kopi/dll,
+                // otomatis sesuaikan fotonya dengan apa yang ditulis pengguna!
+                if (!savedItem.image || savedItem.image.includes("photo-1542838132-92c53300491e") || (savedItem.name && savedItem.name.toLowerCase().includes("tumbler") && !savedItem.image.includes("1602143407151-7111542de6e8"))) {
+                  savedItem.image = this.getSmartProductImage(savedItem.name, savedItem.category);
+                }
                 this.catalog[storeName].push(savedItem);
               }
             });
@@ -621,6 +627,17 @@ class SmartGroceryApp {
     this.liveBudgetPill = document.getElementById("liveBudgetPill");
     this.btnLogout = document.getElementById("btnLogout");
     this.btnOpenAddProduct = document.getElementById("btnOpenAddProduct");
+
+    // Top Over-budget Warning Banner (> 100%)
+    this.topOverbudgetBanner = document.getElementById("topOverbudgetBanner");
+
+    // Bar Status Budget Kita (Hijau / Kuning Waspada / Merah)
+    this.budgetStatusBar = document.getElementById("budgetStatusBar");
+    this.budgetStatusDot = document.getElementById("budgetStatusDot");
+    this.budgetStatusHeadline = document.getElementById("budgetStatusHeadline");
+    this.budgetStatusSub = document.getElementById("budgetStatusSub");
+    this.budgetStatusRatio = document.getElementById("budgetStatusRatio");
+    this.budgetProgressFill = document.getElementById("budgetProgressFill");
 
     // Top Tabs (Store, List, History di Kiri)
     this.topTabStore = document.getElementById("topTabStore");
@@ -700,6 +717,8 @@ class SmartGroceryApp {
     this.editProductCategory = document.getElementById("editProductCategory");
     this.previewHarga2Text = document.getElementById("previewHarga2Text");
     this.previewFlucBadge = document.getElementById("previewFlucBadge");
+    this.previewProductImg = document.getElementById("previewProductImg");
+    this.previewImageDesc = document.getElementById("previewImageDesc");
     this.btnSaveProductChanges = document.getElementById("btnSaveProductChanges");
     this.btnCancelProductChanges = document.getElementById("btnCancelProductChanges");
     this.btnCloseProductModal = document.getElementById("btnCloseProductModal");
@@ -883,9 +902,11 @@ class SmartGroceryApp {
     this.btnCloseProductModal.addEventListener("click", () => this.closeProductModal());
     this.btnCancelProductChanges.addEventListener("click", () => this.closeProductModal());
 
+    this.editProductName.addEventListener("input", () => this.updateModalLivePreview());
     this.editProductPrice.addEventListener("input", () => this.updateModalLivePreview());
     this.editProductLastPrice.addEventListener("input", () => this.updateModalLivePreview());
     this.editProductDiscount.addEventListener("input", () => this.updateModalLivePreview());
+    this.editProductCategory.addEventListener("change", () => this.updateModalLivePreview());
 
     document.getElementById("productEditForm").addEventListener("submit", (e) => {
       e.preventDefault();
@@ -1414,51 +1435,108 @@ class SmartGroceryApp {
 
   /**
    * Status Warna Budget:
-   * - HIJAU: Masih aman (sisa > 25% batas krisis)
-   * - KUNING: Krisis / Warning (sisa <= 25% dari budget acuan)
-   * - MERAH: Habis atau lebih (sisa <= 0 atau over-budget)
+   * - HIJAU: Masih aman (pengeluaran < 90%)
+   * - KUNING: Peringatan Waspada (pengeluaran >= 90% dan <= 100%)
+   * - MERAH: Total belanja melebihi batas saldo dompet (pengeluaran > 100%)
    */
   getDynamicBudgetColor(totalSpent, budget) {
-    if (budget <= 0) return "#F43F5E"; // Merah Ruby: Habis / 0
-    const remaining = budget - totalSpent;
-    if (remaining <= 0) {
-      return "#F43F5E"; // Merah: Habis atau lebih
+    if (budget <= 0) return "#EF4444";
+    const ratio = totalSpent / budget;
+    if (ratio > 1.0) {
+      return "#EF4444"; // Merah tegas (> 100% saldo dompet)
+    } else if (ratio >= 0.90) {
+      return "#F59E0B"; // Kuning: Peringatan Waspada (>= 90%)
     }
-    const criticalThreshold = Math.max(30000, (this.originalBudget || budget) * 0.25);
-    if (remaining <= criticalThreshold) {
-      return "#F59E0B"; // Kuning: Krisis / hampir habis
-    }
-    return "#10B981"; // Hijau: Masih aman
+    return "#10B981"; // Hijau: Masih aman (< 90%)
   }
 
   updateBudgetAndCartUI() {
     const totalSpent = this.getTotalCartPrice();
     const remaining = this.getRemainingBudget();
     const totalItems = this.cart.reduce((cnt, it) => cnt + it.quantity, 0);
+    const budget = this.initialBudget || 0;
+    const ratio = budget > 0 ? (totalSpent / budget) : (totalSpent > 0 ? 2 : 0);
+    const percentUsed = budget > 0 ? Math.round(ratio * 100) : 0;
 
     // 1. Live Remaining Budget in Top Header
     this.headerRemainingBudget.textContent = this.formatRupiah(remaining);
 
-    const criticalThreshold = Math.max(30000, (this.originalBudget || this.initialBudget) * 0.25);
+    // 2. Bar Status Budget & Banner Atas Over-budget:
+    // - >= 90% dari batas saldo dompet: Bar status wajib berubah warna menjadi KUNING (Peringatan Waspada).
+    // - > 100% saldo dompet: Banner atas wajib menyala MERAH TEGAS dengan notifikasi peringatan:
+    //   "Total belanja melebihi batas saldo dompet! Kurangi kuantitas atau batalkan barang sekunder."
+    if (this.budgetStatusRatio) {
+      this.budgetStatusRatio.textContent = `${this.formatRupiah(totalSpent)} / ${this.formatRupiah(budget)}`;
+    }
 
-    if (remaining <= 0) {
-      // MERAH: Habis atau lebih (over-budget)
-      this.liveBudgetPill.style.background = "rgba(244, 63, 94, 0.22)";
-      this.liveBudgetPill.style.borderColor = "rgba(244, 63, 94, 0.65)";
-      this.headerRemainingBudget.style.color = "#FDA4AF";
-    } else if (remaining <= criticalThreshold) {
-      // KUNING: Krisis / warning (budget hampir habis)
-      this.liveBudgetPill.style.background = "rgba(245, 158, 11, 0.20)";
-      this.liveBudgetPill.style.borderColor = "rgba(245, 158, 11, 0.65)";
+    if (ratio > 1.0) {
+      // > 100% Saldo Dompet: MERAH TEGAS
+      if (this.topOverbudgetBanner) {
+        this.topOverbudgetBanner.classList.remove("hidden");
+      }
+      if (this.budgetStatusBar) {
+        this.budgetStatusBar.className = "budget-status-bar status-danger";
+      }
+      if (this.budgetStatusHeadline) {
+        this.budgetStatusHeadline.textContent = `🚨 Over-budget (${percentUsed}%)`;
+      }
+      if (this.budgetStatusSub) {
+        this.budgetStatusSub.textContent = `Kelewatan +${this.formatRupiah(totalSpent - budget)}`;
+      }
+      if (this.budgetProgressFill) {
+        this.budgetProgressFill.style.width = "100%";
+      }
+
+      this.liveBudgetPill.style.background = "rgba(239, 68, 68, 0.25)";
+      this.liveBudgetPill.style.borderColor = "#EF4444";
+      this.headerRemainingBudget.style.color = "#F87171";
+
+    } else if (ratio >= 0.90) {
+      // >= 90% Saldo Dompet: KUNING (Peringatan Waspada)
+      if (this.topOverbudgetBanner) {
+        this.topOverbudgetBanner.classList.add("hidden");
+      }
+      if (this.budgetStatusBar) {
+        this.budgetStatusBar.className = "budget-status-bar status-warning";
+      }
+      if (this.budgetStatusHeadline) {
+        this.budgetStatusHeadline.textContent = `⚠️ Peringatan Waspada (${percentUsed}%)`;
+      }
+      if (this.budgetStatusSub) {
+        this.budgetStatusSub.textContent = `Sisa ${this.formatRupiah(remaining)}`;
+      }
+      if (this.budgetProgressFill) {
+        this.budgetProgressFill.style.width = `${Math.min(100, percentUsed)}%`;
+      }
+
+      this.liveBudgetPill.style.background = "rgba(245, 158, 11, 0.22)";
+      this.liveBudgetPill.style.borderColor = "#F59E0B";
       this.headerRemainingBudget.style.color = "#FBBF24";
+
     } else {
-      // HIJAU: Masih aman
+      // Normal (< 90%): HIJAU (Aman)
+      if (this.topOverbudgetBanner) {
+        this.topOverbudgetBanner.classList.add("hidden");
+      }
+      if (this.budgetStatusBar) {
+        this.budgetStatusBar.className = "budget-status-bar status-safe";
+      }
+      if (this.budgetStatusHeadline) {
+        this.budgetStatusHeadline.textContent = `✅ Aman (${percentUsed}%)`;
+      }
+      if (this.budgetStatusSub) {
+        this.budgetStatusSub.textContent = `Sisa ${this.formatRupiah(remaining)}`;
+      }
+      if (this.budgetProgressFill) {
+        this.budgetProgressFill.style.width = `${Math.min(100, percentUsed)}%`;
+      }
+
       this.liveBudgetPill.style.background = "rgba(16, 185, 129, 0.16)";
       this.liveBudgetPill.style.borderColor = "rgba(16, 185, 129, 0.5)";
       this.headerRemainingBudget.style.color = "#34D399";
     }
 
-    // 2. Tab Badges
+    // 3. Tab Badges
     if (this.listBadgeCount) this.listBadgeCount.textContent = totalItems;
     if (totalItems > 0) {
       this.bottomNavListBadge.classList.remove("hidden");
@@ -1467,7 +1545,7 @@ class SmartGroceryApp {
       this.bottomNavListBadge.classList.add("hidden");
     }
 
-    // 3. List Bottom Summary Bar Styling & Payment Label
+    // 4. List Bottom Summary Bar Styling & Payment Label
     this.listTotalPriceText.textContent = this.formatRupiah(totalSpent);
     const dynamicColor = this.getDynamicBudgetColor(totalSpent, this.initialBudget);
     this.listTotalPriceText.style.color = dynamicColor;
@@ -1482,18 +1560,15 @@ class SmartGroceryApp {
 
     if (this.initialBudget <= 0) {
       this.listBudgetStatusText.textContent = `🚨 Budget Habis (Rp 0 tersisa)!`;
-      this.listBudgetStatusText.style.color = "#F43F5E";
-    } else if (totalSpent >= this.initialBudget) {
-      const overAmount = totalSpent - this.initialBudget;
-      this.listBudgetStatusText.textContent = overAmount > 0
-        ? `🚨 Budget Habis & Kelewatan (+${this.formatRupiah(overAmount)})!`
-        : `🚨 Budget Habis (100% terpakai)!`;
-      this.listBudgetStatusText.style.color = "#F43F5E";
-    } else if (remaining <= criticalThreshold) {
-      this.listBudgetStatusText.textContent = `⚠️ Krisis: Budget hampir habis! (Sisa ${this.formatRupiah(remaining)})`;
+      this.listBudgetStatusText.style.color = "#EF4444";
+    } else if (ratio > 1.0) {
+      this.listBudgetStatusText.textContent = `🚨 Total belanja melebihi batas saldo dompet! Kurangi kuantitas atau batalkan barang sekunder.`;
+      this.listBudgetStatusText.style.color = "#EF4444";
+    } else if (ratio >= 0.90) {
+      this.listBudgetStatusText.textContent = `⚠️ Peringatan Waspada: Budget terpakai ${percentUsed}%! (Sisa ${this.formatRupiah(remaining)})`;
       this.listBudgetStatusText.style.color = "#F59E0B";
     } else {
-      this.listBudgetStatusText.textContent = `✅ Masih Aman (Sisa ${this.formatRupiah(remaining)})`;
+      this.listBudgetStatusText.textContent = `✅ Aman dalam budget (Sisa ${this.formatRupiah(remaining)})`;
       this.listBudgetStatusText.style.color = "#10B981";
     }
 
@@ -1985,6 +2060,199 @@ class SmartGroceryApp {
     this.renderStoreProducts();
   }
 
+  // ==================== SMART PRODUCT IMAGE ENGINE ====================
+  // Menyesuaikan foto barang secara otomatis berdasarkan apa yang diketik pengguna
+  getSmartProductImage(name = "", category = "") {
+    const q = (name || "").toLowerCase().trim();
+
+    // 1. Keyword-based matching
+    if (q.includes("tumbler") || q.includes("botol minum") || q.includes("termos") || q.includes("thermos") || q.includes("tempat minum")) {
+      return "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("aqua") || q.includes("air mineral") || q.includes("air galon") || q.includes("le minerale") || q.includes("cleo")) {
+      return "assets/aqua.jpg";
+    }
+    if (q.includes("minyak") || q.includes("bimoli") || q.includes("filma") || q.includes("sunco") || q.includes("sania") || q.includes("tropical")) {
+      return "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("beras") || q.includes("rice")) {
+      return "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("telur") || q.includes("egg")) {
+      return "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("susu") || q.includes("ultra milk") || q.includes("bear brand") || q.includes("dancow") || q.includes("indomilk") || q.includes("milk")) {
+      return "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("kopi") || q.includes("nescafe") || q.includes("kapal api") || q.includes("torabika") || q.includes("luwak") || q.includes("coffee") || q.includes("espresso")) {
+      return "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("teh") || q.includes("sariwangi") || q.includes("tong tji") || q.includes("tea") || q.includes("poci") || q.includes("matcha")) {
+      return "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("mie") || q.includes("indomie") || q.includes("sedap") || q.includes("sedaap") || q.includes("ramen") || q.includes("spaghetti") || q.includes("pasta") || q.includes("bihun") || q.includes("kwetiau") || q.includes("noodle")) {
+      return "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("gula") || q.includes("sugar")) {
+      return "https://images.unsplash.com/photo-1587735243615-c03f25aaff15?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("garam") || q.includes("salt")) {
+      return "https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("terigu") || q.includes("tepung") || q.includes("flour") || q.includes("tapioka") || q.includes("maizena")) {
+      return "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("roti") || q.includes("bread") || q.includes("sari roti") || q.includes("toast") || q.includes("bakery")) {
+      return "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("daging") || q.includes("sapi") || q.includes("beef") || q.includes("meat") || q.includes("steak") || q.includes("rendang")) {
+      return "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("ayam") || q.includes("chicken") || q.includes("fillet") || q.includes("sayap") || q.includes("paha")) {
+      return "https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("ikan") || q.includes("salmon") || q.includes("tuna") || q.includes("fish") || q.includes("udang") || q.includes("cumi") || q.includes("seafood")) {
+      return "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("sabun mandi") || q.includes("lifebuoy") || q.includes("dettol") || q.includes("lux") || q.includes("biore") || q.includes("body wash") || q.includes("shower gel")) {
+      return "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("sabun") || q.includes("deterjen") || q.includes("rinso") || q.includes("daia") || q.includes("soklin") || q.includes("sunlight") || q.includes("mama lemon") || q.includes("cuci piring")) {
+      return "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("sampo") || q.includes("shampoo") || q.includes("pantene") || q.includes("clear") || q.includes("sunsilk") || q.includes("head & shoulders")) {
+      return "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("odol") || q.includes("pasta gigi") || q.includes("sikat gigi") || q.includes("toothpaste") || q.includes("pepsodent") || q.includes("colgate")) {
+      return "https://images.unsplash.com/photo-1559591937-e1032b4b248e?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("tisu") || q.includes("tissue") || q.includes("paseo") || q.includes("nice") || q.includes("wipes")) {
+      return "https://images.unsplash.com/photo-1584556812952-905ffd0c611a?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("apel") || q.includes("apple")) {
+      return "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("pisang") || q.includes("banana")) {
+      return "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("jeruk") || q.includes("orange") || q.includes("lemon") || q.includes("mandarin")) {
+      return "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("mangga") || q.includes("mango")) {
+      return "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("semangka") || q.includes("watermelon") || q.includes("melon")) {
+      return "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("alpukat") || q.includes("avocado")) {
+      return "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("anggur") || q.includes("grape")) {
+      return "https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("bawang") || q.includes("onion") || q.includes("shallot") || q.includes("garlic")) {
+      return "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("cabai") || q.includes("cabe") || q.includes("chili") || q.includes("rawit") || q.includes("paprika")) {
+      return "https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("tomat") || q.includes("tomato")) {
+      return "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("wortel") || q.includes("carrot")) {
+      return "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("kentang") || q.includes("potato")) {
+      return "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("sayur") || q.includes("bayam") || q.includes("kangkung") || q.includes("sawi") || q.includes("selada") || q.includes("brokoli") || q.includes("vegetable")) {
+      return "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("chitato") || q.includes("keripik") || q.includes("chips") || q.includes("snack") || q.includes("lays") || q.includes("doritos") || q.includes("taro") || q.includes("qtela") || q.includes("popcorn")) {
+      return "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("biskuit") || q.includes("cookie") || q.includes("roma") || q.includes("oreo") || q.includes("wafer") || q.includes("tango")) {
+      return "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("cokelat") || q.includes("chocolate") || q.includes("silverqueen") || q.includes("kitkat") || q.includes("cadbury")) {
+      return "https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("permen") || q.includes("candy") || q.includes("yupi") || q.includes("lollipop")) {
+      return "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("buku") || q.includes("notebook") || q.includes("buku tulis") || q.includes("binder") || q.includes("journal")) {
+      return "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("pulpen") || q.includes("pen") || q.includes("pensil") || q.includes("pencil") || q.includes("spidol") || q.includes("bolpoin") || q.includes("marker")) {
+      return "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("atk") || q.includes("sticky notes") || q.includes("post it") || q.includes("penghapus") || q.includes("penggaris") || q.includes("stapler") || q.includes("stationery") || q.includes("gunting") || q.includes("lakban") || q.includes("solasi")) {
+      return "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("baterai") || q.includes("battery") || q.includes("alkaline") || q.includes("energizer")) {
+      return "https://images.unsplash.com/photo-1619725002198-6a689b72f41d?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("piring") || q.includes("gelas") || q.includes("cangkir") || q.includes("mug") || q.includes("mangkok") || q.includes("cup")) {
+      return "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("sendok") || q.includes("garpu") || q.includes("pisau") || q.includes("cutlery")) {
+      return "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("wajan") || q.includes("panci") || q.includes("teflon") || q.includes("cookware")) {
+      return "https://images.unsplash.com/photo-1584990347449-399c5625b169?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("payung") || q.includes("umbrella") || q.includes("jas hujan")) {
+      return "https://images.unsplash.com/photo-1517400508447-f8dd518b86db?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("tas") || q.includes("bag") || q.includes("backpack") || q.includes("tote")) {
+      return "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("sepatu") || q.includes("sandal") || q.includes("shoes") || q.includes("kaus kaki")) {
+      return "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("baju") || q.includes("kaos") || q.includes("tshirt") || q.includes("shirt") || q.includes("celana") || q.includes("handuk")) {
+      return "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("skincare") || q.includes("serum") || q.includes("sunscreen") || q.includes("lotion") || q.includes("pelembab") || q.includes("lipstik") || q.includes("bedak")) {
+      return "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("parfum") || q.includes("perfume") || q.includes("cologne") || q.includes("deodorant")) {
+      return "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("obat") || q.includes("vitamin") || q.includes("panadol") || q.includes("paracetamol") || q.includes("bodrex") || q.includes("tolak angin")) {
+      return "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("saus") || q.includes("sambal") || q.includes("kecap") || q.includes("sauce") || q.includes("bumbu") || q.includes("kaldu")) {
+      return "https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("mentega") || q.includes("butter") || q.includes("keju") || q.includes("cheese")) {
+      return "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("sosis") || q.includes("nugget") || q.includes("frozen")) {
+      return "https://images.unsplash.com/photo-1585325701165-351af916e581?auto=format&fit=crop&w=500&q=80";
+    }
+    if (q.includes("es krim") || q.includes("ice cream")) {
+      return "https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=500&q=80";
+    }
+
+    // 2. Category fallback matching
+    switch (category) {
+      case "Bahan Pokok":
+        return "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80";
+      case "Kebersihan & Mandi":
+        return "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?auto=format&fit=crop&w=500&q=80";
+      case "Sayur & Buah":
+        return "https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=500&q=80";
+      case "Snack":
+        return "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=500&q=80";
+      case "ATK":
+        return "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=500&q=80";
+      case "Kebutuhan lainnya":
+      default:
+        return "https://images.unsplash.com/photo-1584556812952-905ffd0c611a?auto=format&fit=crop&w=500&q=80";
+    }
+  }
+
   // ==================== REALTIME PRODUCT EDIT MODAL (KATALOG) ====================
   openEditProductModal(productId) {
     const products = this.getCurrentStoreProducts();
@@ -1998,7 +2266,7 @@ class SmartGroceryApp {
     this.editProductPrice.value = product.price;
     this.editProductLastPrice.value = product.lastMonthPrice !== undefined ? product.lastMonthPrice : product.price;
     this.editProductDiscount.value = product.discountFormula || Math.round((product.discount || 0) * 100);
-    this.editProductCategory.value = product.category || "Sembako";
+    this.editProductCategory.value = product.category || "Bahan Pokok";
 
     this.updateModalLivePreview();
     this.productEditModalBackdrop.classList.remove("hidden");
@@ -2012,7 +2280,7 @@ class SmartGroceryApp {
     this.editProductPrice.value = "";
     this.editProductLastPrice.value = "";
     this.editProductDiscount.value = "0";
-    this.editProductCategory.value = "Sembako";
+    this.editProductCategory.value = "Bahan Pokok";
 
     this.updateModalLivePreview();
     this.productEditModalBackdrop.classList.remove("hidden");
@@ -2033,11 +2301,22 @@ class SmartGroceryApp {
   }
 
   updateModalLivePreview() {
+    const nameVal = (this.editProductName.value || "").trim();
+    const catVal = this.editProductCategory.value || "Bahan Pokok";
     const price = parseFloat(this.editProductPrice.value) || 0;
     const lastPrice = parseFloat(this.editProductLastPrice.value) || price;
     const discountStr = (this.editProductDiscount.value || "0").trim();
 
-    // Parse discount text (bisa bertingkat misal: 50+20 atau 10%)
+    // 1. Live Smart Image Preview sesuai apa yang diketik pengguna
+    const smartImg = this.getSmartProductImage(nameVal, catVal);
+    if (this.previewProductImg) {
+      this.previewProductImg.src = smartImg;
+    }
+    if (this.previewImageDesc) {
+      this.previewImageDesc.textContent = nameVal ? `Otomatis sesuai "${nameVal}"` : `Sesuai kategori ${catVal}`;
+    }
+
+    // 2. Parse discount text (bisa bertingkat misal: 50+20 atau 10%)
     const layers = this.parseFormulaLayers(discountStr);
     const calcResult = this.calculateCompoundDiscount(price, layers);
     const harga2 = calcResult.finalPrice;
@@ -2081,10 +2360,15 @@ class SmartGroceryApp {
     const discountFormula = calcResult.formula !== "0% (Normal)" ? calcResult.formula : "";
 
     const storeProducts = this.getCurrentStoreProducts();
+    const smartImg = this.getSmartProductImage(name, category);
 
     if (id) {
       const idx = storeProducts.findIndex(p => p.id === id);
       if (idx !== -1) {
+        let updatedImg = storeProducts[idx].image;
+        if (!updatedImg || updatedImg.includes("photo-1542838132-92c53300491e") || storeProducts[idx].name !== name) {
+          updatedImg = smartImg;
+        }
         storeProducts[idx] = {
           ...storeProducts[idx],
           name: name,
@@ -2092,7 +2376,8 @@ class SmartGroceryApp {
           lastMonthPrice: lastPrice,
           discount: discountDec,
           discountFormula: discountFormula,
-          category: category
+          category: category,
+          image: updatedImg
         };
         this.showToast("💾", `Data "${name}" berhasil diperbarui.`);
       }
@@ -2107,10 +2392,10 @@ class SmartGroceryApp {
         lastMonthPrice: lastPrice,
         discount: discountDec,
         discountFormula: discountFormula,
-        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80",
+        image: smartImg,
         isNew: true
       });
-      this.showToast("🎉", `"${name}" berhasil dibuat & otomatis muncul di beranda toko!`);
+      this.showToast("🎉", `"${name}" berhasil dibuat dengan foto yang sesuai & muncul di beranda toko!`);
     }
 
     this.saveCatalogDatabase();

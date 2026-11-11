@@ -1904,6 +1904,209 @@ html::-webkit-scrollbar-thumb {
   line-height: 1.4;
 }
 
+/* ==================== BANNER ATAS OVER-BUDGET (> 100%) ==================== */
+.top-overbudget-banner {
+  position: sticky;
+  top: 54px;
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+  border-bottom: 2px solid #F87171;
+  color: #FFFFFF;
+  padding: 9px 14px;
+  animation: pulseOverbudget 1.5s infinite alternate ease-in-out;
+  box-shadow: 0 4px 18px rgba(220, 38, 38, 0.55);
+  z-index: 58;
+  flex-shrink: 0;
+}
+
+@keyframes pulseOverbudget {
+  0% {
+    background-color: #DC2626;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.4);
+  }
+  100% {
+    background-color: #B91C1C;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.85);
+  }
+}
+
+.overbudget-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.overbudget-banner-icon {
+  flex-shrink: 0;
+  color: #FEF08A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overbudget-banner-text {
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+
+/* ==================== BAR STATUS BUDGET KITA ==================== */
+.budget-status-bar {
+  position: sticky;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 7px 14px 8px;
+  background: #0B1324;
+  border-bottom: 1px solid #1E293B;
+  z-index: 54;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.budget-status-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.budget-status-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budget-status-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: #10B981;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+  transition: all 0.2s ease;
+}
+
+.budget-status-headline {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #10B981;
+  font-family: var(--font-heading);
+  transition: all 0.2s ease;
+}
+
+.budget-status-sub {
+  font-size: 0.68rem;
+  color: #94A3B8;
+}
+
+.budget-status-right {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #CBD5E1;
+  font-family: var(--font-heading);
+  flex-shrink: 0;
+}
+
+.budget-progress-track {
+  width: 100%;
+  height: 5px;
+  background: #1E293B;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.budget-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, #059669 0%, #10B981 100%);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+/* State 1: Peringatan Waspada (>= 90%) - KUNING */
+.budget-status-bar.status-warning {
+  background: #1B1812;
+  border-bottom-color: rgba(245, 158, 11, 0.4);
+}
+.budget-status-bar.status-warning .budget-status-indicator-dot {
+  background: #F59E0B;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.9);
+}
+.budget-status-bar.status-warning .budget-status-headline {
+  color: #FBBF24;
+}
+.budget-status-bar.status-warning .budget-progress-fill {
+  background: linear-gradient(90deg, #D97706 0%, #F59E0B 100%);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
+}
+
+/* State 2: Over Budget (> 100%) - MERAH TEGAS */
+.budget-status-bar.status-danger {
+  background: #231215;
+  border-bottom-color: rgba(239, 68, 68, 0.6);
+}
+.budget-status-bar.status-danger .budget-status-indicator-dot {
+  background: #EF4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 1);
+}
+.budget-status-bar.status-danger .budget-status-headline {
+  color: #F87171;
+}
+.budget-status-bar.status-danger .budget-progress-fill {
+  background: linear-gradient(90deg, #B91C1C 0%, #EF4444 100%);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.9);
+}
+
+/* Preview Gambar Otomatis di Modal Tambah Produk */
+.product-preview-image-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0B1324;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  margin-top: 4px;
+}
+
+.modal-preview-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  background: #1E293B;
+}
+
+.modal-preview-img-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-img-title {
+  font-size: 0.68rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.preview-img-desc {
+  font-size: 0.76rem;
+  color: #38BDF8;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ==================== LOBBY: SEBELUM PILIH LOKASI (SIGN IN BOX) ==================== */
 .setup-auth-box {
   background: #17171C;

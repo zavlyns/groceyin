@@ -29,7 +29,7 @@
         rel="stylesheet">
 
     <!-- External Stylesheet (Slate Aesthetic & Sky Cyan Glow) -->
-    <link rel="stylesheet" href="style.css?v=20261111d">
+    <link rel="stylesheet" href="style.css?v=20261111e">
 </head>
 
 <body>
@@ -77,12 +77,45 @@
 
             </header>
 
+            <!-- ==================== BANNER ATAS NOTIFIKASI OVER-BUDGET (> 100%) ==================== -->
+            <div class="top-overbudget-banner hidden" id="topOverbudgetBanner" role="alert">
+                <div class="overbudget-banner-content">
+                    <div class="overbudget-banner-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="overbudget-banner-text">
+                        Total belanja melebihi batas saldo dompet! Kurangi kuantitas atau batalkan barang sekunder.
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== STORE LOCATION SUB-BAR ==================== -->
             <div class="store-sub-bar" id="storeSubBar">
                 <div class="store-sub-info">
                     <span class="store-badge-icon">🏬</span>
                     <span class="store-name-text" id="displayStoreName">Lotte Mart Grocery - Puri Indah</span>
                     <span class="store-city-text" id="displayStoreCity">• Jakarta Barat (Puri Indah)</span>
+                </div>
+            </div>
+
+            <!-- ==================== BAR STATUS BUDGET KITA (HIJAU / KUNING WASPADA / MERAH) ==================== -->
+            <div class="budget-status-bar" id="budgetStatusBar">
+                <div class="budget-status-meta">
+                    <div class="budget-status-left">
+                        <span class="budget-status-indicator-dot" id="budgetStatusDot"></span>
+                        <strong class="budget-status-headline" id="budgetStatusHeadline">Aman (0%)</strong>
+                        <span class="budget-status-sub" id="budgetStatusSub">Sisa Rp 0</span>
+                    </div>
+                    <div class="budget-status-right">
+                        <span class="budget-status-ratio" id="budgetStatusRatio">Rp 0 / Rp 0</span>
+                    </div>
+                </div>
+                <div class="budget-progress-track">
+                    <div class="budget-progress-fill" id="budgetProgressFill" style="width: 0%;"></div>
                 </div>
             </div>
 
@@ -749,7 +782,16 @@
 
                         <div class="modal-field-group">
                             <label for="editProductName">Nama Barang</label>
-                            <input type="text" id="editProductName" class="modal-input" placeholder="Contoh: Beras 5kg" required>
+                            <input type="text" id="editProductName" class="modal-input" placeholder="Contoh: Tumbler 1L, Kopi, Susu, Sabun" required>
+                        </div>
+
+                        <!-- Smart Image Preview (Menyesuaikan apa yang kita tulis) -->
+                        <div class="product-preview-image-row" id="productPreviewImageRow">
+                            <img id="previewProductImg" src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=400&q=80" alt="Preview Gambar" class="modal-preview-thumb">
+                            <div class="modal-preview-img-info">
+                                <span class="preview-img-title">Foto Otomatis Produk:</span>
+                                <strong class="preview-img-desc" id="previewImageDesc">Menyesuaikan apa yang Anda tulis</strong>
+                            </div>
                         </div>
 
                         <div class="modal-field-row">
@@ -881,7 +923,7 @@
     </div>
 
     <!-- Main JavaScript Logic Engine -->
-    <script src="app.js?v=20261111d"></script>
+    <script src="app.js?v=20261111e"></script>
 </body>
 
 </html>

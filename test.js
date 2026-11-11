@@ -40,18 +40,18 @@ function detectPriceFluctuation(currentPrice, lastMonthPrice) {
 }
 
 // 3. Three-Tier Budget Logic:
-// - HIJAU: Masih aman (pengeluaran < 75%)
-// - KUNING: Warning / mau habis (pengeluaran 75% - 99%)
-// - MERAH: Habis & kelewatan (pengeluaran >= 100%)
+// - HIJAU: Masih aman (pengeluaran < 90%)
+// - KUNING: Peringatan Waspada (pengeluaran >= 90% dan <= 100%)
+// - MERAH: Total belanja melebihi batas saldo dompet (pengeluaran > 100%)
 function getBudgetStatusTier(totalSpent, initialBudget) {
   if (initialBudget <= 0) return { tier: "RED", color: "#EF4444", status: "OVER_BUDGET" };
   const ratio = totalSpent / initialBudget;
-  if (ratio >= 1.0) {
-    return { tier: "RED", color: "#EF4444", status: "HABIS_DAN_KELEWATAN" };
-  } else if (ratio >= 0.75) {
-    return { tier: "YELLOW", color: "#EAB308", status: "WARNING_MAU_HABIS" };
+  if (ratio > 1.0) {
+    return { tier: "RED", color: "#EF4444", status: "MELEBIHI_SALDO_DOMPET" };
+  } else if (ratio >= 0.90) {
+    return { tier: "YELLOW", color: "#F59E0B", status: "PERINGATAN_WASPADA" };
   } else {
-    return { tier: "GREEN", color: "#22C55E", status: "AMAN" };
+    return { tier: "GREEN", color: "#10B981", status: "AMAN" };
   }
 }
 
@@ -92,7 +92,7 @@ const DEFAULT_COMMODITIES = [
   { id: "prod-telur-1kg", name: "Telur 1kg (Tanpa Diskon)", defaultUnit: "kg", price: 28000, lastMonthPrice: 32000, discount: 0 },
   { id: "prod-garam-500g", name: "Garam 500g", defaultUnit: "pack", price: 5000, lastMonthPrice: 5000, discount: 0 },
   { id: "prod-beras-5kg-745", name: "Beras 5kg (Premium)", defaultUnit: "pack", price: 74500, lastMonthPrice: 74500, discount: 0 },
-  { id: "prod-minyak-2l", name: "Minyak Goreng 2L", defaultUnit: "liter", price: 42000, lastMonthPrice: 42000, discount: 0 },
+  { id: "prod-minyak-2l", name: "Minyak Goreng 2L", defaultUnit: "liter", price: 43000, lastMonthPrice: 43000, discount: 0 },
   { id: "prod-indomie-goreng-5", name: "Indomie Goreng 5 pcs", defaultUnit: "pack", price: 16500, lastMonthPrice: 16500, discount: 0 },
   { id: "prod-indomie-kuah-5", name: "Indomie Kuah 5 pcs", defaultUnit: "pack", price: 16000, lastMonthPrice: 16000, discount: 0 },
   { id: "prod-terigu-1kg", name: "Tepung Terigu 1kg", defaultUnit: "kg", price: 15500, lastMonthPrice: 15500, discount: 0 },
@@ -161,19 +161,19 @@ const resultBeras = merged.find(it => it.id === "prod-beras-5kg-74");
 assert.strictEqual(resultBeras.price, 76000, "Harga hasil editan user harus tetap 76000 dan tidak kembali ke 74000");
 console.log("✔ Test 6 Passed: Data yang diubah user tetap tersimpan dan tidak terganti balik ke default.");
 
-// Test 7: Three-Tier Budget Logic (Hijau = Aman, Kuning = Warning Mau Habis, Merah = Habis & Kelewatan)
-const budgetAman = getBudgetStatusTier(150000, 300000); // 50%
+// Test 7: Three-Tier Budget Logic (Hijau = Aman < 90%, Kuning = Waspada >= 90%, Merah = Melebihi Saldo > 100%)
+const budgetAman = getBudgetStatusTier(150000, 300000); // 50% < 90%
 assert.strictEqual(budgetAman.tier, "GREEN");
 assert.strictEqual(budgetAman.status, "AMAN");
 
-const budgetWarning = getBudgetStatusTier(240000, 300000); // 80%
+const budgetWarning = getBudgetStatusTier(275000, 300000); // ~91.6% >= 90%
 assert.strictEqual(budgetWarning.tier, "YELLOW");
-assert.strictEqual(budgetWarning.status, "WARNING_MAU_HABIS");
+assert.strictEqual(budgetWarning.status, "PERINGATAN_WASPADA");
 
-const budgetOver = getBudgetStatusTier(310000, 300000); // 103%
+const budgetOver = getBudgetStatusTier(310000, 300000); // 103% > 100%
 assert.strictEqual(budgetOver.tier, "RED");
-assert.strictEqual(budgetOver.status, "HABIS_DAN_KELEWATAN");
-console.log("✔ Test 7 Passed: Logika Budget (Hijau = Aman, Kuning = Warning Mau Habis, Merah = Habis & Kelewatan) terbukti akurat.");
+assert.strictEqual(budgetOver.status, "MELEBIHI_SALDO_DOMPET");
+console.log("✔ Test 7 Passed: Logika Budget (Hijau = Aman < 90%, Kuning = Waspada >= 90%, Merah = Melebihi Saldo > 100%) terbukti akurat.");
 
 // Test 8: Unit & Discount Configuration on Cart Item
 const testItem = {
