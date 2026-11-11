@@ -6,6 +6,9 @@ const os = require('os');
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
+// In-Memory Shared Shopping Sessions for PC ⇄ HP Sync
+const activeSessions = {};
+
 const MIME_TYPES = {
   '.html': 'text/html',
   '.css': 'text/css',
@@ -18,6 +21,58 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
+  // 1. Cross-Device Shopping Session Sync API
+  if (req.url.startsWith('/api/session')) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    const hostHeader = req.headers.host || 'localhost:3000';
+    const parsedUrl = new URL(req.url, `http://${hostHeader}`);
+    const roomId = (parsedUrl.searchParams.get('room') || 'session-lab-1').trim().toLowerCase();
+
+    if (req.method === 'GET') {
+      const data = activeSessions[roomId] || null;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, room: roomId, data: data, serverTime: Date.now() }));
+      return;
+    }
+
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', () => {
+        try {
+          const payload = JSON.parse(body);
+          activeSessions[roomId] = {
+            ...payload,
+            updatedAt: Date.now()
+          };
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, room: roomId, updatedAt: activeSessions[roomId].updatedAt }));
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+        }
+      });
+      return;
+    }
+  }
+
+  // 2. Server Network Info API
+  if (req.url === '/api/info') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ localIp: getLocalIp(), port: PORT }));
+    return;
+  }
+
   let reqPath = req.url.split('?')[0];
   if (reqPath === '/' || reqPath === '/groceyin' || reqPath === '/groceyin/') {
     reqPath = '/index.html';

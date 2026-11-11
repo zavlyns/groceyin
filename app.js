@@ -432,6 +432,7 @@ class SmartGroceryApp {
     this.loadCatalogDatabase();
     this.initEvents();
     this.loadState();
+    this.initSessionSync();
   }
 
   // ==================== PWA SERVICE WORKER & INSTALLATION ENGINE ====================
@@ -628,6 +629,15 @@ class SmartGroceryApp {
     this.btnLogout = document.getElementById("btnLogout");
     this.btnOpenAddProduct = document.getElementById("btnOpenAddProduct");
 
+    // Header Back & Sync Sesi
+    this.btnHeaderBackStore = document.getElementById("btnHeaderBackStore");
+    this.appBrandIconBox = document.getElementById("appBrandIconBox");
+    this.appBrandName = document.getElementById("appBrandName");
+    this.btnSyncSession = document.getElementById("btnSyncSession");
+    this.syncStatusDot = document.getElementById("syncStatusDot");
+    this.syncStatusText = document.getElementById("syncStatusText");
+    this.btnEditStoreLocation = document.getElementById("btnEditStoreLocation");
+
     // Top Over-budget Warning Banner (> 100%)
     this.topOverbudgetBanner = document.getElementById("topOverbudgetBanner");
 
@@ -771,17 +781,39 @@ class SmartGroceryApp {
     this.btnConfirmAddItem = document.getElementById("btnConfirmAddItem");
     this.btnConfirmAddItemText = document.getElementById("btnConfirmAddItemText");
 
+    // Modal Edit Lokasi Toko & Cabang
+    this.editLocationModalOverlay = document.getElementById("editLocationModalOverlay");
+    this.inputCustomStoreName = document.getElementById("inputCustomStoreName");
+    this.inputCustomCity = document.getElementById("inputCustomCity");
+    this.btnSaveLocation = document.getElementById("btnSaveLocation");
+    this.btnCancelLocation = document.getElementById("btnCancelLocation");
+
+    // Modal Session Sync PC ⇄ HP
+    this.sessionSyncModalOverlay = document.getElementById("sessionSyncModalOverlay");
+    this.syncModalStatusPill = document.getElementById("syncModalStatusPill");
+    this.syncModalStatusText = document.getElementById("syncModalStatusText");
+    this.sessionQrCodeBox = document.getElementById("sessionQrCodeBox");
+    this.inputSessionRoom = document.getElementById("inputSessionRoom");
+    this.btnJoinSessionRoom = document.getElementById("btnJoinSessionRoom");
+    this.btnCopySessionLink = document.getElementById("btnCopySessionLink");
+    this.btnForceSyncNow = document.getElementById("btnForceSyncNow");
+    this.btnCloseSessionSync = document.getElementById("btnCloseSessionSync");
+
     // Receipt Modal (diakses opsional via tab History)
     this.receiptModalBackdrop = document.getElementById("receiptModalBackdrop");
     this.receiptStoreHeader = document.getElementById("receiptStoreHeader");
     this.receiptCityHeader = document.getElementById("receiptCityHeader");
+    this.receiptTrxId = document.getElementById("receiptTrxId");
     this.receiptTimestamp = document.getElementById("receiptTimestamp");
     this.receiptPaymentMethod = document.getElementById("receiptPaymentMethod");
     this.receiptItemsListBody = document.getElementById("receiptItemsListBody");
-    this.receiptInitialBudget = document.getElementById("receiptInitialBudget");
+    this.receiptSubtotalOriginal = document.getElementById("receiptSubtotalOriginal");
     this.receiptTotalDiscount = document.getElementById("receiptTotalDiscount");
+    this.receiptDiscountRow = document.getElementById("receiptDiscountRow");
     this.receiptFinalTotal = document.getElementById("receiptFinalTotal");
+    this.receiptInitialBudget = document.getElementById("receiptInitialBudget");
     this.receiptRemainingSafe = document.getElementById("receiptRemainingSafe");
+    this.receiptBarcodeNumber = document.getElementById("receiptBarcodeNumber");
     this.btnReceiptPrint = document.getElementById("btnReceiptPrint");
     this.btnReceiptClose = document.getElementById("btnReceiptClose");
 
@@ -828,6 +860,39 @@ class SmartGroceryApp {
 
     // 4. Logout / Ganti Toko & Budget
     this.btnLogout.addEventListener("click", () => this.handleLogout());
+
+    // 4b. Tombol Back ke Store dari Header & List
+    if (this.btnHeaderBackStore) {
+      this.btnHeaderBackStore.addEventListener("click", () => this.switchTab("store"));
+    }
+
+    // 4c. Modal Edit Lokasi Toko & Cabang Bebas
+    if (this.btnEditStoreLocation) {
+      this.btnEditStoreLocation.addEventListener("click", () => this.openLocationEditModal());
+    }
+    if (this.btnSaveLocation) {
+      this.btnSaveLocation.addEventListener("click", () => this.handleSaveLocation());
+    }
+    if (this.btnCancelLocation) {
+      this.btnCancelLocation.addEventListener("click", () => this.closeLocationEditModal());
+    }
+
+    // 4d. Modal Sesi Sync PC ⇄ HP
+    if (this.btnSyncSession) {
+      this.btnSyncSession.addEventListener("click", () => this.openSessionSyncModal());
+    }
+    if (this.btnCloseSessionSync) {
+      this.btnCloseSessionSync.addEventListener("click", () => this.closeSessionSyncModal());
+    }
+    if (this.btnJoinSessionRoom) {
+      this.btnJoinSessionRoom.addEventListener("click", () => this.handleJoinSessionRoom());
+    }
+    if (this.btnCopySessionLink) {
+      this.btnCopySessionLink.addEventListener("click", () => this.copySessionLink());
+    }
+    if (this.btnForceSyncNow) {
+      this.btnForceSyncNow.addEventListener("click", () => this.forceSyncSession());
+    }
 
     // 5. Tab Navigation
     if (this.topTabStore) this.topTabStore.addEventListener("click", () => this.switchTab("store"));
@@ -1402,6 +1467,19 @@ class SmartGroceryApp {
     bottomButtons.forEach(b => {
       if (b.el) b.el.classList.toggle("active", b.name === tabName);
     });
+
+    // Toggle Tombol Back di Header saat di List / History
+    if (this.btnHeaderBackStore) {
+      if (tabName === "store") {
+        this.btnHeaderBackStore.classList.add("hidden");
+        if (this.appBrandIconBox) this.appBrandIconBox.classList.remove("hidden");
+        if (this.appBrandName) this.appBrandName.classList.remove("hidden");
+      } else {
+        this.btnHeaderBackStore.classList.remove("hidden");
+        if (this.appBrandIconBox) this.appBrandIconBox.classList.add("hidden");
+        if (this.appBrandName) this.appBrandName.classList.add("hidden");
+      }
+    }
 
     if (this.listBottomSummaryBar) {
       if (tabName === "list" && this.cart.length > 0) {
@@ -2454,6 +2532,9 @@ class SmartGroceryApp {
 
   saveCart() {
     localStorage.setItem(this.STORAGE_CART, JSON.stringify(this.cart));
+    if (typeof this.broadcastSessionUpdate === "function") {
+      this.broadcastSessionUpdate();
+    }
   }
 
   renderCartList() {
@@ -2617,41 +2698,63 @@ class SmartGroceryApp {
 
   showReceiptModal(record) {
     if (!record) return;
-    this.receiptStoreHeader.textContent = record.supermarket.toUpperCase();
-    this.receiptCityHeader.textContent = `Cabang ${record.city}`;
+    this.receiptStoreHeader.textContent = (record.supermarket || "GROCERY STORE").toUpperCase();
+    this.receiptCityHeader.textContent = `Cabang ${record.city || "Lokal"}`;
     
     const d = new Date(record.date);
-    this.receiptTimestamp.textContent = d.toLocaleDateString("id-ID", {
+    const dateFormatted = d.toLocaleDateString("id-ID", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric"
     }) + " " + d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    this.receiptTimestamp.textContent = dateFormatted;
+
+    const shortId = (record.id || `${Date.now()}`).slice(-7).toUpperCase();
+    if (this.receiptTrxId) {
+      this.receiptTrxId.textContent = `TRX-${shortId}`;
+    }
+    if (this.receiptBarcodeNumber) {
+      this.receiptBarcodeNumber.textContent = `2026 1111 ${shortId} 09`;
+    }
 
     if (this.receiptPaymentMethod) {
       this.receiptPaymentMethod.textContent = record.paymentMethod || "QRIS";
     }
 
     let itemsHtml = "";
+    let subtotalOri = 0;
     record.items.forEach(it => {
       const unit = it.unit || "pcs";
+      const itemSubtotal = it.finalPrice * it.quantity;
+      const originalSubtotal = (it.price || it.finalPrice) * it.quantity;
+      subtotalOri += originalSubtotal;
+
+      const hasDisc = it.discount > 0 || it.finalPrice < it.price;
       itemsHtml += `
         <div class="receipt-item-row">
           <div class="r-item-left">
             <span>${this.escapeHtml(it.name)}</span>
-            <small>${it.quantity} ${unit} x ${this.formatRupiah(it.finalPrice)}</small>
+            <small>${it.quantity} ${unit} x ${this.formatRupiah(it.finalPrice)}${hasDisc ? ` (Disc)` : ''}</small>
           </div>
           <div class="r-item-right">
-            <strong>${this.formatRupiah(it.finalPrice * it.quantity)}</strong>
+            <strong>${this.formatRupiah(itemSubtotal)}</strong>
           </div>
         </div>
       `;
     });
 
     this.receiptItemsListBody.innerHTML = itemsHtml;
+    if (this.receiptSubtotalOriginal) {
+      this.receiptSubtotalOriginal.textContent = this.formatRupiah(subtotalOri || record.totalSpent);
+    }
     this.receiptInitialBudget.textContent = this.formatRupiah(record.initialBudget);
-    this.receiptTotalDiscount.textContent = `-${this.formatRupiah(record.totalDiscountSaved)}`;
+    this.receiptTotalDiscount.textContent = `-${this.formatRupiah(record.totalDiscountSaved || 0)}`;
     this.receiptFinalTotal.textContent = this.formatRupiah(record.totalSpent);
     this.receiptRemainingSafe.textContent = this.formatRupiah(record.remainingBudget);
+
+    if (this.receiptDiscountRow) {
+      this.receiptDiscountRow.style.display = (record.totalDiscountSaved > 0) ? "flex" : "none";
+    }
 
     this.receiptModalBackdrop.classList.remove("hidden");
   }
@@ -2732,6 +2835,340 @@ class SmartGroceryApp {
     } else {
       return date.toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' });
     }
+  }
+
+  // ==================== EDIT LOKASI TOKO & CABANG BEBAS ====================
+  openLocationEditModal() {
+    if (!this.editLocationModalOverlay) return;
+    if (this.inputCustomStoreName) this.inputCustomStoreName.value = this.supermarket || "";
+    if (this.inputCustomCity) this.inputCustomCity.value = this.city || "";
+    this.editLocationModalOverlay.classList.remove("hidden");
+    setTimeout(() => {
+      if (this.inputCustomStoreName) this.inputCustomStoreName.focus();
+    }, 100);
+  }
+
+  closeLocationEditModal() {
+    if (this.editLocationModalOverlay) {
+      this.editLocationModalOverlay.classList.add("hidden");
+    }
+  }
+
+  handleSaveLocation() {
+    const store = (this.inputCustomStoreName.value || "").trim();
+    const city = (this.inputCustomCity.value || "").trim();
+
+    if (!store || !city) {
+      this.showToast("⚠️", "Harap isi nama supermarket dan lokasi cabang/kota!");
+      return;
+    }
+
+    this.supermarket = store;
+    this.city = city;
+
+    // Pastikan katalog untuk toko kustom ini tersedia
+    if (!this.catalog[this.supermarket] || !Array.isArray(this.catalog[this.supermarket]) || this.catalog[this.supermarket].length === 0) {
+      // Duplikasi katalog default komoditas agar pembeli langsung bisa belanja
+      this.catalog[this.supermarket] = JSON.parse(JSON.stringify(DEFAULT_COMMODITIES));
+      this.saveCatalogDatabase();
+    }
+
+    if (this.displayStoreName) this.displayStoreName.textContent = this.supermarket;
+    if (this.displayStoreCity) this.displayStoreCity.textContent = `• ${this.city}`;
+
+    // Simpan ke storage session
+    localStorage.setItem(this.STORAGE_SESSION, JSON.stringify({
+      city: this.city,
+      supermarket: this.supermarket,
+      initialBudget: this.initialBudget,
+      originalBudget: this.originalBudget,
+      isLocked: true
+    }));
+
+    this.closeLocationEditModal();
+    this.renderStoreProducts();
+    if (typeof this.broadcastSessionUpdate === "function") {
+      this.broadcastSessionUpdate();
+    }
+    this.showToast("📍", `Lokasi toko berhasil diubah ke "${this.supermarket}" (${this.city})`);
+  }
+
+  // ==================== CROSS-DEVICE SHOPPING SESSION SYNC ENGINE ====================
+  initSessionSync() {
+    this.deviceId = this.getOrCreateDeviceId();
+    this.sessionRoomId = this.detectSessionRoomId();
+    this.lastSyncedUpdatedAt = 0;
+    this.peer = null;
+    this.peerConnections = [];
+
+    // Update UI status text
+    if (this.syncStatusText) {
+      this.syncStatusText.textContent = `Sesi: ${this.sessionRoomId}`;
+    }
+
+    // 1. Local Server Polling (Bila dijalankan via node server.js di Lab / IP Lokal / localhost)
+    const hostname = window.location.hostname || "localhost";
+    this.isLocalServer = hostname === "localhost" || 
+                         hostname === "127.0.0.1" || 
+                         /^192\.168\./.test(hostname) ||
+                         /^10\./.test(hostname) ||
+                         /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
+
+    // Initial fetch from server
+    this.fetchSessionFromLocalServer();
+
+    // Polling interval (setiap 1.5 detik jika di local server)
+    if (this.isLocalServer) {
+      setInterval(() => {
+        this.fetchSessionFromLocalServer();
+      }, 1500);
+    }
+
+    // 2. WebRTC PeerJS Sync (Untuk GitHub Pages / Vercel / Live URL tanpa server backend)
+    this.initPeerJSSync();
+  }
+
+  detectSessionRoomId() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlRoom = urlParams.get("session") || urlParams.get("room");
+      if (urlRoom && urlRoom.trim().length > 0) {
+        const clean = urlRoom.trim().toLowerCase();
+        localStorage.setItem("groceryin_session_room", clean);
+        return clean;
+      }
+    } catch (e) {}
+
+    const saved = localStorage.getItem("groceryin_session_room");
+    if (saved && saved.trim().length > 0) return saved.trim().toLowerCase();
+
+    return "session-lab-1";
+  }
+
+  getOrCreateDeviceId() {
+    let id = localStorage.getItem("groceryin_device_id");
+    if (!id) {
+      id = "dev-" + Math.random().toString(36).substring(2, 8);
+      localStorage.setItem("groceryin_device_id", id);
+    }
+    return id;
+  }
+
+  fetchSessionFromLocalServer() {
+    if (!this.sessionRoomId) return;
+    const url = `/api/session?room=${encodeURIComponent(this.sessionRoomId)}`;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .then(result => {
+        if (result && result.success && result.data) {
+          this.applyRemoteSessionData(result.data);
+        }
+      })
+      .catch(() => {});
+  }
+
+  broadcastSessionUpdate() {
+    const sessionPayload = {
+      cart: this.cart,
+      initialBudget: this.initialBudget,
+      originalBudget: this.originalBudget,
+      supermarket: this.supermarket,
+      city: this.city,
+      history: this.history,
+      selectedPaymentMethod: this.selectedPaymentMethod,
+      updatedAt: Date.now(),
+      updatedBy: this.deviceId
+    };
+
+    this.lastSyncedUpdatedAt = sessionPayload.updatedAt;
+
+    // 1. Kirim ke local server API
+    if (this.isLocalServer) {
+      fetch(`/api/session?room=${encodeURIComponent(this.sessionRoomId)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sessionPayload)
+      }).catch(() => {});
+    }
+
+    // 2. Kirim via WebRTC PeerJS connections
+    if (this.peerConnections && this.peerConnections.length > 0) {
+      this.peerConnections.forEach(conn => {
+        if (conn && conn.open) {
+          try {
+            conn.send({ type: "SESSION_UPDATE", payload: sessionPayload });
+          } catch (e) {}
+        }
+      });
+    }
+  }
+
+  applyRemoteSessionData(data) {
+    if (!data || !data.updatedAt) return;
+    if (data.updatedBy === this.deviceId) return; // Abaikan echo dari diri sendiri
+    if (data.updatedAt <= this.lastSyncedUpdatedAt) return; // Abaikan data yang lebih lama
+
+    this.lastSyncedUpdatedAt = data.updatedAt;
+
+    // Update state belanja
+    if (Array.isArray(data.cart)) {
+      this.cart = data.cart;
+      localStorage.setItem(this.STORAGE_CART, JSON.stringify(this.cart));
+    }
+    if (typeof data.initialBudget === "number" && data.initialBudget > 0) {
+      this.initialBudget = data.initialBudget;
+      this.originalBudget = data.originalBudget || data.initialBudget;
+    }
+    if (data.supermarket) {
+      this.supermarket = data.supermarket;
+      this.city = data.city || this.city;
+      if (this.displayStoreName) this.displayStoreName.textContent = this.supermarket;
+      if (this.displayStoreCity) this.displayStoreCity.textContent = `• ${this.city}`;
+    }
+    if (Array.isArray(data.history)) {
+      this.history = data.history;
+      localStorage.setItem(this.STORAGE_HISTORY, JSON.stringify(this.history));
+    }
+    if (data.selectedPaymentMethod) {
+      this.selectedPaymentMethod = data.selectedPaymentMethod;
+    }
+
+    // Refresh UI
+    this.updateBudgetAndCartUI();
+    this.renderStoreProducts();
+    this.renderCartList();
+    this.renderHistory();
+
+    // Visual feedback
+    if (this.syncStatusDot) {
+      this.syncStatusDot.style.background = "#38BDF8";
+      setTimeout(() => {
+        if (this.syncStatusDot) this.syncStatusDot.style.background = "#34D399";
+      }, 1000);
+    }
+  }
+
+  initPeerJSSync() {
+    if (typeof Peer === "undefined") return;
+
+    try {
+      const peerId = `groceyin-${this.sessionRoomId}-${this.deviceId}`;
+      this.peer = new Peer(peerId, { debug: 0 });
+
+      this.peer.on("open", () => {
+        if (this.syncStatusDot) this.syncStatusDot.classList.add("active");
+      });
+
+      this.peer.on("connection", (conn) => {
+        this.setupPeerConnection(conn);
+      });
+
+      this.peer.on("error", () => {});
+    } catch (e) {}
+  }
+
+  setupPeerConnection(conn) {
+    conn.on("open", () => {
+      this.peerConnections.push(conn);
+      this.broadcastSessionUpdate();
+    });
+
+    conn.on("data", (msg) => {
+      if (msg && msg.type === "SESSION_UPDATE" && msg.payload) {
+        this.applyRemoteSessionData(msg.payload);
+      }
+    });
+
+    conn.on("close", () => {
+      this.peerConnections = this.peerConnections.filter(c => c !== conn);
+    });
+  }
+
+  openSessionSyncModal() {
+    if (!this.sessionSyncModalOverlay) return;
+
+    if (this.inputSessionRoom) {
+      this.inputSessionRoom.value = this.sessionRoomId;
+    }
+    if (this.syncModalStatusText) {
+      this.syncModalStatusText.textContent = `Sesi Aktif: ${this.sessionRoomId}`;
+    }
+
+    const shareUrl = this.getSessionShareUrl();
+
+    if (this.sessionQrCodeBox && typeof QRCode !== "undefined") {
+      this.sessionQrCodeBox.innerHTML = "";
+      try {
+        new QRCode(this.sessionQrCodeBox, {
+          text: shareUrl,
+          width: 140,
+          height: 140,
+          colorDark: "#0F172A",
+          colorLight: "#FFFFFF",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (e) {
+        this.sessionQrCodeBox.innerHTML = `<p style="font-size:0.75rem; color:#0F172A; font-weight:700;">${this.escapeHtml(shareUrl)}</p>`;
+      }
+    }
+
+    this.sessionSyncModalOverlay.classList.remove("hidden");
+  }
+
+  closeSessionSyncModal() {
+    if (this.sessionSyncModalOverlay) {
+      this.sessionSyncModalOverlay.classList.add("hidden");
+    }
+  }
+
+  getSessionShareUrl() {
+    const loc = window.location;
+    return `${loc.protocol}//${loc.host}${loc.pathname}?session=${encodeURIComponent(this.sessionRoomId)}`;
+  }
+
+  copySessionLink() {
+    const shareUrl = this.getSessionShareUrl();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        this.showToast("📋", "Link sesi berhasil disalin! Buka di HP Anda.");
+      }).catch(() => {
+        prompt("Salin link sesi belanja ini dan buka di HP:", shareUrl);
+      });
+    } else {
+      prompt("Salin link sesi belanja ini dan buka di HP:", shareUrl);
+    }
+  }
+
+  handleJoinSessionRoom() {
+    const newRoom = (this.inputSessionRoom.value || "").trim().toLowerCase();
+    if (!newRoom) {
+      this.showToast("⚠️", "Masukkan nama atau ID sesi yang valid!");
+      return;
+    }
+
+    this.sessionRoomId = newRoom;
+    localStorage.setItem("groceryin_session_room", this.sessionRoomId);
+    if (this.syncStatusText) {
+      this.syncStatusText.textContent = `Sesi: ${this.sessionRoomId}`;
+    }
+
+    const newUrl = this.getSessionShareUrl();
+    window.history.replaceState({}, "", newUrl);
+
+    this.fetchSessionFromLocalServer();
+    this.broadcastSessionUpdate();
+    this.closeSessionSyncModal();
+    this.showToast("🔗", `Bergabung ke sesi "${this.sessionRoomId}". Perangkat tersambung!`);
+  }
+
+  forceSyncSession() {
+    this.fetchSessionFromLocalServer();
+    this.broadcastSessionUpdate();
+    this.showToast("🔄", "Sinkronisasi sesi belanja dijalankan.");
   }
 
   // ==================== UTILS ====================

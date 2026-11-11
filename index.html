@@ -28,8 +28,12 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
         rel="stylesheet">
 
+    <!-- External Libraries: QRCode & PeerJS (Sinkronisasi Sesi PC ⇄ HP) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
     <!-- External Stylesheet (Slate Aesthetic & Sky Cyan Glow) -->
-    <link rel="stylesheet" href="style.css?v=20261111e">
+    <link rel="stylesheet" href="style.css?v=20261111f">
 </head>
 
 <body>
@@ -42,9 +46,15 @@
             <!-- 3 Tab di kiri (Store, List, History) & Diatas Kanan: Budget + Tombol Log Out -->
             <header class="app-top-bar" id="appTopBar">
 
-                <!-- Left Side: Clean App Brand Badge (Tanpa tab kotak kaku) -->
+                <!-- Left Side: Clean App Brand Badge & Tombol Back saat di List/History -->
                 <div class="app-brand-badge" id="appBrandBadge">
-                    <div class="app-brand-icon-box">
+                    <button type="button" class="btn-header-back-store hidden" id="btnHeaderBackStore" onclick="app.switchTab('store')" title="Kembali belanja ke toko">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                        <span>Belanja</span>
+                    </button>
+                    <div class="app-brand-icon-box" id="appBrandIconBox">
                         <svg class="lucide-icon" viewBox="0 0 24 24" width="18" height="18" fill="none"
                             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
@@ -52,11 +62,17 @@
                             <path d="M16 10a4 4 0 0 1-8 0" />
                         </svg>
                     </div>
-                    <span class="app-brand-name">GroceryIn</span>
+                    <span class="app-brand-name" id="appBrandName">GroceryIn</span>
                 </div>
 
-                <!-- Right Side: Nominal Uang Budget & Tombol Log Out -->
+                <!-- Right Side: Sesi PC⇄HP, Nominal Uang Budget & Tombol Log Out -->
                 <div class="header-right-group">
+                    <!-- Tombol Sesi Sync PC ⇄ HP -->
+                    <button type="button" class="btn-sync-session" id="btnSyncSession" title="Hubungkan Sesi Belanja PC & HP" onclick="app.openSessionSyncModal()">
+                        <span class="sync-dot" id="syncStatusDot"></span>
+                        <span class="sync-text" id="syncStatusText">Sesi PC⇄HP</span>
+                    </button>
+
                     <!-- Live Budget Pill (Hijau = Aman, Kuning = Warning, Merah = Habis/Kelewatan) -->
                     <div class="live-budget-pill" id="liveBudgetPill" title="Sisa Budget Belanja Anda">
                         <span class="budget-label">Sisa:</span>
@@ -93,13 +109,14 @@
                 </div>
             </div>
 
-            <!-- ==================== STORE LOCATION SUB-BAR ==================== -->
+            <!-- ==================== STORE LOCATION SUB-BAR (DAPAT DIEDIT BEBAS) ==================== -->
             <div class="store-sub-bar" id="storeSubBar">
-                <div class="store-sub-info">
+                <button type="button" class="store-sub-info" id="btnEditStoreLocation" onclick="app.openLocationEditModal()" title="Klik untuk edit lokasi toko & cabang bebas dimana saja">
                     <span class="store-badge-icon">🏬</span>
                     <span class="store-name-text" id="displayStoreName">Lotte Mart Grocery - Puri Indah</span>
                     <span class="store-city-text" id="displayStoreCity">• Jakarta Barat (Puri Indah)</span>
-                </div>
+                    <span class="store-edit-badge">✏️ Edit</span>
+                </button>
             </div>
 
             <!-- ==================== BAR STATUS BUDGET KITA (HIJAU / KUNING WASPADA / MERAH) ==================== -->
@@ -213,6 +230,16 @@
                         <p>Silakan buka tab <strong>Store</strong> lalu klik <strong>"+ Add to list"</strong> pada barang yang ingin Anda beli untuk memilih satuan dan diskonnya.</p>
                         <button type="button" class="btn-primary-action" id="btnGoToStore">
                             <span>Ke Halaman Store</span>
+                        </button>
+                    </div>
+
+                    <!-- Navigation Bar: Tombol Back ke Halaman Store saat di List -->
+                    <div class="list-nav-header-bar" id="listNavHeaderBar">
+                        <button type="button" class="btn-list-back-store" id="btnListBackStore" onclick="app.switchTab('store')" title="Kembali belanja ke toko">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m15 18-6-6 6-6"/>
+                            </svg>
+                            <span>← Lanjut Belanja (Tambah Barang)</span>
                         </button>
                     </div>
 
@@ -338,6 +365,14 @@
 
             <!-- ==================== LIST BOTTOM FIXED BAR ==================== -->
             <footer class="list-bottom-bar hidden" id="listBottomSummaryBar">
+                <!-- Tombol Back Cepat ke Toko -->
+                <button type="button" class="btn-summary-back" id="btnSummaryBackStore" onclick="app.switchTab('store')" title="Kembali belanja ke toko">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                    <span>+ Beli</span>
+                </button>
+
                 <div class="list-summary-info">
                     <span class="summary-label" id="summaryPaymentMethodLabel">Bayar via QRIS:</span>
                     <!-- Transisi Warna: Hijau (Aman) -> Kuning (Warning Mau Habis) -> Merah (Habis & Kelewatan) -->
@@ -543,6 +578,77 @@
                     <button type="button" class="btn-confirm-setup" id="btnCloseInstallGuide" style="margin-top: 16px;">
                         <span>Mengerti & Kembali</span>
                     </button>
+                </div>
+            </div>
+
+            <!-- ==================== MODAL EDIT LOKASI TOKO & CABANG (BEBAS MANA SAJA) ==================== -->
+            <div class="modal-backdrop-custom hidden" id="editLocationModalOverlay" style="z-index: 1250;">
+                <div class="setup-card" style="max-width: 380px;">
+                    <div class="setup-header" style="margin-bottom: 12px;">
+                        <div class="setup-brand-icon" style="background: rgba(56, 189, 248, 0.2);">🏬</div>
+                        <h3 style="color: #F8FAFC; margin-bottom: 4px;">Edit Lokasi Toko & Cabang</h3>
+                        <p style="font-size: 0.76rem; color: #94A3B8;">Ubah nama supermarket dan lokasi cabang bebas mau di mana saja:</p>
+                    </div>
+                    <form id="editLocationForm" onsubmit="return false;" style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="modal-field-group">
+                            <label for="inputCustomStoreName">Nama Supermarket / Toko</label>
+                            <input type="text" id="inputCustomStoreName" class="modal-input" placeholder="Contoh: Lotte Mart, Super Indo, Hypermart, Grand Lucky, dll" required>
+                        </div>
+                        <div class="modal-field-group">
+                            <label for="inputCustomCity">Lokasi Cabang / Kota</label>
+                            <input type="text" id="inputCustomCity" class="modal-input" placeholder="Contoh: Puri Indah, Jakarta Barat, Bandung, Surabaya, dll" required>
+                        </div>
+                        <div class="modal-actions-row" style="margin-top: 6px;">
+                            <button type="submit" class="btn-confirm-setup" id="btnSaveLocation">
+                                <span>💾 Simpan Lokasi Baru</span>
+                            </button>
+                            <button type="button" class="btn-modal-cancel" id="btnCancelLocation">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ==================== MODAL SINKRONISASI SESI PC ⇄ HP REALTIME ==================== -->
+            <div class="modal-backdrop-custom hidden" id="sessionSyncModalOverlay" style="z-index: 1300;">
+                <div class="setup-card session-sync-card" style="max-width: 380px;">
+                    <div class="setup-header" style="margin-bottom: 10px;">
+                        <div class="setup-brand-icon" style="background: rgba(16, 185, 129, 0.2);">📱</div>
+                        <h3 style="color: #F8FAFC; margin-bottom: 4px;">Sesi Belanja PC ⇄ HP</h3>
+                        <p style="font-size: 0.76rem; color: #94A3B8;">Hubungkan PC Lab dan Smartphone ke sesi belanja yang sama secara realtime:</p>
+                    </div>
+
+                    <div class="sync-status-badge-row">
+                        <span class="sync-live-pill" id="syncModalStatusPill">
+                            <span class="sync-dot active"></span>
+                            <strong id="syncModalStatusText">Sesi Aktif: session-lab-1</strong>
+                        </span>
+                    </div>
+
+                    <!-- QR Code Container -->
+                    <div class="qr-code-wrapper" style="text-align: center; margin: 12px 0; background: #FFFFFF; padding: 12px; border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div id="sessionQrCodeBox"></div>
+                        <small style="color: #0F172A; font-weight: 700; margin-top: 6px; font-size: 0.72rem;">Scan QR di atas dengan kamera HP</small>
+                    </div>
+
+                    <div class="modal-field-group">
+                        <label for="inputSessionRoom">Kode / ID Sesi Belanja:</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="inputSessionRoom" class="modal-input" placeholder="session-lab-1" style="font-family: var(--font-mono); font-weight: 700;">
+                            <button type="button" class="btn-primary-action" id="btnJoinSessionRoom" style="width: auto; padding: 0 14px; min-height: 40px; font-size: 0.78rem;">
+                                Gabung
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 8px; display:flex; flex-direction:column; gap:8px;">
+                        <button type="button" class="btn-setup-install" id="btnCopySessionLink">
+                            <span>📋 Salin Link Sesi untuk HP</span>
+                        </button>
+                        <button type="button" class="btn-confirm-setup" id="btnForceSyncNow" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38BDF8;">
+                            <span>🔄 Sinkronkan Sekarang</span>
+                        </button>
+                        <button type="button" class="btn-modal-cancel" id="btnCloseSessionSync" style="margin-top: 4px;">Tutup</button>
+                    </div>
                 </div>
             </div>
 
@@ -848,43 +954,73 @@
                 </div>
             </div>
 
-            <!-- ==================== RECEIPT PRINTABLE / CHECKOUT MODAL (Dapat dibuka manual via riwayat jika diinginkan) ==================== -->
+            <!-- ==================== RECEIPT PRINTABLE / CHECKOUT MODAL (RINCIAN STRUK PROFESIONAL) ==================== -->
             <div class="modal-backdrop-receipt hidden" id="receiptModalBackdrop">
                 <div class="receipt-box-card">
                     <div class="receipt-paper" id="receiptPrintableSheet">
+                        <!-- Top Serrated Edge Styling -->
+                        <div class="receipt-edge-teeth"></div>
+
                         <div class="receipt-top-header">
+                            <div class="receipt-store-logo">🛒</div>
                             <h2 id="receiptStoreHeader">LOTTE MART GROCERY</h2>
-                            <p id="receiptCityHeader">Cabang Puri Indah</p>
-                            <div class="receipt-dashed-line">--------------------------------</div>
-                            <div class="receipt-date-row">
-                                <span>Waktu:</span>
-                                <span id="receiptTimestamp">05/11/2026 19:30</span>
+                            <p id="receiptCityHeader" class="receipt-branch-text">Cabang Puri Indah</p>
+                            <small class="receipt-tagline">SMART GROCERY & BUDGET TRACKER</small>
+                            <div class="receipt-dashed-line">----------------------------------------</div>
+                            <div class="receipt-meta-grid">
+                                <div class="r-meta-item">
+                                    <span>No. Trx:</span>
+                                    <strong id="receiptTrxId">TRX-8FA0DE4</strong>
+                                </div>
+                                <div class="r-meta-item text-right">
+                                    <span>Kasir:</span>
+                                    <span>Self-Checkout #01</span>
+                                </div>
+                                <div class="r-meta-item">
+                                    <span>Waktu:</span>
+                                    <span id="receiptTimestamp">11/11/2026 21:30</span>
+                                </div>
+                                <div class="r-meta-item text-right">
+                                    <span>Metode:</span>
+                                    <strong id="receiptPaymentMethod" class="badge-payment-receipt">QRIS</strong>
+                                </div>
                             </div>
-                            <div class="receipt-payment-row">
-                                <span>Metode:</span>
-                                <strong id="receiptPaymentMethod">QRIS</strong>
-                            </div>
-                            <div class="receipt-dashed-line">--------------------------------</div>
+                            <div class="receipt-dashed-line">----------------------------------------</div>
                         </div>
 
+                        <!-- Table Header -->
+                        <div class="receipt-table-header">
+                            <span>PRODUK / JUMLAH</span>
+                            <span style="text-align: right;">TOTAL (RP)</span>
+                        </div>
+                        <div class="receipt-dashed-line">----------------------------------------</div>
+
+                        <!-- Items Body -->
                         <div class="receipt-items-content" id="receiptItemsListBody">
                             <!-- Populated via JS -->
                         </div>
 
-                        <div class="receipt-dashed-line">--------------------------------</div>
+                        <div class="receipt-dashed-line">----------------------------------------</div>
+                        
+                        <!-- Financial Summary -->
                         <div class="receipt-summary-block">
                             <div class="r-summary-row">
-                                <span>Batas Budget Awal:</span>
-                                <span id="receiptInitialBudget">Rp 300.000</span>
+                                <span>Total Belanja:</span>
+                                <strong id="receiptSubtotalOriginal">Rp 0</strong>
                             </div>
-                            <div class="r-summary-row text-discount">
+                            <div class="r-summary-row text-discount" id="receiptDiscountRow">
                                 <span>Hemat Diskon:</span>
-                                <span id="receiptTotalDiscount">-Rp 0</span>
+                                <strong id="receiptTotalDiscount">-Rp 0</strong>
                             </div>
-                            <div class="receipt-double-line">================================</div>
+                            <div class="receipt-double-line">========================================</div>
                             <div class="r-summary-row r-final-total">
-                                <span>TOTAL AKHIR:</span>
+                                <span>TOTAL BAYAR:</span>
                                 <strong id="receiptFinalTotal">Rp 0</strong>
+                            </div>
+                            <div class="receipt-double-line">========================================</div>
+                            <div class="r-summary-row">
+                                <span>Batas Saldo Awal:</span>
+                                <span id="receiptInitialBudget">Rp 300.000</span>
                             </div>
                             <div class="r-summary-row r-remaining">
                                 <span>Sisa Uang Dompet:</span>
@@ -892,10 +1028,21 @@
                             </div>
                         </div>
 
-                        <div class="receipt-bottom-note">
-                            <p>Belanja bulanan hemat & aman terkendali.</p>
-                            <small>*** Simpan struk ini untuk pembukuan anak rantau ***</small>
+                        <div class="receipt-dashed-line">----------------------------------------</div>
+
+                        <!-- Barcode Simulation -->
+                        <div class="receipt-barcode-box">
+                            <div class="barcode-lines">||| | || |||| | ||| || ||| | |||| || |||</div>
+                            <div class="barcode-number" id="receiptBarcodeNumber">2026 1111 8FA0 DE40</div>
                         </div>
+
+                        <div class="receipt-bottom-note">
+                            <p><strong>TERIMA KASIH TELAH BERBELANJA HEMAT!</strong></p>
+                            <small>Barang yang sudah dibeli tidak dapat ditukar kecuali ada perjanjian. Simpan struk ini untuk pembukuan bulanan anak rantau.</small>
+                        </div>
+
+                        <!-- Bottom Serrated Edge Styling -->
+                        <div class="receipt-edge-teeth bottom"></div>
                     </div>
 
                     <div class="receipt-actions-bar">
@@ -908,7 +1055,7 @@
                             </svg>
                             <span>Cetak Struk</span>
                         </button>
-                        <button type="button" class="btn-receipt-close" id="btnReceiptClose">Tutup</button>
+                        <button type="button" class="btn-receipt-close" id="btnReceiptClose">✕ Tutup</button>
                     </div>
                 </div>
             </div>
@@ -923,7 +1070,7 @@
     </div>
 
     <!-- Main JavaScript Logic Engine -->
-    <script src="app.js?v=20261111e"></script>
+    <script src="app.js?v=20261111f"></script>
 </body>
 
 </html>

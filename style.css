@@ -4081,6 +4081,333 @@ html::-webkit-scrollbar-thumb {
   }
 }
 
+/* ==================== TOMBOL BACK KE STORE DARI LIST & HEADER ==================== */
+.btn-header-back-store {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38BDF8;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-header-back-store:hover,
+.btn-header-back-store:active {
+  background: #38BDF8;
+  color: #0F172A;
+  transform: translateY(-1px);
+}
+
+.list-nav-header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  margin-bottom: 8px;
+}
+
+.btn-list-back-store {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(56, 189, 248, 0.2) 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.5);
+  color: #38BDF8;
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+}
+
+.btn-list-back-store:hover {
+  background: #38BDF8;
+  color: #0F172A;
+  transform: translateY(-1px);
+}
+
+.btn-list-back-store:active {
+  transform: scale(0.98);
+}
+
+.btn-summary-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38BDF8;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-height: 44px;
+  transition: all 0.15s ease;
+}
+
+.btn-summary-back:hover,
+.btn-summary-back:active {
+  background: rgba(56, 189, 248, 0.2);
+  transform: scale(0.96);
+}
+
+/* ==================== TOMBOL SESI PC ⇄ HP SYNC ==================== */
+.btn-sync-session {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34D399;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sync-session:hover {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: #34D399;
+}
+
+.sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34D399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.8);
+  animation: pulseSync 2s infinite ease-in-out;
+}
+
+@keyframes pulseSync {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.sync-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34D399;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+}
+
+/* ==================== STORE SUB-BAR EDITABLE BADGE ==================== */
+.store-sub-bar button.store-sub-info {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.store-sub-bar button.store-sub-info:hover {
+  border-color: #38BDF8;
+  background: rgba(56, 189, 248, 0.1);
+  transform: translateY(-1px);
+}
+
+.store-edit-badge {
+  font-size: 0.66rem;
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+/* ==================== UPGRADED RECEIPT (STRUK PROFESIONAL) ==================== */
+.receipt-paper {
+  background: #FAFAF9;
+  color: #1C1917;
+  border-radius: 4px;
+  padding: 20px 16px;
+  font-family: 'Courier New', Courier, monospace;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.receipt-store-logo {
+  font-size: 1.8rem;
+  margin-bottom: 2px;
+}
+
+.receipt-top-header h2 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: 1.5px;
+  margin: 0;
+}
+
+.receipt-branch-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 2px 0;
+}
+
+.receipt-tagline {
+  font-size: 0.64rem;
+  color: #94A3B8;
+  letter-spacing: 1px;
+}
+
+.receipt-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 4px;
+  font-size: 0.72rem;
+  color: #334155;
+  text-align: left;
+  margin: 4px 0;
+}
+
+.receipt-meta-grid .text-right {
+  text-align: right;
+}
+
+.badge-payment-receipt {
+  background: #0284C7;
+  color: #FFFFFF;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.68rem;
+}
+
+.receipt-table-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: 0.5px;
+}
+
+.receipt-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  padding: 2px 0;
+}
+
+.r-item-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.r-item-left span {
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.r-item-left small {
+  font-size: 0.68rem;
+  color: #64748B;
+}
+
+.r-item-right {
+  text-align: right;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.receipt-summary-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.76rem;
+  color: #334155;
+}
+
+.r-summary-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.r-summary-row.text-discount {
+  color: #059669;
+}
+
+.r-summary-row.r-final-total {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: 0.5px;
+  padding: 2px 0;
+}
+
+.r-summary-row.r-remaining {
+  color: #047857;
+  font-weight: 700;
+}
+
+.receipt-barcode-box {
+  text-align: center;
+  margin: 10px 0 6px;
+}
+
+.barcode-lines {
+  font-size: 1.3rem;
+  letter-spacing: 4px;
+  color: #0F172A;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.barcode-number {
+  font-size: 0.66rem;
+  color: #64748B;
+  letter-spacing: 1px;
+}
+
+.receipt-bottom-note {
+  text-align: center;
+  font-size: 0.68rem;
+  color: #64748B;
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+.receipt-bottom-note p {
+  color: #0F172A;
+  margin-bottom: 2px;
+}
+
 /* ==================== PRINT STYLES ==================== */
 @media print {
   body * {
