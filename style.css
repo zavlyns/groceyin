@@ -827,48 +827,80 @@ html::-webkit-scrollbar-thumb {
   margin-bottom: 8px;
 }
 
-.price-calculation-row {
+.price-comparison-line {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 4px;
 }
 
-.product-price-original {
-  font-size: 0.85rem;
+.price-old-strikethrough {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748B;
+  text-decoration: line-through;
+  text-decoration-color: rgba(148, 163, 184, 0.85);
+  white-space: nowrap;
+}
+
+.product-price-current {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
   font-weight: 800;
   color: #FFFFFF;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
 }
 
-.product-price-original.has-discount {
-  font-size: 0.72rem;
+.product-price-current.has-discount {
+  font-size: 0.74rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #64748B;
   text-decoration: line-through;
 }
 
 .product-price-final {
+  font-family: var(--font-heading);
   font-size: 0.95rem;
   font-weight: 800;
-  color: var(--primary-light);
+  color: #38BDF8;
 }
 
-.price-fluctuation-emote {
-  font-size: 0.82rem;
-  font-weight: 800;
+/* Fluctuation Indicator Tag (Panah Merah Naik, Hijau Turun, Abu-abu Stabil) */
+.price-fluctuation-tag {
   display: inline-flex;
   align-items: center;
-  margin-left: 2px;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  width: fit-content;
+  line-height: 1.3;
 }
 
-.price-fluctuation-emote.emote-up {
-  color: var(--danger);
+.price-fluctuation-tag.fluc-up {
+  color: #F87171;
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.35);
 }
-.price-fluctuation-emote.emote-down {
-  color: var(--safe);
+
+.price-fluctuation-tag.fluc-down {
+  color: #34D399;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.35);
 }
-.price-fluctuation-emote.emote-equal {
-  color: var(--warning);
+
+.price-fluctuation-tag.fluc-equal {
+  color: #94A3B8;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.price-fluctuation-tag .fluc-symbol {
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 /* Button Add to List */
@@ -2257,7 +2289,51 @@ html::-webkit-scrollbar-thumb {
 .modal-prod-base-price {
   font-size: 0.88rem;
   font-weight: 800;
-  color: #EF4444;
+  color: #38BDF8;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.modal-strike-price {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748B;
+  text-decoration: line-through;
+}
+
+.modal-curr-price {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.fluc-pill-mini {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  line-height: 1.25;
+}
+
+.fluc-pill-mini.fluc-up {
+  color: #F87171;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.fluc-pill-mini.fluc-down {
+  color: #34D399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.fluc-pill-mini.fluc-equal {
+  color: #94A3B8;
+  background: rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 /* Modal Config Section */

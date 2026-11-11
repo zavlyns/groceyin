@@ -83,17 +83,17 @@ const DEFAULT_COMMODITIES = [
     category: "Sembako",
     defaultUnit: "kg",
     price: 74000,
-    lastMonthPrice: 68000, // ⬆ Merah (Naik dari 68rb jadi 74rb)
+    lastMonthPrice: 68000, // ⬆ Merah (Naik dari 68rb jadi 74rb, selisih +Rp 6.000)
     discount: 0,
     image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80"
   },
   {
     id: "prod-telur-1kg",
-    name: "Telur 1kg (Tanpa Diskon)",
+    name: "Telur 1kg",
     category: "Sembako",
     defaultUnit: "kg",
     price: 28000,
-    lastMonthPrice: 32000, // ⬇︎ Hijau (Turun dari 32rb jadi 28rb)
+    lastMonthPrice: 32000, // ⬇︎ Hijau (Turun dari 32rb jadi 28rb, hemat -Rp 4.000)
     discount: 0,
     image: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=500&q=80"
   },
@@ -103,7 +103,7 @@ const DEFAULT_COMMODITIES = [
     category: "Dapur & Masak",
     defaultUnit: "pack",
     price: 5000,
-    lastMonthPrice: 5000, // = Abu-abu (Setara / Sama dengan bulan lalu)
+    lastMonthPrice: 5000, // = Abu-abu (Setara / Sama Rp 5.000 dengan bulan lalu)
     discount: 0,
     image: "https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=500&q=80"
   },
@@ -238,7 +238,7 @@ class SmartGroceryApp {
     this.STORAGE_SESSION = "groceryin_rantau_session";
     this.STORAGE_CART = "groceryin_rantau_cart";
     this.STORAGE_HISTORY = "groceryin_rantau_history";
-    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v3";
+    this.STORAGE_CUSTOM_CATALOG = "groceryin_catalog_db_v4";
 
     // State
     this.city = "Jakarta Barat (Puri Indah)";
@@ -309,6 +309,9 @@ class SmartGroceryApp {
                 this.catalog[storeName][defIdx] = {
                   ...freshDefault,
                   ...savedItem,
+                  name: freshDefault.name,
+                  price: freshDefault.price,
+                  lastMonthPrice: freshDefault.lastMonthPrice !== undefined ? freshDefault.lastMonthPrice : freshDefault.price,
                   // Pastikan gambar default terbaru diterapkan dan link lama/rusak ditimpa
                   image: (savedItem.id === "prod-aqua-6" || !savedItem.image || savedItem.image.includes("1548839140"))
                     ? freshDefault.image
@@ -1278,19 +1281,33 @@ class SmartGroceryApp {
       const harga2 = hasDiscount ? Math.round(item.price * (1 - item.discount)) : item.price;
       const discountBadgeText = item.discountFormula ? `-${item.discountFormula}` : `-${discountPercent}%`;
 
-      let emoteSymbol = "=";
-      let emoteClass = "emote-equal";
       const lastPrice = item.lastMonthPrice !== undefined ? item.lastMonthPrice : item.price;
+      const isPriceChanged = item.price !== lastPrice;
 
+      let flucHtml = "";
       if (item.price > lastPrice) {
-        emoteSymbol = "⬆";
-        emoteClass = "emote-up";
+        const diff = item.price - lastPrice;
+        flucHtml = `
+          <div class="price-fluctuation-tag fluc-up" title="Harga naik dibanding bulan lalu">
+            <span class="fluc-symbol">↑</span>
+            <span class="fluc-text">(+${this.formatRupiah(diff)})</span>
+          </div>
+        `;
       } else if (item.price < lastPrice) {
-        emoteSymbol = "⬇︎";
-        emoteClass = "emote-down";
+        const hemat = lastPrice - item.price;
+        flucHtml = `
+          <div class="price-fluctuation-tag fluc-down" title="Harga turun dibanding bulan lalu (hemat)">
+            <span class="fluc-symbol">↓</span>
+            <span class="fluc-text">(-${this.formatRupiah(hemat)})</span>
+          </div>
+        `;
       } else {
-        emoteSymbol = "=";
-        emoteClass = "emote-equal";
+        flucHtml = `
+          <div class="price-fluctuation-tag fluc-equal" title="Harga stabil (sama dengan bulan lalu)">
+            <span class="fluc-symbol">=</span>
+            <span class="fluc-text">Harga stabil</span>
+          </div>
+        `;
       }
 
       html += `
@@ -1307,15 +1324,16 @@ class SmartGroceryApp {
             ${this.escapeHtml(item.name)}
           </div>
 
-          <!-- Format: Harga - Diskon - Harga2 - emote -->
+          <!-- Format: Harga Sebelumnya Dicoret (jika berubah) + Harga Saat Ini + Indikator Fluktuasi -->
           <div class="product-price-block">
-            <div class="price-calculation-row">
-              <span class="product-price-original ${hasDiscount ? 'has-discount' : ''}">
+            <div class="price-comparison-line">
+              ${isPriceChanged ? `<span class="price-old-strikethrough">${this.formatRupiah(lastPrice)}</span>` : ''}
+              <span class="product-price-current ${hasDiscount ? 'has-discount' : ''}">
                 ${this.formatRupiah(item.price)}
               </span>
               ${hasDiscount ? `<span class="product-price-final">${this.formatRupiah(harga2)}</span>` : ''}
-              <span class="price-fluctuation-emote ${emoteClass}" title="Bulan lalu: ${this.formatRupiah(lastPrice)}">${emoteSymbol}</span>
             </div>
+            ${flucHtml}
           </div>
 
           <!-- Tombol Add to list: membuka modal pemilihan satuan (kg/pcs/liter) & kalkulator diskon -->
@@ -1345,11 +1363,32 @@ class SmartGroceryApp {
     this.modalProductName.textContent = targetItem.name;
     this.modalProductImg.src = targetItem.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
     this.modalProductCategory.textContent = targetItem.category || "Grocery";
-    this.modalProductBasePrice.textContent = `${this.formatRupiah(targetItem.price)} / satuan`;
-
+    
     // 1. Initial Satuan
     let initialUnit = editCartItem ? editCartItem.unit : (targetItem.defaultUnit || "pcs");
     this.modalUnit = initialUnit;
+
+    const targetLastPrice = targetItem.lastMonthPrice !== undefined ? targetItem.lastMonthPrice : targetItem.price;
+    if (targetItem.price > targetLastPrice) {
+      const diff = targetItem.price - targetLastPrice;
+      this.modalProductBasePrice.innerHTML = `
+        <span class="modal-strike-price">${this.formatRupiah(targetLastPrice)}</span>
+        <span class="modal-curr-price">${this.formatRupiah(targetItem.price)}</span> / ${initialUnit}
+        <span class="fluc-pill-mini fluc-up">↑ (+${this.formatRupiah(diff)})</span>
+      `;
+    } else if (targetItem.price < targetLastPrice) {
+      const hemat = targetLastPrice - targetItem.price;
+      this.modalProductBasePrice.innerHTML = `
+        <span class="modal-strike-price">${this.formatRupiah(targetLastPrice)}</span>
+        <span class="modal-curr-price">${this.formatRupiah(targetItem.price)}</span> / ${initialUnit}
+        <span class="fluc-pill-mini fluc-down">↓ (-${this.formatRupiah(hemat)})</span>
+      `;
+    } else {
+      this.modalProductBasePrice.innerHTML = `
+        <span class="modal-curr-price">${this.formatRupiah(targetItem.price)}</span> / ${initialUnit}
+        <span class="fluc-pill-mini fluc-equal">= Stabil</span>
+      `;
+    }
 
     const commonUnits = ["pcs", "kg", "liter", "pack", "botol", "gram", "ml", "ikat"];
     let isCommon = commonUnits.includes(initialUnit);
