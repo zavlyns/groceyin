@@ -3,7 +3,7 @@
  * Provides offline capabilities & caching for aesthetic mobile experience.
  */
 
-const CACHE_NAME = 'groceryin-aesthetic-v12';
+const CACHE_NAME = 'groceryin-aesthetic-v13';
 
 const STATIC_ASSETS = [
   './',
@@ -53,6 +53,7 @@ self.addEventListener('fetch', (event) => {
 
   if (req.method !== 'GET') return;
   if (url.protocol.startsWith('chrome-extension')) return;
+  if (url.hostname.includes('firebase') || url.hostname.includes('firestore.googleapis.com')) return;
 
   event.respondWith(
     fetch(req)

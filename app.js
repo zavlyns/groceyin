@@ -384,6 +384,41 @@ const INITIAL_MASTER_CATALOG = {
   "Family Mart": buildDefaultCatalogForStore()
 };
 
+// ==================== FIREBASE FIRESTORE REALTIME SYNC CONFIG ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyCyr3K9_IxxrD30TYkpLApD6AMxsYoxf1c",
+  authDomain: "grocery1n.firebaseapp.com",
+  projectId: "grocery1n",
+  storageBucket: "grocery1n.firebasestorage.app",
+  messagingSenderId: "135631831952",
+  appId: "1:135631831952:web:e680edb0bb9fffebf72915"
+};
+
+let firebaseApp = null;
+let firestoreDb = null;
+
+try {
+  if (typeof firebase !== "undefined") {
+    if (!firebase.apps.length) {
+      firebaseApp = firebase.initializeApp(firebaseConfig);
+    } else {
+      firebaseApp = firebase.app();
+    }
+    firestoreDb = firebase.firestore();
+  }
+} catch (e) {
+  console.warn("Firebase initialize notice:", e);
+}
+
+// Wrapper fungsi onSnapshot() agar mendukung pemanggilan modular onSnapshot(docRef, callback)
+// maupun compat SDK, menggantikan pemanggilan getDoc / getDocs statis
+function onSnapshot(docRef, onNext, onError) {
+  if (docRef && typeof docRef.onSnapshot === "function") {
+    return docRef.onSnapshot(onNext, onError);
+  }
+  return () => {};
+}
+
 // ==================== 3. GROCERYIN APP ENGINE ====================
 class SmartGroceryApp {
   constructor() {
@@ -2900,13 +2935,18 @@ class SmartGroceryApp {
     this.lastSyncedUpdatedAt = 0;
     this.peer = null;
     this.peerConnections = [];
+    this.firestoreUnsubscribe = null;
 
     // Update UI status text
     if (this.syncStatusText) {
       this.syncStatusText.textContent = "Sesi";
     }
 
-    // 1. Local Server Polling (Bila dijalankan via node server.js di Lab / IP Lokal / localhost)
+    // 1. Cloud Firestore Realtime Sync menggunakan onSnapshot()
+    // Menggantikan pemanggilan getDoc / getDocs statis agar multi-device seketika sinkron tanpa F5
+    this.initFirestoreRealtimeSync();
+
+    // 2. Local Server Polling (Bila dijalankan via node server.js di Lab / IP Lokal / localhost)
     const hostname = window.location.hostname || "localhost";
     this.isLocalServer = hostname === "localhost" || 
                          hostname === "127.0.0.1" || 
@@ -2924,8 +2964,79 @@ class SmartGroceryApp {
       }, 1500);
     }
 
-    // 2. WebRTC PeerJS Sync (Untuk GitHub Pages / Vercel / Live URL tanpa server backend)
+    // 3. WebRTC PeerJS Sync (Untuk GitHub Pages / Vercel / Live URL tanpa server backend)
     this.initPeerJSSync();
+  }
+
+  // ==================== FIRESTORE REALTIME onSnapshot() LISTENER ====================
+  // Menggunakan listener realtime onSnapshot() (bukan getDoc/getDocs statis)
+  // agar state keranjang & saldo dompet di layar langsung di-render ulang
+  // setiap kali ada perubahan di HP atau PC tanpa perlu refresh manual (F5)
+  initFirestoreRealtimeSync() {
+    if (!firestoreDb) {
+      console.warn("[Firestore] Layanan Firebase Firestore belum terhubung.");
+      return;
+    }
+
+    const roomId = this.sessionRoomId || "session-lab-1";
+    const docRef = firestoreDb.collection("sessions").doc(roomId);
+
+    // Hentikan listener lama jika berpindah room/sesi
+    if (this.firestoreUnsubscribe) {
+      try { this.firestoreUnsubscribe(); } catch (e) {}
+      this.firestoreUnsubscribe = null;
+    }
+
+    console.log(`[Firestore Realtime] Mengaktifkan listener onSnapshot(docRef) untuk sesi: "${roomId}"`);
+
+    // Ganti pemanggilan getDoc/getDocs dengan listener realtime onSnapshot()
+    this.firestoreUnsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (!docSnap || !docSnap.exists) {
+        console.log(`[Firestore] Dokumen sesi "${roomId}" belum ada di cloud. Mengunggah state awal...`);
+        this.saveSessionToFirestore();
+        return;
+      }
+
+      const remoteData = docSnap.data();
+      if (!remoteData) return;
+
+      console.log(`[Firestore] Realtime snapshot event diterima dari sesi: ${roomId}`, remoteData);
+
+      // Render ulang otomatis seluruh UI perangkat seketika tanpa perlu reload / F5
+      this.applyRemoteSessionData(remoteData);
+    }, (error) => {
+      console.warn("[Firestore] onSnapshot error:", error);
+    });
+  }
+
+  saveSessionToFirestore(customPayload = null) {
+    if (!firestoreDb) return;
+    const roomId = this.sessionRoomId || "session-lab-1";
+    const docRef = firestoreDb.collection("sessions").doc(roomId);
+
+    const sessionPayload = customPayload || {
+      cart: this.cart,
+      initialBudget: this.initialBudget,
+      originalBudget: this.originalBudget,
+      supermarket: this.supermarket,
+      city: this.city,
+      history: this.history,
+      selectedPaymentMethod: this.selectedPaymentMethod,
+      updatedAt: Date.now(),
+      updatedBy: this.deviceId
+    };
+
+    docRef.set(sessionPayload, { merge: true }).catch(err => {
+      console.warn("[Firestore] Gagal menyimpan sesi belanja ke cloud:", err);
+    });
+
+    // Mirroring ke koleksi groceries_shared untuk kompatibilitas riwayat/evaluator
+    try {
+      firestoreDb.collection("groceries_shared").doc(roomId).set(sessionPayload, { merge: true }).catch(() => {});
+      if (roomId === "session-lab-1") {
+        firestoreDb.collection("groceries_shared").doc("current_cart").set(sessionPayload, { merge: true }).catch(() => {});
+      }
+    } catch (e) {}
   }
 
   detectSessionRoomId() {
@@ -2986,7 +3097,10 @@ class SmartGroceryApp {
 
     this.lastSyncedUpdatedAt = sessionPayload.updatedAt;
 
-    // 1. Kirim ke local server API
+    // 1. Simpan ke Cloud Firestore (memicu event onSnapshot realtime di perangkat lain)
+    this.saveSessionToFirestore(sessionPayload);
+
+    // 2. Kirim ke local server API
     if (this.isLocalServer) {
       fetch(`/api/session?room=${encodeURIComponent(this.sessionRoomId)}`, {
         method: "POST",
@@ -2995,7 +3109,7 @@ class SmartGroceryApp {
       }).catch(() => {});
     }
 
-    // 2. Kirim via WebRTC PeerJS connections
+    // 3. Kirim via WebRTC PeerJS connections
     if (this.peerConnections && this.peerConnections.length > 0) {
       this.peerConnections.forEach(conn => {
         if (conn && conn.open) {
@@ -3008,11 +3122,18 @@ class SmartGroceryApp {
   }
 
   applyRemoteSessionData(data) {
-    if (!data || !data.updatedAt) return;
+    if (!data) return;
     if (data.updatedBy === this.deviceId) return; // Abaikan echo dari diri sendiri
-    if (data.updatedAt <= this.lastSyncedUpdatedAt) return; // Abaikan data yang lebih lama
 
-    this.lastSyncedUpdatedAt = data.updatedAt;
+    const incomingUpdatedAt = (data.updatedAt && typeof data.updatedAt.toMillis === "function")
+      ? data.updatedAt.toMillis()
+      : (typeof data.updatedAt === "number" ? data.updatedAt : Date.now());
+
+    if (incomingUpdatedAt && this.lastSyncedUpdatedAt && incomingUpdatedAt < this.lastSyncedUpdatedAt) {
+      return; // Abaikan data yang lebih lama
+    }
+
+    this.lastSyncedUpdatedAt = incomingUpdatedAt;
 
     // Update state belanja
     if (Array.isArray(data.cart)) {
@@ -3022,6 +3143,14 @@ class SmartGroceryApp {
     if (typeof data.initialBudget === "number" && data.initialBudget > 0) {
       this.initialBudget = data.initialBudget;
       this.originalBudget = data.originalBudget || data.initialBudget;
+      try {
+        const sess = JSON.parse(localStorage.getItem(this.STORAGE_SESSION) || "{}");
+        sess.initialBudget = this.initialBudget;
+        sess.originalBudget = this.originalBudget;
+        sess.city = data.city || this.city;
+        sess.supermarket = data.supermarket || this.supermarket;
+        localStorage.setItem(this.STORAGE_SESSION, JSON.stringify(sess));
+      } catch (e) {}
     }
     if (data.supermarket) {
       this.supermarket = data.supermarket;
@@ -3037,7 +3166,7 @@ class SmartGroceryApp {
       this.selectedPaymentMethod = data.selectedPaymentMethod;
     }
 
-    // Refresh UI
+    // Refresh UI seketika tanpa reload browser / F5
     this.updateBudgetAndCartUI();
     this.renderStoreProducts();
     this.renderCartList();
@@ -3159,6 +3288,8 @@ class SmartGroceryApp {
     const newUrl = this.getSessionShareUrl();
     window.history.replaceState({}, "", newUrl);
 
+    // Refresh realtime listeners
+    this.initFirestoreRealtimeSync();
     this.fetchSessionFromLocalServer();
     this.broadcastSessionUpdate();
     this.closeSessionSyncModal();
@@ -3166,6 +3297,7 @@ class SmartGroceryApp {
   }
 
   forceSyncSession() {
+    this.initFirestoreRealtimeSync();
     this.fetchSessionFromLocalServer();
     this.broadcastSessionUpdate();
     this.showToast("🔄", "Sinkronisasi sesi belanja dijalankan.");
